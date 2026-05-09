@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Mail, Lock, LogIn, ShieldCheck, WifiOff, AlertTriangle } from "lucide-react";
+import { Mail, Lock, ShieldCheck, WifiOff } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function Auth() {
@@ -19,8 +19,6 @@ export function Auth() {
     const checkConnection = async () => {
       try {
         const { error } = await supabase.from('profiles').select('id').limit(1);
-        // We don't care if we get a 401 or 403 (unauthorized), that means the connection works
-        // We only care about network errors or 5xx
         if (error && (error.message.includes("fetch") || error.status === 500)) {
           throw error;
         }
@@ -35,28 +33,20 @@ export function Auth() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login attempt initiated for:", email);
-    
-    if (loading) {
-      console.log("Login already in progress, skipping.");
-      return;
-    }
+    if (loading) return;
     
     setLoading(true);
     setIsSlowConnection(false);
 
     const slowConnTimeout = setTimeout(() => {
-      console.warn("Connection seems slow...");
       setIsSlowConnection(true);
     }, 5000);
 
     try {
-      console.log("Calling supabase.auth.signInWithPassword...");
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       clearTimeout(slowConnTimeout);
       
       if (error) {
-        console.error("Supabase Auth Error:", error);
         if (error.message.includes("Invalid login credentials")) {
           toast.error("E-mail ou senha incorretos.");
         } else if (error.message.includes("Network request failed")) {
@@ -67,16 +57,13 @@ export function Auth() {
         return;
       }
 
-      console.log("Auth success! User data:", data.user?.id);
       if (data.user) {
         toast.success("Autenticado! Carregando dashboard...");
-        // Forcing a hard refresh can sometimes help if the router state is stuck
         setTimeout(() => {
           window.location.reload();
         }, 500);
       }
     } catch (err: any) {
-      console.error("Catch block error:", err);
       clearTimeout(slowConnTimeout);
       toast.error("Erro crítico no sistema.");
     } finally {
@@ -121,6 +108,8 @@ export function Auth() {
               </AlertDescription>
             </Alert>
           )}
+
+          <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 ml-1">E-mail</label>
               <div className="relative">
