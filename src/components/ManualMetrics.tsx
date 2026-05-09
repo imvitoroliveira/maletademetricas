@@ -6,8 +6,8 @@ import {
   Edit2, 
   Check, 
   X,
-  MoreVertical,
-  GripVertical
+  FileText,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,13 +21,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 interface CustomMetric {
   id: string;
   name: string;
   value: string;
   category: string;
-  status: 'active' | 'pending';
+  status: string;
+  user_id?: string;
 }
 
 export function ManualMetrics() {
