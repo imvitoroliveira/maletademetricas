@@ -21,7 +21,6 @@ export function useAuth() {
       }
 
       try {
-        console.log("Fetching profile for:", sessionUser.email);
         const { data, error } = await supabase
           .from("profiles")
           .select("*, client_permissions(*)")
@@ -32,7 +31,6 @@ export function useAuth() {
           console.error("Error fetching profile:", error);
           if (mounted) setProfile(null);
         } else {
-          console.log("Profile data received:", data);
           if (mounted) setProfile(data);
         }
       } catch (err) {
@@ -56,7 +54,6 @@ export function useAuth() {
           }
         }
       } catch (err) {
-        console.error("Init auth error:", err);
         if (mounted) setLoading(false);
       }
     };
@@ -64,15 +61,15 @@ export function useAuth() {
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state change event:", event, session?.user?.email);
       const currentUser = session?.user ?? null;
-      if (mounted) setUser(currentUser);
       
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-        if (mounted) setLoading(true);
-        await fetchProfileData(currentUser);
-      } else if (event === 'SIGNED_OUT') {
-        if (mounted) {
+      if (mounted) {
+        setUser(currentUser);
+        
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+          setLoading(true);
+          await fetchProfileData(currentUser);
+        } else if (event === 'SIGNED_OUT') {
           setProfile(null);
           setUser(null);
           setLoading(false);
