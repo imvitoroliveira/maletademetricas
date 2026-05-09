@@ -49,16 +49,13 @@ function Dashboard() {
     return <Auth />;
   }
 
-  if (loading) {
+  if (loading && session) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
           <p className="text-sm font-medium text-slate-500 animate-pulse">Carregando dashboard...</p>
           <div className="flex flex-col gap-2 mt-4">
-            <pre className="text-[10px] bg-slate-100 p-2 rounded">
-              Status: {JSON.stringify({ hasSession: !!session, hasProfile: !!profile, loading })}
-            </pre>
             <Button variant="outline" size="sm" onClick={() => {
               supabase.auth.signOut();
               window.location.reload();
