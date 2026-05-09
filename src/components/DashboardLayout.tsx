@@ -3,12 +3,6 @@ import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import { 
   LayoutDashboard, 
-  BarChart3, 
-  Settings, 
-  Users, 
-  Target, 
-  PieChart, 
-  TrendingUp,
   Search,
   Bell,
   Menu,
