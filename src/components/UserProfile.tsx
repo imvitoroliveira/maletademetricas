@@ -26,7 +26,7 @@ export function UserProfile() {
       <Card className="border-none shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl">
-            <User className="h-6 w-6 text-indigo-600" />
+            <User className="h-6 w-6 text-fuchsia-600" />
             Meu Perfil
           </CardTitle>
           <CardDescription>
@@ -68,7 +68,7 @@ export function UserProfile() {
               <Label htmlFor="display_name">Nome de Exibição</Label>
               <Input id="display_name" placeholder="Seu nome" defaultValue={profile.display_name} />
             </div>
-            <Button type="submit" className="bg-indigo-600" disabled={isUpdating}>
+            <Button type="submit" className="bg-fuchsia-600" disabled={isUpdating}>
               Salvar Alterações
             </Button>
           </form>

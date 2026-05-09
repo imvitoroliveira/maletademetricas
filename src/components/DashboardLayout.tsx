@@ -96,11 +96,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b bg-white/50 dark:bg-slate-900/50 px-8 backdrop-blur-xl">
           <div className="flex-1 max-w-md">
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-fuchsia-500 transition-colors" />
               <Input 
                 type="search" 
                 placeholder="Pesquisar métricas ou campanhas..." 
-                className="pl-10 bg-slate-100/50 border-none dark:bg-slate-800/50 focus-visible:ring-1 focus-visible:ring-indigo-500 h-10"
+                className="pl-10 bg-slate-100/50 border-none dark:bg-slate-800/50 focus-visible:ring-1 focus-visible:ring-fuchsia-500 h-10"
               />
             </div>
           </div>
@@ -109,7 +109,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-[10px] text-slate-300 hover:text-indigo-500"
+              className="text-[10px] text-slate-300 hover:text-fuchsia-500"
               onClick={() => setShowLogs(!showLogs)}
             >
               Logs
@@ -145,9 +145,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Content Area */}
         <div className="p-8">
           {showLogs && (
-            <div className="mb-6 p-4 bg-slate-900 text-slate-50 rounded-lg text-xs font-mono border-l-4 border-indigo-500 shadow-xl animate-in slide-in-from-top duration-300">
+            <div className="mb-6 p-4 bg-slate-900 text-slate-50 rounded-lg text-xs font-mono border-l-4 border-fuchsia-500 shadow-xl animate-in slide-in-from-top duration-300">
               <div className="flex justify-between items-center mb-2">
-                <span className="font-bold text-indigo-400">PAINEL DE DIAGNÓSTICO AUTH</span>
+                <span className="font-bold text-fuchsia-400">PAINEL DE DIAGNÓSTICO AUTH</span>
                 <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => setShowLogs(false)}>Ocultar</Button>
               </div>
               <div className="space-y-1 max-h-40 overflow-y-auto">
