@@ -32,7 +32,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
-  const { user: session, profile, isAdmin, isActive, loading: authLoading, signOut } = useAuth();
+  const { user: session, profile, isAdmin, isActive, loading: authLoading, signOut, authLogs } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [metrics, setMetrics] = useState<any[]>([]);
   const [loadingMetrics, setLoadingMetrics] = useState(false);
@@ -94,7 +94,7 @@ function Dashboard() {
   }
 
   if (!session) {
-    addLog?.("Redirecionando para login: Sem sessão ativa"); // Added in next tool call or via useAuth
+    // Sessão não detectada ou invalidada
     return <Auth />;
   }
 
