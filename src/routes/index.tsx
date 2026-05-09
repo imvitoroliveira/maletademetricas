@@ -34,11 +34,17 @@ function Dashboard() {
   useEffect(() => {
     let mounted = true;
     
+    // Check if we are on the client
+    if (typeof window === 'undefined') {
+      setLoading(false);
+      return;
+    }
+
     const initSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
         if (mounted) {
-          setSession(session?.user ?? null);
+          setSession(currentSession?.user ?? null);
         }
       } catch (err) {
         console.error("Session error:", err);
