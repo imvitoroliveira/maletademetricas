@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
@@ -9,21 +9,22 @@ export function useAuth() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [authLogs, setAuthLogs] = useState<{event: string, timestamp: string}[]>([]);
+  const isInitialMount = useRef(true);
 
   const addLog = useCallback((event: string) => {
-    const newLog = { event, timestamp: new Date().toLocaleTimeString() };
-    setAuthLogs(prev => [newLog, ...prev].slice(0, 10));
-    console.log(`[AUTH DIAGNOSTIC] ${newLog.timestamp}: ${event}`);
+    const timestamp = new Date().toLocaleTimeString();
+    setAuthLogs(prev => [{ event, timestamp }, ...prev].slice(0, 15));
+    console.log(`[AUTH] ${timestamp}: ${event}`);
   }, []);
 
   const fetchProfileData = useCallback(async (sessionUser: User | null) => {
     if (!sessionUser) {
       setProfile(null);
-      setLoading(false);
-      return;
+      return null;
     }
 
     try {
+      addLog(`Buscando perfil para ID: ${sessionUser.id.substring(0, 8)}...`);
       const { data, error } = await supabase
         .from("profiles")
         .select("*, client_permissions(*)")
@@ -31,68 +32,86 @@ export function useAuth() {
         .maybeSingle();
 
       if (error) {
-        addLog(`Erro ao carregar perfil: ${error.message}`);
-      } else if (data) {
+        addLog(`Erro na busca do perfil: ${error.message}`);
+        return null;
+      }
+
+      if (data) {
         if (!data.is_active) {
-          addLog("Usuário inativo detectado, encerrando sessão.");
+          addLog("Perfil inativo. Encerrando sessão.");
           await supabase.auth.signOut();
           setProfile(null);
           setUser(null);
-          toast.error("Sua conta está desativada. Entre em contato com o suporte.");
-        } else {
-          setProfile(data);
-          addLog(`Perfil carregado: ${data.is_admin ? 'Gestor' : 'Cliente'}`);
+          toast.error("Conta desativada. Entre em contato com o gestor.");
+          return null;
         }
+        setProfile(data);
+        addLog(`Perfil carregado: ${data.is_admin ? 'Gestor' : 'Cliente'}`);
+        return data;
       } else {
-        addLog("Perfil não encontrado no banco de dados.");
+        addLog("Perfil não encontrado no banco.");
+        return null;
       }
     } catch (err) {
-      addLog(`Exceção ao buscar perfil: ${err}`);
-    } finally {
-      setLoading(false);
+      addLog(`Exceção no perfil: ${err}`);
+      return null;
     }
   }, [addLog]);
 
   useEffect(() => {
     let mounted = true;
 
-    const initAuth = async () => {
+    const initialize = async () => {
+      setLoading(true);
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        // getUser is more secure than getSession as it validates with the server
+        const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
         
-        const currentUser = session?.user ?? null;
-        if (mounted) {
-          setUser(currentUser);
-          if (currentUser) {
-            addLog("Sessão inicial detectada");
-            await fetchProfileData(currentUser);
-          } else {
-            addLog("Nenhuma sessão inicial");
-            setLoading(false);
+        if (userError) {
+          addLog(`Nenhum usuário ativo: ${userError.message}`);
+          if (mounted) {
+            setUser(null);
+            setProfile(null);
           }
+        } else if (currentUser && mounted) {
+          setUser(currentUser);
+          addLog("Usuário validado com sucesso");
+          await fetchProfileData(currentUser);
         }
       } catch (err) {
         addLog(`Erro na inicialização: ${err}`);
+      } finally {
         if (mounted) setLoading(false);
+        isInitialMount.current = false;
       }
     };
 
-    initAuth();
+    initialize();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      addLog(`Evento Auth: ${event}`);
       const currentUser = session?.user ?? null;
-      addLog(`Evento de Auth: ${event}`);
-      
-      if (mounted) {
+
+      if (!mounted) return;
+
+      if (event === 'SIGNED_IN') {
         setUser(currentUser);
-        
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        setLoading(true);
+        await fetchProfileData(currentUser);
+        setLoading(false);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setProfile(null);
+        setLoading(false);
+      } else if (event === 'TOKEN_REFRESHED') {
+        // Only fetch if user ID changed or profile is missing
+        if (currentUser && (!profile || profile.id !== currentUser.id)) {
           await fetchProfileData(currentUser);
-        } else if (event === 'SIGNED_OUT') {
-          setProfile(null);
-          setUser(null);
-          setLoading(false);
+        }
+      } else if (event === 'USER_UPDATED') {
+        if (currentUser) {
+          setUser(currentUser);
+          await fetchProfileData(currentUser);
         }
       }
     });
@@ -101,21 +120,22 @@ export function useAuth() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [fetchProfileData, addLog]);
+  }, [fetchProfileData, addLog]); // profile intentionally omitted to prevent loop
 
   const signOut = async () => {
     setLoading(true);
-    addLog("Iniciando logout manual");
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      addLog(`Erro no logout: ${error.message}`);
-      toast.error("Erro ao sair do sistema.");
-    } else {
-      addLog("Logout concluído com sucesso");
-      setProfile(null);
+    addLog("Iniciando logout manual...");
+    try {
+      await supabase.auth.signOut();
       setUser(null);
+      setProfile(null);
+      addLog("Logout concluído.");
+      toast.success("Sessão encerrada.");
+    } catch (err) {
+      addLog(`Erro no logout: ${err}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return { 
