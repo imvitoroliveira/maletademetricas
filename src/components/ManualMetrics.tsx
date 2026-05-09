@@ -87,7 +87,7 @@ export function ManualMetrics() {
               <TableHead>Valor</TableHead>
               <TableHead>Categoria</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              {isAdmin && <TableHead className="text-right">Ações</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
