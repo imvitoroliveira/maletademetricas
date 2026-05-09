@@ -30,6 +30,8 @@ export const Route = createFileRoute("/")({
 function Dashboard() {
   const [session, setSession] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     // Immediate check if we're on the server
