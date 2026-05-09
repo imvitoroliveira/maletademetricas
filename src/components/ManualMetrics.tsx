@@ -262,6 +262,8 @@ export function ManualMetrics() {
                 </TableCell>
               </TableRow>
             )}
+              </>
+            )}
           </TableBody>
         </Table>
       </CardContent>
