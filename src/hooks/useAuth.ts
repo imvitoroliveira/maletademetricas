@@ -7,7 +7,6 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -29,13 +28,11 @@ export function useAuth() {
           .maybeSingle();
 
         if (error) {
-          console.error("Error fetching profile:", error);
           if (mounted) setProfile(null);
         } else {
           if (mounted) setProfile(data);
         }
       } catch (err) {
-        console.error("Profile fetch error:", err);
         if (mounted) setProfile(null);
       } finally {
         if (mounted) setLoading(false);
@@ -63,10 +60,8 @@ export function useAuth() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user ?? null;
-      
       if (mounted) {
         setUser(currentUser);
-        
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
           setLoading(true);
           await fetchProfileData(currentUser);
@@ -83,12 +78,6 @@ export function useAuth() {
       subscription.unsubscribe();
     };
   }, []);
-
-  // Compute final loading state: if there's no user session, we are NOT loading profile
-  const isFinalLoading = loading && (!!user || !user); 
-  // Wait, if loading is true, we want to know if we are waiting for something.
-  // Actually, 'loading' starts as true. initAuth sets it to false if no user.
-  // So 'loading' is correct.
 
   return { user, profile, isAdmin: profile?.is_admin || false, loading };
 }
