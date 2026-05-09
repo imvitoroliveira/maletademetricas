@@ -8,33 +8,35 @@ export function useAuth() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchProfile = async (sessionUser: User | null) => {
-      if (!sessionUser) {
+  const fetchProfile = async (sessionUser: User | null) => {
+    if (!sessionUser) {
+      setProfile(null);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*, client_permissions(*)")
+        .eq("id", sessionUser.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
         setProfile(null);
-        setLoading(false);
-        return;
+      } else {
+        setProfile(data);
       }
+    } catch (err) {
+      console.error("Profile fetch error:", err);
+      setProfile(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", sessionUser.id)
-          .single();
-
-        if (error) {
-          console.error("Error fetching profile:", error);
-        } else {
-          setProfile(data);
-        }
-      } catch (err) {
-        console.error("Profile fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  useEffect(() => {
     const initAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const currentUser = session?.user ?? null;
@@ -47,6 +49,7 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
+      
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         setLoading(true);
         await fetchProfile(currentUser);
