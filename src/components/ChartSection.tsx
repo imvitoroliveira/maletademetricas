@@ -67,6 +67,7 @@ export function ChartSection() {
                   fillOpacity={1} 
                   fill="url(#colorInv)" 
                   strokeWidth={2}
+                  isAnimationActive={false}
                 />
                 <Area 
                   type="monotone" 
@@ -75,6 +76,7 @@ export function ChartSection() {
                   fillOpacity={1} 
                   fill="url(#colorConv)" 
                   strokeWidth={2}
+                  isAnimationActive={false}
                 />
               </AreaChart>
             </ResponsiveContainer>
