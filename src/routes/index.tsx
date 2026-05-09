@@ -1,4 +1,3 @@
-
 import { createFileRoute } from "@tanstack/react-router";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { MetricCard } from "@/components/MetricCard";
@@ -7,17 +6,7 @@ import { ManualMetrics } from "@/components/ManualMetrics";
 import { UserManager } from "@/components/UserManager";
 import { UserProfile } from "@/components/UserProfile";
 import { useAuth } from "@/hooks/useAuth";
-import { 
-  TrendingUp, 
-  DollarSign, 
-  MousePointer2, 
-  Target, 
-  Zap, 
-  BarChart2,
-  X,
-  Loader2,
-  Plus
-} from "lucide-react";
+import { BarChart2, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
@@ -25,43 +14,38 @@ import { supabase } from "@/integrations/supabase/client";
 import { Auth } from "@/components/Auth";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
 });
 
 function Dashboard() {
-  const { user: session, profile, isAdmin, isActive, loading: authLoading, signOut, authLogs } = useAuth();
+  const { user, profile, isAdmin, isActive, loading: authLoading, signOut, authLogs } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [metrics, setMetrics] = useState<any[]>([]);
   const [loadingMetrics, setLoadingMetrics] = useState(false);
-  
+
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
     d.setMonth(d.getMonth() - 1);
-    return d.toISOString().split('T')[0];
+    return d.toISOString().split("T")[0];
   });
-  const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(() => new Date().toISOString().split("T")[0]);
 
   useEffect(() => {
-    if (session) {
+    if (user) {
       fetchMetrics();
     }
-  }, [session, startDate, endDate]);
+  }, [user, startDate, endDate]);
 
   const fetchMetrics = async () => {
     setLoadingMetrics(true);
     try {
-      let query = supabase
-        .from('custom_metrics')
-        .select('*')
-        .order('metric_date', { ascending: false });
+      let query = supabase.from("custom_metrics").select("*").order("metric_date", { ascending: false });
 
-      if (startDate) query = query.gte('metric_date', startDate);
-      if (endDate) query = query.lte('metric_date', endDate);
-      
-      // RLS handles the filtering by user_id for clients
+      if (startDate) query = query.gte("metric_date", startDate);
+      if (endDate) query = query.lte("metric_date", endDate);
+
       const { data, error } = await query;
       if (error) throw error;
       setMetrics(data || []);
@@ -72,11 +56,10 @@ function Dashboard() {
     }
   };
 
-  // Permissions check
   const permissions = profile?.client_permissions?.[0] || {
     can_view_charts: true,
     can_view_metrics: true,
-    can_view_insights: true
+    can_view_insights: true,
   };
 
   if (authLoading) {
@@ -84,8 +67,8 @@ function Dashboard() {
       <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
-            <div className="absolute inset-0 h-10 w-10 animate-ping rounded-full bg-indigo-400/20"></div>
+            <Loader2 className="h-10 w-10 animate-spin text-sky-600" />
+            <div className="absolute inset-0 h-10 w-10 animate-ping rounded-full bg-sky-400/20"></div>
           </div>
           <p className="text-sm font-medium text-slate-500 animate-pulse">Sincronizando acesso...</p>
         </div>
@@ -93,8 +76,7 @@ function Dashboard() {
     );
   }
 
-  if (!session) {
-    // Sessão não detectada ou invalidada
+  if (!user) {
     return <Auth />;
   }
 
@@ -106,8 +88,14 @@ function Dashboard() {
             <X className="h-10 w-10" />
           </div>
           <h2 className="text-2xl font-bold text-slate-900">Acesso Suspenso</h2>
-          <p className="text-slate-500">Seu perfil foi desativado por um administrador. Entre em contato para reativar.</p>
-          <Button variant="outline" onClick={() => signOut()} className="w-full h-11 border-slate-200 hover:bg-slate-50 transition-all">
+          <p className="text-slate-500">
+            Seu perfil foi desativado por um administrador. Entre em contato para reativar.
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => signOut()}
+            className="w-full h-11 border-slate-200 hover:bg-slate-50 transition-all"
+          >
             Voltar para Login
           </Button>
         </Card>
@@ -116,28 +104,28 @@ function Dashboard() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout profile={profile} isAdmin={isAdmin} signOut={signOut} authLogs={authLogs}>
       <div className="flex flex-col gap-8">
         {isAdmin && (
           <div className="flex gap-2 border-b pb-4">
-            <Button 
-              variant={activeTab === "overview" ? "default" : "ghost"} 
+            <Button
+              variant={activeTab === "overview" ? "default" : "ghost"}
               onClick={() => setActiveTab("overview")}
-              className={activeTab === "overview" ? "bg-indigo-600" : ""}
+              className={activeTab === "overview" ? "bg-sky-600" : ""}
             >
-              Visão Geral
+              Visao Geral
             </Button>
-            <Button 
-              variant={activeTab === "users" ? "default" : "ghost"} 
+            <Button
+              variant={activeTab === "users" ? "default" : "ghost"}
               onClick={() => setActiveTab("users")}
-              className={activeTab === "users" ? "bg-indigo-600" : ""}
+              className={activeTab === "users" ? "bg-sky-600" : ""}
             >
-              Gestão de Clientes
+              Gestao de Clientes
             </Button>
-            <Button 
-              variant={activeTab === "profile" ? "default" : "ghost"} 
+            <Button
+              variant={activeTab === "profile" ? "default" : "ghost"}
               onClick={() => setActiveTab("profile")}
-              className={activeTab === "profile" ? "bg-indigo-600" : ""}
+              className={activeTab === "profile" ? "bg-sky-600" : ""}
             >
               Meu Perfil
             </Button>
@@ -152,40 +140,40 @@ function Dashboard() {
           <>
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Dashboard de Performance</h1>
-                <p className="text-slate-500 mt-1">Gestão de Tráfego Pago e Métricas de Conversão.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+                  Dashboard de Performance
+                </h1>
+                <p className="text-slate-500 mt-1">Gestao de Trafego Pago e Metricas de Conversao.</p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-lg border shadow-sm">
-                    <span className="text-xs font-medium text-slate-500 uppercase ml-1">Período:</span>
-                    <Input 
-                      type="date" 
-                      className="w-auto h-9 border-none bg-transparent focus-visible:ring-0" 
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                    />
-                    <span className="text-slate-300">|</span>
-                    <Input 
-                      type="date" 
-                      className="w-auto h-9 border-none bg-transparent focus-visible:ring-0" 
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                    />
+                  <span className="text-xs font-medium text-slate-500 uppercase ml-1">Periodo:</span>
+                  <Input
+                    type="date"
+                    className="w-auto h-9 border-none bg-transparent focus-visible:ring-0"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                  <span className="text-slate-300">|</span>
+                  <Input
+                    type="date"
+                    className="w-auto h-9 border-none bg-transparent focus-visible:ring-0"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Metrics cards would only show values if there are relevant metrics */}
             {(isAdmin || permissions.can_view_charts) && (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <MetricCard 
-                  title="Métricas Ativas" 
-                  value={metrics.length} 
-                  description="total no período"
+                <MetricCard
+                  title="Metricas Ativas"
+                  value={metrics.length}
+                  description="total no periodo"
                   icon={<BarChart2 className="h-4 w-4" />}
                   className="border-none shadow-sm"
                 />
-                {/* Outros cartões seriam preenchidos dinamicamente baseados nas métricas inseridas */}
               </div>
             )}
 
@@ -199,17 +187,18 @@ function Dashboard() {
                   <ManualMetrics startDate={startDate} endDate={endDate} />
                 )}
               </div>
-              
+
               {(isAdmin || permissions.can_view_insights) && (
                 <div className="lg:col-span-1">
-                  <Card className="h-full shadow-sm border-none bg-indigo-600 text-white overflow-hidden">
+                  <Card className="h-full shadow-sm border-none bg-sky-600 text-white overflow-hidden">
                     <div className="p-6 relative z-10">
-                      <h3 className="text-lg font-semibold mb-2">Análise Estratégica</h3>
-                      <p className="text-indigo-100 text-sm leading-relaxed mb-6">
-                        O gestor adicionará aqui os insights baseados na performance real do período selecionado.
+                      <h3 className="text-lg font-semibold mb-2">Analise Estrategica</h3>
+                      <p className="text-sky-100 text-sm leading-relaxed mb-6">
+                        O gestor adicionara aqui os insights baseados na performance real do periodo
+                        selecionado.
                       </p>
                     </div>
-                    <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl"></div>
+                    <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-sky-500/20 rounded-full blur-3xl"></div>
                   </Card>
                 </div>
               )}

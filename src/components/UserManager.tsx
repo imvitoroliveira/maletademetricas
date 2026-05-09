@@ -1,19 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { 
-  Users, 
-  UserPlus, 
-  Trash2, 
-  Shield, 
-  ShieldAlert, 
-  CheckCircle2, 
-  XCircle,
-  Loader2,
-  Lock,
-  Mail,
-  ToggleLeft,
-  ToggleRight
-} from "lucide-react";
+import { Users, UserPlus, Trash2, Shield, ShieldAlert, CircleCheck as CheckCircle2, Circle as XCircle, Loader as Loader2, Lock, Mail, ToggleLeft, ToggleRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -160,7 +147,7 @@ export function UserManager() {
         
         <Dialog open={isAdding} onOpenChange={setIsAdding}>
           <DialogTrigger asChild>
-            <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+            <Button className="gap-2 bg-sky-600 hover:bg-sky-700">
               <UserPlus className="h-4 w-4" />
               Novo Cliente
             </Button>
@@ -202,7 +189,7 @@ export function UserManager() {
                 </div>
               </div>
               <DialogFooter className="pt-4">
-                <Button type="submit" className="w-full bg-indigo-600">Criar Acesso</Button>
+                <Button type="submit" className="w-full bg-sky-600">Criar Acesso</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -225,7 +212,7 @@ export function UserManager() {
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center">
                   <div className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
+                    <Loader2 className="h-4 w-4 animate-spin text-sky-600" />
                     <span>Carregando usuários...</span>
                   </div>
                 </TableCell>
@@ -280,7 +267,7 @@ export function UserManager() {
                           variant="ghost" 
                           size="sm" 
                           onClick={() => openPermissions(profile)}
-                          className="h-8 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                          className="h-8 text-sky-600 hover:text-sky-700 hover:bg-sky-50"
                         >
                           Permissões
                         </Button>
@@ -356,7 +343,7 @@ export function UserManager() {
             </div>
           </div>
           <DialogFooter className="pt-4">
-            <Button onClick={handleUpdatePermissions} className="w-full bg-indigo-600">Salvar Permissões</Button>
+            <Button onClick={handleUpdatePermissions} className="w-full bg-sky-600">Salvar Permissões</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

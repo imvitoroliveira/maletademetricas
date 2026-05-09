@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { AuthContext, useAuthProvider } from "@/hooks/useAuth";
 
 function NotFoundComponent() {
   return (
@@ -114,10 +115,13 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const auth = useAuthProvider();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <AuthContext.Provider value={auth}>
+        <Outlet />
+      </AuthContext.Provider>
     </QueryClientProvider>
   );
 }

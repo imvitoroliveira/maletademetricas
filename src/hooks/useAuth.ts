@@ -1,10 +1,30 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, createContext, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
 type AuthLog = { event: string; timestamp: string };
 
-export function useAuth() {
+interface AuthState {
+  user: User | null;
+  profile: any;
+  isAdmin: boolean;
+  isActive: boolean;
+  loading: boolean;
+  authLogs: AuthLog[];
+  signOut: () => Promise<void>;
+}
+
+export const AuthContext = createContext<AuthState>({
+  user: null,
+  profile: null,
+  isAdmin: false,
+  isActive: true,
+  loading: true,
+  authLogs: [],
+  signOut: async () => {},
+});
+
+export function useAuthProvider() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -19,73 +39,82 @@ export function useAuth() {
     if (typeof console !== "undefined") console.log(`[AUTH] ${timestamp}: ${event}`);
   }, []);
 
-  // Carrega perfil + role. Não desloga se falhar — apenas loga.
-  const loadProfileAndRole = useCallback(async (uid: string) => {
-    try {
-      const [{ data: profileData, error: pErr }, { data: roleData, error: rErr }] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("*, client_permissions(*)")
-          .eq("id", uid)
-          .maybeSingle(),
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", uid),
-      ]);
+  const loadProfileAndRole = useCallback(
+    async (uid: string) => {
+      try {
+        const [
+          { data: profileData, error: pErr },
+          { data: roleData, error: rErr },
+        ] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("*, client_permissions(*)")
+            .eq("id", uid)
+            .maybeSingle(),
+          supabase.from("user_roles").select("role").eq("user_id", uid),
+        ]);
 
-      if (pErr) addLog(`Perfil: ${pErr.message}`);
-      if (rErr) addLog(`Roles: ${rErr.message}`);
+        if (pErr) addLog(`Perfil: ${pErr.message}`);
+        if (rErr) addLog(`Roles: ${rErr.message}`);
 
-      setProfile(profileData ?? null);
-      const admin = !!roleData?.some((r: any) => r.role === "admin");
-      setIsAdmin(admin);
-      addLog(`Sessão pronta (${admin ? "Gestor" : "Cliente"})`);
-    } catch (err: any) {
-      addLog(`Erro ao carregar perfil: ${err?.message ?? err}`);
-    }
-  }, [addLog]);
+        setProfile(profileData ?? null);
+        const admin = !!roleData?.some((r: any) => r.role === "admin");
+        setIsAdmin(admin);
+        addLog(`Sessao pronta (${admin ? "Gestor" : "Cliente"})`);
+      } catch (err: any) {
+        addLog(`Erro ao carregar perfil: ${err?.message ?? err}`);
+      }
+    },
+    [addLog],
+  );
 
   useEffect(() => {
     let mounted = true;
 
-    // 1) Listener primeiro (sem await dentro do callback)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session: Session | null) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session: Session | null) => {
       if (!mounted) return;
       addLog(`Evento: ${event}`);
       const u = session?.user ?? null;
       setUser(u);
       if (u) {
-        // disparar fetch sem bloquear o callback
-        setTimeout(() => { if (mounted) loadProfileAndRole(u.id); }, 0);
+        setTimeout(() => {
+          if (mounted) loadProfileAndRole(u.id);
+        }, 0);
       } else {
         setProfile(null);
         setIsAdmin(false);
       }
     });
 
-    // 2) Hidratar sessão atual
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      const u = session?.user ?? null;
-      setUser(u);
-      if (u) {
-        addLog("Sessão restaurada");
-        loadProfileAndRole(u.id).finally(() => mounted && setLoading(false));
-      } else {
-        addLog("Sem sessão ativa");
-        setLoading(false);
-      }
-    }).catch((err) => {
-      addLog(`Falha getSession: ${err?.message ?? err}`);
-      if (mounted) setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (!mounted) return;
+        const u = session?.user ?? null;
+        setUser(u);
+        if (u) {
+          addLog("Sessao restaurada");
+          loadProfileAndRole(u.id).finally(() => mounted && setLoading(false));
+        } else {
+          addLog("Sem sessao ativa");
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        addLog(`Falha getSession: ${err?.message ?? err}`);
+        if (mounted) setLoading(false);
+      });
 
-    return () => { mounted = false; subscription.unsubscribe(); };
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [loadProfileAndRole, addLog]);
 
   const signOut = useCallback(async () => {
-    addLog("Encerrando sessão...");
+    addLog("Encerrando sessao...");
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
@@ -101,4 +130,8 @@ export function useAuth() {
     authLogs,
     signOut,
   };
+}
+
+export function useAuth() {
+  return useContext(AuthContext);
 }
