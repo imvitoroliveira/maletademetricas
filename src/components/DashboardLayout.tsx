@@ -93,14 +93,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         isSidebarOpen ? "pl-64" : "pl-20"
       )}>
         {/* Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white/80 dark:bg-slate-900/80 px-8 backdrop-blur-md">
+        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b bg-white/50 dark:bg-slate-900/50 px-8 backdrop-blur-xl">
           <div className="flex-1 max-w-md">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
               <Input 
                 type="search" 
-                placeholder="Pesquisar métricas..." 
-                className="pl-9 bg-slate-50 border-none dark:bg-slate-800"
+                placeholder="Pesquisar métricas ou campanhas..." 
+                className="pl-10 bg-slate-100/50 border-none dark:bg-slate-800/50 focus-visible:ring-1 focus-visible:ring-indigo-500 h-10"
               />
             </div>
           </div>
