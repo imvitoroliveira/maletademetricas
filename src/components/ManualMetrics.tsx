@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { useAuth } from "@/hooks/useAuth";
 
 interface CustomMetric {
   id: string;
@@ -37,7 +38,7 @@ interface CustomMetric {
 }
 
 export function ManualMetrics({ startDate, endDate }: { startDate?: string, endDate?: string }) {
-  const [isAdmin, setIsAdmin] = React.useState(false);
+  const { user, profile, isAdmin, loading: authLoading } = useAuth();
   const [loading, setLoading] = React.useState(true);
   const [metrics, setMetrics] = React.useState<CustomMetric[]>([]);
 
@@ -45,14 +46,10 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
   const [newMetric, setNewMetric] = React.useState({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0] });
 
   React.useEffect(() => {
-    fetchMetrics();
-    
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAdmin(user?.email === 'ovitoroliveira60@gmail.com');
-    };
-    checkUser();
-  }, [startDate, endDate]);
+    if (!authLoading) {
+      fetchMetrics();
+    }
+  }, [startDate, endDate, authLoading]);
 
   const fetchMetrics = async () => {
     setLoading(true);
@@ -66,6 +63,11 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
       }
       if (endDate) {
         query = query.lte('metric_date', endDate);
+      }
+
+      // If client, ensure they only see their metrics (RLS handles this but filter for clarity)
+      if (!isAdmin && user) {
+        query = query.eq('user_id', user.id);
       }
 
       const { data, error } = await query.order('metric_date', { ascending: false });
@@ -82,7 +84,6 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
   const handleAddMetric = async () => {
     if (newMetric.name && newMetric.value) {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("Você precisa estar logado para adicionar métricas.");
 
         const { data, error } = await supabase
@@ -159,9 +160,6 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
             <FileText className="h-4 w-4" />
             PDF
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setIsAdmin(!isAdmin)}>
-            {isAdmin ? "Modo Cliente" : "Modo Gestor"}
-          </Button>
           {isAdmin && (
             <Button onClick={() => setIsAdding(!isAdding)} size="sm" className="gap-2">
               {isAdding ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
@@ -194,100 +192,99 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
               </TableRow>
             ) : (
               <>
-
-            {isAdding && (
-              <TableRow className="bg-blue-50/30 dark:bg-blue-900/10">
-                <TableCell>
-                  <Input 
-                    type="date"
-                    value={newMetric.metric_date || ''}
-                    onChange={(e) => setNewMetric({...newMetric, metric_date: e.target.value})}
-                    className="h-8"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Input 
-                    placeholder="Ex: Leads" 
-                    value={newMetric.name}
-                    onChange={(e) => setNewMetric({...newMetric, name: e.target.value})}
-                    className="h-8"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Input 
-                    placeholder="Ex: 142" 
-                    value={newMetric.value}
-                    onChange={(e) => setNewMetric({...newMetric, value: e.target.value})}
-                    className="h-8"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Input 
-                    placeholder="Ex: Conversão" 
-                    value={newMetric.category || ''}
-                    onChange={(e) => setNewMetric({...newMetric, category: e.target.value})}
-                    className="h-8"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary">Pendente</Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-emerald-600" onClick={handleAddMetric}>
-                      <Check className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-            {metrics.map((metric) => (
-              <TableRow key={metric.id} className="group transition-colors">
-                <TableCell className="text-sm text-slate-500">
-                  {metric.metric_date ? new Date(metric.metric_date).toLocaleDateString() : '-'}
-                </TableCell>
-                <TableCell className="font-medium text-slate-700 dark:text-slate-200">
-                  {metric.name}
-                </TableCell>
-                <TableCell className="text-slate-600 dark:text-slate-400">
-                  {metric.value}
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="font-normal border-slate-200 text-slate-500">
-                    {metric.category}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={metric.status === 'active' ? 'secondary' : 'default'} className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400">
-                    {metric.status === 'active' ? 'Ativo' : 'Pendente'}
-                  </Badge>
-                </TableCell>
-                {isAdmin && (
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-slate-600">
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button 
-                        size="icon" 
-                        variant="ghost" 
-                        className="h-8 w-8 text-slate-400 hover:text-rose-600"
-                        onClick={() => removeMetric(metric.id)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </TableCell>
+                {isAdding && (
+                  <TableRow className="bg-blue-50/30 dark:bg-blue-900/10">
+                    <TableCell>
+                      <Input 
+                        type="date"
+                        value={newMetric.metric_date || ''}
+                        onChange={(e) => setNewMetric({...newMetric, metric_date: e.target.value})}
+                        className="h-8"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input 
+                        placeholder="Ex: Leads" 
+                        value={newMetric.name}
+                        onChange={(e) => setNewMetric({...newMetric, name: e.target.value})}
+                        className="h-8"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input 
+                        placeholder="Ex: 142" 
+                        value={newMetric.value}
+                        onChange={(e) => setNewMetric({...newMetric, value: e.target.value})}
+                        className="h-8"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input 
+                        placeholder="Ex: Conversão" 
+                        value={newMetric.category || ''}
+                        onChange={(e) => setNewMetric({...newMetric, category: e.target.value})}
+                        className="h-8"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">Pendente</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button size="icon" variant="ghost" className="h-8 w-8 text-emerald-600" onClick={handleAddMetric}>
+                          <Check className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </TableRow>
-            ))}
-            {metrics.length === 0 && !isAdding && (
-              <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                  Nenhuma métrica personalizada adicionada.
-                </TableCell>
-              </TableRow>
-            )}
+                {metrics.map((metric) => (
+                  <TableRow key={metric.id} className="group transition-colors">
+                    <TableCell className="text-sm text-slate-500">
+                      {metric.metric_date ? new Date(metric.metric_date).toLocaleDateString() : '-'}
+                    </TableCell>
+                    <TableCell className="font-medium text-slate-700 dark:text-slate-200">
+                      {metric.name}
+                    </TableCell>
+                    <TableCell className="text-slate-600 dark:text-slate-400">
+                      {metric.value}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-normal border-slate-200 text-slate-500">
+                        {metric.category}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={metric.status === 'active' ? 'secondary' : 'default'} className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400">
+                        {metric.status === 'active' ? 'Ativo' : 'Pendente'}
+                      </Badge>
+                    </TableCell>
+                    {isAdmin && (
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-slate-600">
+                            <Edit2 className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-8 w-8 text-slate-400 hover:text-rose-600"
+                            onClick={() => removeMetric(metric.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+                {metrics.length === 0 && !isAdding && (
+                  <TableRow>
+                    <TableCell colSpan={isAdmin ? 6 : 5} className="h-32 text-center text-muted-foreground">
+                      Nenhuma métrica personalizada encontrada para este período.
+                    </TableCell>
+                  </TableRow>
+                )}
               </>
             )}
           </TableBody>
