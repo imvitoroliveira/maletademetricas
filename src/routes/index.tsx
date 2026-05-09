@@ -14,14 +14,74 @@ import {
   Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Auth } from "@/components/Auth";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { User } from "@supabase/supabase-js";
+
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
 });
 
 function Dashboard() {
+  const [session, setSession] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Immediate check if we're on the server
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    let mounted = true;
+
+    const checkSession = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (mounted) {
+          setSession(currentSession?.user ?? null);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Auth init error:", err);
+        if (mounted) setLoading(false);
+      }
+    };
+
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) {
+        setSession(session?.user ?? null);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Auth />;
+  }
+
   return (
     <DashboardLayout>
+
       <div className="flex flex-col gap-8">
         {/* Page Header */}
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -30,13 +90,19 @@ function Dashboard() {
             <p className="text-slate-500 mt-1">Bem-vindo de volta! Aqui está o resumo da performance das campanhas.</p>
           </div>
           <div className="flex items-center gap-3">
+             <div className="flex items-center gap-2 mr-4">
+                <span className="text-sm text-slate-500">Período:</span>
+                <Input type="date" className="w-auto" />
+                <span className="text-sm text-slate-500">até</span>
+                <Input type="date" className="w-auto" />
+             </div>
             <Button variant="outline" className="gap-2">
               <Calendar className="h-4 w-4" />
-              Maio 01 - Maio 09, 2026
+              Filtrar
             </Button>
             <Button className="gap-2 shadow-sm">
               <Zap className="h-4 w-4" />
-              Sincronizar Dados
+              Sincronizar
             </Button>
           </div>
         </div>
