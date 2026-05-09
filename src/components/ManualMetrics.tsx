@@ -94,7 +94,7 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
         if (error) throw error;
 
         setMetrics([...metrics, data]);
-        setNewMetric({ name: '', value: '', category: '' });
+        setNewMetric({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0] });
         setIsAdding(false);
         toast.success("Métrica adicionada com sucesso!");
       } catch (error: any) {
