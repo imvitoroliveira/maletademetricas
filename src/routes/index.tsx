@@ -30,13 +30,19 @@ function Dashboard() {
             <p className="text-slate-500 mt-1">Bem-vindo de volta! Aqui está o resumo da performance das campanhas.</p>
           </div>
           <div className="flex items-center gap-3">
+             <div className="flex items-center gap-2 mr-4">
+                <span className="text-sm text-slate-500">Período:</span>
+                <Input type="date" className="w-auto" />
+                <span className="text-sm text-slate-500">até</span>
+                <Input type="date" className="w-auto" />
+             </div>
             <Button variant="outline" className="gap-2">
               <Calendar className="h-4 w-4" />
-              Maio 01 - Maio 09, 2026
+              Filtrar
             </Button>
             <Button className="gap-2 shadow-sm">
               <Zap className="h-4 w-4" />
-              Sincronizar Dados
+              Sincronizar
             </Button>
           </div>
         </div>
