@@ -47,13 +47,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       >
         <div className="flex h-20 items-center px-6 border-b">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-200 dark:shadow-none">
-              <TrendingUp className="h-6 w-6" />
+            <div className="h-10 w-10 rounded-xl overflow-hidden shadow-lg shadow-fuchsia-200 ring-2 ring-white">
+              <img src={logo} alt="Maleta de Métricas" className="h-full w-full object-cover" />
             </div>
             {isSidebarOpen && (
               <div className="flex flex-col">
-                <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50 leading-none">TrafficDash</span>
-                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mt-1">Analytics Pro</span>
+                <span className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-50 leading-none">Maleta de Métricas</span>
+                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mt-1">Performance Pro</span>
               </div>
             )}
           </div>
