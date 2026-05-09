@@ -10,8 +10,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export function Auth() {
-  const [magicLoading, setMagicLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [magicLoading, setMagicLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSlowConnection, setIsSlowConnection] = useState(false);
@@ -40,6 +40,9 @@ export function Auth() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+    
     if (loading) return;
     
     setLastError(null);
@@ -51,7 +54,10 @@ export function Auth() {
     }, 5000);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password: cleanPassword });
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email: cleanEmail, 
+        password: cleanPassword 
+      });
       clearTimeout(slowConnTimeout);
       
       if (error) {
