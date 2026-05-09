@@ -106,6 +106,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-slate-500 hover:text-rose-600 mr-2"
+              onClick={() => {
+                supabase.auth.signOut();
+                toast.success("Sessão encerrada");
+              }}
+            >
+              Sair
+            </Button>
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5 text-slate-500" />
               <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-rose-500 border-2 border-white dark:border-slate-900"></span>
