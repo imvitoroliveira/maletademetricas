@@ -127,16 +127,22 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
     doc.setTextColor(100);
     doc.text(`Data: ${new Date().toLocaleDateString()}`, 14, 30);
     
-    const tableData = metrics.map(m => [m.name, m.value, m.category || '-', m.status]);
+    const tableData = metrics.map(m => [
+      m.metric_date ? new Date(m.metric_date).toLocaleDateString() : '-',
+      m.name, 
+      m.value, 
+      m.category || '-', 
+      m.status
+    ]);
     
     (doc as any).autoTable({
       startY: 40,
-      head: [['Métrica', 'Valor', 'Categoria', 'Status']],
+      head: [['Data', 'Métrica', 'Valor', 'Categoria', 'Status']],
       body: tableData,
       theme: 'grid',
       headStyles: { fillColor: [79, 70, 229] },
     });
-    
+
     doc.save("relatorio-trafego.pdf");
     toast.success("Relatório PDF exportado!");
   };
