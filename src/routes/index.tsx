@@ -83,27 +83,33 @@ function Dashboard() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
-          <p className="text-sm font-medium text-slate-500 animate-pulse">Carregando dashboard...</p>
+          <div className="relative">
+            <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
+            <div className="absolute inset-0 h-10 w-10 animate-ping rounded-full bg-indigo-400/20"></div>
+          </div>
+          <p className="text-sm font-medium text-slate-500 animate-pulse">Sincronizando acesso...</p>
         </div>
       </div>
     );
   }
 
   if (!session) {
+    addLog?.("Redirecionando para login: Sem sessão ativa"); // Added in next tool call or via useAuth
     return <Auth />;
   }
 
   if (profile && !isActive) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 dark:bg-slate-950">
-        <Card className="w-full max-w-md p-8 text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center text-rose-600">
-            <X className="h-8 w-8" />
+        <Card className="w-full max-w-md p-8 text-center space-y-4 border-none shadow-2xl">
+          <div className="mx-auto w-20 h-20 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 shadow-inner">
+            <X className="h-10 w-10" />
           </div>
-          <h2 className="text-2xl font-bold">Acesso Suspenso</h2>
-          <p className="text-slate-500">Seu perfil foi desativado por um administrador.</p>
-          <Button variant="outline" onClick={() => signOut()} className="w-full">Voltar para Login</Button>
+          <h2 className="text-2xl font-bold text-slate-900">Acesso Suspenso</h2>
+          <p className="text-slate-500">Seu perfil foi desativado por um administrador. Entre em contato para reativar.</p>
+          <Button variant="outline" onClick={() => signOut()} className="w-full h-11 border-slate-200 hover:bg-slate-50 transition-all">
+            Voltar para Login
+          </Button>
         </Card>
       </div>
     );
