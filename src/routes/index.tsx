@@ -32,34 +32,32 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-    
-    // Check if we are on the client
+    // Immediate check if we're on the server
     if (typeof window === 'undefined') {
-      setLoading(false);
       return;
     }
 
-    const initSession = async () => {
+    let mounted = true;
+
+    const checkSession = async () => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         if (mounted) {
           setSession(currentSession?.user ?? null);
-        }
-      } catch (err) {
-        console.error("Session error:", err);
-      } finally {
-        if (mounted) {
           setLoading(false);
         }
+      } catch (err) {
+        console.error("Auth init error:", err);
+        if (mounted) setLoading(false);
       }
     };
 
-    initSession();
+    checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (mounted) {
         setSession(session?.user ?? null);
+        setLoading(false);
       }
     });
 
