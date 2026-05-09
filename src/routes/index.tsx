@@ -84,23 +84,29 @@ function Dashboard() {
 
       <div className="flex flex-col gap-8">
         {/* Page Header */}
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Dashboard de Tráfego</h1>
             <p className="text-slate-500 mt-1">Bem-vindo de volta! Aqui está o resumo da performance das campanhas.</p>
           </div>
-          <div className="flex items-center gap-3">
-             <div className="flex items-center gap-2 mr-4">
-                <span className="text-sm text-slate-500">Período:</span>
-                <Input type="date" className="w-auto" />
-                <span className="text-sm text-slate-500">até</span>
-                <Input type="date" className="w-auto" />
+          <div className="flex flex-wrap items-center gap-3">
+             <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-lg border shadow-sm">
+                <span className="text-xs font-medium text-slate-500 uppercase ml-1">Período:</span>
+                <Input 
+                  type="date" 
+                  className="w-auto h-9 border-none bg-transparent focus-visible:ring-0" 
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+                <span className="text-slate-300">|</span>
+                <Input 
+                  type="date" 
+                  className="w-auto h-9 border-none bg-transparent focus-visible:ring-0" 
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
              </div>
-            <Button variant="outline" className="gap-2">
-              <Calendar className="h-4 w-4" />
-              Filtrar
-            </Button>
-            <Button className="gap-2 shadow-sm">
+            <Button className="gap-2 shadow-md bg-indigo-600 hover:bg-indigo-700 h-10 px-5">
               <Zap className="h-4 w-4" />
               Sincronizar
             </Button>
