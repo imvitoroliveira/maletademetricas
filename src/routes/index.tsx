@@ -78,19 +78,19 @@ function Dashboard() {
     can_view_insights: true
   };
 
-  if (!session && !authLoading) {
-    return <Auth />;
-  }
-
-  if (authLoading && session) {
+  if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
-          <p className="text-sm font-medium text-slate-500 animate-pulse">Autenticando...</p>
+          <p className="text-sm font-medium text-slate-500 animate-pulse">Carregando dashboard...</p>
         </div>
       </div>
     );
+  }
+
+  if (!session) {
+    return <Auth />;
   }
 
   if (profile && !profile.is_active) {

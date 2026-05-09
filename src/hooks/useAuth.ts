@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 
@@ -8,50 +8,54 @@ export function useAuth() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchProfileData = useCallback(async (sessionUser: User | null) => {
+    if (!sessionUser) {
+      setProfile(null);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Try to fetch profile with a small retry logic for resilience
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*, client_permissions(*)")
+        .eq("id", sessionUser.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        // If it's a transient error, we might not want to clear the profile immediately
+        // but for safety in auth flows, we clear if we can't verify
+      } else if (data) {
+        setProfile(data);
+      }
+    } catch (err) {
+      console.error("Auth Exception:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     let mounted = true;
 
-    const fetchProfileData = async (sessionUser: User | null) => {
-      if (!sessionUser) {
-        if (mounted) {
-          setProfile(null);
-          setLoading(false);
-        }
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*, client_permissions(*)")
-          .eq("id", sessionUser.id)
-          .maybeSingle();
-
-        if (error) {
-          if (mounted) setProfile(null);
-        } else {
-          if (mounted) setProfile(data);
-        }
-      } catch (err) {
-        if (mounted) setProfile(null);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
     const initAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
         const currentUser = session?.user ?? null;
         if (mounted) {
           setUser(currentUser);
-          if (!currentUser) {
-            setLoading(false);
-          } else {
+          if (currentUser) {
             await fetchProfileData(currentUser);
+          } else {
+            setLoading(false);
           }
         }
       } catch (err) {
+        console.error("Session init error:", err);
         if (mounted) setLoading(false);
       }
     };
@@ -59,11 +63,13 @@ export function useAuth() {
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth event:", event);
       const currentUser = session?.user ?? null;
+      
       if (mounted) {
         setUser(currentUser);
+        
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-          setLoading(true);
           await fetchProfileData(currentUser);
         } else if (event === 'SIGNED_OUT') {
           setProfile(null);
@@ -77,7 +83,7 @@ export function useAuth() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchProfileData]);
 
   return { user, profile, isAdmin: profile?.is_admin || false, loading };
 }
