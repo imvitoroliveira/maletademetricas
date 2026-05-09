@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      custom_metrics: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          name: string
+          status: string | null
+          updated_at: string
+          user_id: string | null
+          value: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+          value: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
