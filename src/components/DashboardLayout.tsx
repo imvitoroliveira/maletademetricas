@@ -135,8 +135,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <p className="text-xs text-muted-foreground mt-1">{isAdmin ? "Gestor de Tráfego" : "Cliente"}</p>
               </div>
               <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>GT</AvatarFallback>
+                <AvatarImage src={logo} />
+                <AvatarFallback className="bg-fuchsia-100 text-fuchsia-700">MM</AvatarFallback>
               </Avatar>
             </div>
           </div>
