@@ -15,40 +15,50 @@ export function Auth() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading) return;
+    console.log("Login attempt initiated for:", email);
+    
+    if (loading) {
+      console.log("Login already in progress, skipping.");
+      return;
+    }
     
     setLoading(true);
     setIsSlowConnection(false);
 
-    // Timeout to detect slow connection
     const slowConnTimeout = setTimeout(() => {
+      console.warn("Connection seems slow...");
       setIsSlowConnection(true);
     }, 5000);
 
     try {
+      console.log("Calling supabase.auth.signInWithPassword...");
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       clearTimeout(slowConnTimeout);
       
       if (error) {
-        console.error("Login error:", error);
+        console.error("Supabase Auth Error:", error);
         if (error.message.includes("Invalid login credentials")) {
-          toast.error("E-mail ou senha incorretos. Verifique suas credenciais.");
+          toast.error("E-mail ou senha incorretos.");
         } else if (error.message.includes("Network request failed")) {
-          toast.error("Falha na conexão. Verifique sua internet.");
-        } else if (error.status === 429) {
-          toast.error("Muitas tentativas. Tente novamente em alguns minutos.");
+          toast.error("Erro de rede. Verifique sua internet.");
         } else {
-          toast.error(error.message || "Erro inesperado ao realizar login.");
+          toast.error(error.message || "Erro inesperado.");
         }
         return;
       }
 
+      console.log("Auth success! User data:", data.user?.id);
       if (data.user) {
-        toast.success("Bem-vindo ao Dashboard!");
+        toast.success("Autenticado! Carregando dashboard...");
+        // Forcing a hard refresh can sometimes help if the router state is stuck
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }
-    } catch (error: any) {
+    } catch (err: any) {
+      console.error("Catch block error:", err);
       clearTimeout(slowConnTimeout);
-      toast.error("Erro no sistema. Tente novamente mais tarde.");
+      toast.error("Erro crítico no sistema.");
     } finally {
       setLoading(false);
       setIsSlowConnection(false);
@@ -101,8 +111,12 @@ export function Auth() {
                 />
               </div>
             </div>
-            <Button className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg shadow-indigo-100 transition-all" disabled={loading}>
-              {loading ? (isSlowConnection ? "Conexão lenta, aguarde..." : "Autenticando...") : "Entrar no Dashboard"}
+            <Button 
+              type="submit"
+              className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg shadow-indigo-100 transition-all" 
+              disabled={loading}
+            >
+              {loading ? (isSlowConnection ? "Conexão lenta, aguarde..." : "Verificando...") : "Entrar no Dashboard"}
             </Button>
           </form>
           
