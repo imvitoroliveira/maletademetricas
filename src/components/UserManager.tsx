@@ -82,12 +82,9 @@ export function UserManager() {
     if (!newEmail || !newPassword) return;
 
     try {
-      // In a real production app with Edge Functions, we would call an Edge Function
-      // Since we are in a demo environment and need to create auth users,
-      // we'll use signUp which creates the auth user AND our profile trigger handles the profile.
-      const { data, error } = await supabase.auth.signUp({
-        email: newEmail,
-        password: newPassword,
+      // Use the admin-create-user Edge Function instead of client-side signUp
+      const { data, error } = await supabase.functions.invoke("admin-create-user", {
+        body: { email: newEmail, password: newPassword }
       });
 
       if (error) throw error;
