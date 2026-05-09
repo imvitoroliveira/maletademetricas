@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export function Auth() {
+  const [magicLoading, setMagicLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,7 +51,7 @@ export function Auth() {
     }, 5000);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password: cleanPassword });
       clearTimeout(slowConnTimeout);
       
       if (error) {
@@ -188,9 +189,43 @@ export function Auth() {
             <Button 
               type="submit"
               className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg shadow-indigo-100 transition-all" 
-              disabled={loading}
+              disabled={loading || magicLoading}
             >
               {loading ? (isSlowConnection ? "Conexão lenta, aguarde..." : "Verificando...") : "Entrar no Dashboard"}
+            </Button>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-slate-400">Ou use acesso direto</span>
+              </div>
+            </div>
+
+            <Button 
+              type="button"
+              variant="outline"
+              className="w-full h-11 border-indigo-200 text-indigo-600 hover:bg-indigo-50 font-medium transition-all"
+              onClick={async () => {
+                if (magicLoading) return;
+                setMagicLoading(true);
+                try {
+                  const { error } = await supabase.auth.signInWithOtp({ 
+                    email: 'ovitoroliveira60@gmail.com',
+                    options: { shouldCreateUser: false }
+                  });
+                  if (error) throw error;
+                  toast.success("Link de acesso enviado para seu e-mail!");
+                } catch (err: any) {
+                  toast.error("Erro ao enviar link: " + err.message);
+                } finally {
+                  setMagicLoading(false);
+                }
+              }}
+              disabled={magicLoading || loading}
+            >
+              {magicLoading ? "Enviando..." : "Receber Link por E-mail"}
             </Button>
           </form>
           
