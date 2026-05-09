@@ -34,11 +34,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Perfil', href: '/perfil', icon: Users },
-    ...(isAdmin ? [
-      { name: 'Campanhas', href: '/campanhas', icon: Target },
-      { name: 'Configurações', href: '/configuracoes', icon: Settings },
-    ] : []),
   ];
 
   return (
