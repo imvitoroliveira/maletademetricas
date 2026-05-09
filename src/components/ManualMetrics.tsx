@@ -31,6 +31,7 @@ interface CustomMetric {
 }
 
 export function ManualMetrics() {
+  const [isAdmin, setIsAdmin] = React.useState(true);
   const [metrics, setMetrics] = React.useState<CustomMetric[]>([
     { id: '1', name: 'Leads Qualificados (MQL)', value: '142', category: 'Fundo de Funil', status: 'active' },
     { id: '2', name: 'Taxa de Agendamento', value: '12%', category: 'Conversão', status: 'active' },
