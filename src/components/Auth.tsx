@@ -106,7 +106,7 @@ export function Auth() {
                 </span>
               </div>
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-6 text-[10px] text-indigo-600">
+                <Button variant="ghost" size="sm" className="h-6 text-[10px] text-fuchsia-600">
                   {showDiag ? "Fechar" : "Diagnóstico"}
                 </Button>
               </CollapsibleTrigger>
@@ -159,7 +159,7 @@ export function Auth() {
             </div>
             <Button
               type="submit"
-              className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
+              className="w-full h-11 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-semibold"
               disabled={loading || conn === "error"}
             >
               {loading ? "Verificando..." : "Entrar no Dashboard"}
