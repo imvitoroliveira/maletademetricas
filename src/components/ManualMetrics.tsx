@@ -141,13 +141,17 @@ export function ManualMetrics() {
           <CardDescription>Métricas inseridas manualmente para o cliente</CardDescription>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={exportPDF} className="gap-2">
+            <FileText className="h-4 w-4" />
+            PDF
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setIsAdmin(!isAdmin)}>
-            {isAdmin ? "Ver como Cliente" : "Voltar para Gestor"}
+            {isAdmin ? "Modo Cliente" : "Modo Gestor"}
           </Button>
           {isAdmin && (
             <Button onClick={() => setIsAdding(!isAdding)} size="sm" className="gap-2">
               {isAdding ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-              {isAdding ? "Adicionar Métrica" : "Nova Métrica"}
+              {isAdding ? "Cancelar" : "Nova Métrica"}
             </Button>
           )}
         </div>
