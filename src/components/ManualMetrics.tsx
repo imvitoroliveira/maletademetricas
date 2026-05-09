@@ -234,6 +234,9 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
             )}
             {metrics.map((metric) => (
               <TableRow key={metric.id} className="group transition-colors">
+                <TableCell className="text-sm text-slate-500">
+                  {metric.metric_date ? new Date(metric.metric_date).toLocaleDateString() : '-'}
+                </TableCell>
                 <TableCell className="font-medium text-slate-700 dark:text-slate-200">
                   {metric.name}
                 </TableCell>
