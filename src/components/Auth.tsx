@@ -11,25 +11,47 @@ export function Auth() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSlowConnection, setIsSlowConnection] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
+    
     setLoading(true);
+    setIsSlowConnection(false);
+
+    // Timeout to detect slow connection
+    const slowConnTimeout = setTimeout(() => {
+      setIsSlowConnection(true);
+    }, 5000);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      clearTimeout(slowConnTimeout);
+      
       if (error) {
+        console.error("Login error:", error);
         if (error.message.includes("Invalid login credentials")) {
-          throw new Error("E-mail ou senha incorretos.");
+          toast.error("E-mail ou senha incorretos. Verifique suas credenciais.");
+        } else if (error.message.includes("Network request failed")) {
+          toast.error("Falha na conexão. Verifique sua internet.");
+        } else if (error.status === 429) {
+          toast.error("Muitas tentativas. Tente novamente em alguns minutos.");
+        } else {
+          toast.error(error.message || "Erro inesperado ao realizar login.");
         }
-        throw error;
+        return;
       }
-      toast.success("Login realizado com sucesso!");
+
+      if (data.user) {
+        toast.success("Bem-vindo ao Dashboard!");
+      }
     } catch (error: any) {
-      toast.error(error.message || "Erro na autenticação. Verifique suas credenciais.");
+      clearTimeout(slowConnTimeout);
+      toast.error("Erro no sistema. Tente novamente mais tarde.");
     } finally {
       setLoading(false);
+      setIsSlowConnection(false);
     }
   };
 
@@ -80,7 +102,7 @@ export function Auth() {
               </div>
             </div>
             <Button className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg shadow-indigo-100 transition-all" disabled={loading}>
-              {loading ? "Autenticando..." : "Entrar no Dashboard"}
+              {loading ? (isSlowConnection ? "Conexão lenta, aguarde..." : "Autenticando...") : "Entrar no Dashboard"}
             </Button>
           </form>
           

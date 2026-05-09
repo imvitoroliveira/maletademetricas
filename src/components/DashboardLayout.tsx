@@ -27,16 +27,17 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { profile, isAdmin } = useAuth();
+  const { profile, isAdmin, signOut, authLogs } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const [showLogs, setShowLogs] = React.useState(false);
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Campanhas', href: '/campanhas', icon: Target },
-    { name: 'Métricas', href: '/metricas', icon: BarChart3 },
-    { name: 'Públicos', href: '/publicos', icon: Users },
-    { name: 'Relatórios', href: '/relatorios', icon: PieChart },
-    { name: 'Configurações', href: '/configuracoes', icon: Settings },
+    { name: 'Perfil', href: '/perfil', icon: Users },
+    ...(isAdmin ? [
+      { name: 'Campanhas', href: '/campanhas', icon: Target },
+      { name: 'Configurações', href: '/configuracoes', icon: Settings },
+    ] : []),
   ];
 
   return (
@@ -112,9 +113,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <Button 
               variant="ghost" 
               size="sm" 
+              className="text-[10px] text-slate-300 hover:text-indigo-500"
+              onClick={() => setShowLogs(!showLogs)}
+            >
+              Logs
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
               className="text-slate-500 hover:text-rose-600 mr-2"
               onClick={() => {
-                supabase.auth.signOut();
+                signOut();
                 toast.success("Sessão encerrada");
               }}
             >
@@ -139,6 +148,23 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Content Area */}
         <div className="p-8">
+          {showLogs && (
+            <div className="mb-6 p-4 bg-slate-900 text-slate-50 rounded-lg text-xs font-mono border-l-4 border-indigo-500 shadow-xl animate-in slide-in-from-top duration-300">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-bold text-indigo-400">PAINEL DE DIAGNÓSTICO AUTH</span>
+                <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => setShowLogs(false)}>Ocultar</Button>
+              </div>
+              <div className="space-y-1 max-h-40 overflow-y-auto">
+                {authLogs.length === 0 && <p className="text-slate-500">Nenhum evento registrado.</p>}
+                {authLogs.map((log, i) => (
+                  <div key={i} className="flex gap-4 border-b border-slate-800 pb-1">
+                    <span className="text-slate-500">[{log.timestamp}]</span>
+                    <span>{log.event}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {children}
         </div>
       </main>

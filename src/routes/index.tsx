@@ -5,6 +5,7 @@ import { MetricCard } from "@/components/MetricCard";
 import { ChartSection } from "@/components/ChartSection";
 import { ManualMetrics } from "@/components/ManualMetrics";
 import { UserManager } from "@/components/UserManager";
+import { UserProfile } from "@/components/UserProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { 
   TrendingUp, 
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
-  const { user: session, profile, isAdmin, loading: authLoading } = useAuth();
+  const { user: session, profile, isAdmin, isActive, loading: authLoading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [metrics, setMetrics] = useState<any[]>([]);
   const [loadingMetrics, setLoadingMetrics] = useState(false);
@@ -93,7 +94,7 @@ function Dashboard() {
     return <Auth />;
   }
 
-  if (profile && !profile.is_active) {
+  if (profile && !isActive) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 dark:bg-slate-950">
         <Card className="w-full max-w-md p-8 text-center space-y-4">
@@ -101,8 +102,8 @@ function Dashboard() {
             <X className="h-8 w-8" />
           </div>
           <h2 className="text-2xl font-bold">Acesso Suspenso</h2>
-          <p className="text-slate-500">Seu acesso foi desativado. Entre em contato com o gestor.</p>
-          <Button variant="outline" onClick={() => supabase.auth.signOut()} className="w-full">Sair</Button>
+          <p className="text-slate-500">Seu perfil foi desativado por um administrador.</p>
+          <Button variant="outline" onClick={() => signOut()} className="w-full">Voltar para Login</Button>
         </Card>
       </div>
     );
@@ -127,10 +128,19 @@ function Dashboard() {
             >
               Gestão de Clientes
             </Button>
+            <Button 
+              variant={activeTab === "profile" ? "default" : "ghost"} 
+              onClick={() => setActiveTab("profile")}
+              className={activeTab === "profile" ? "bg-indigo-600" : ""}
+            >
+              Meu Perfil
+            </Button>
           </div>
         )}
 
-        {activeTab === "users" && isAdmin ? (
+        {activeTab === "profile" ? (
+          <UserProfile />
+        ) : activeTab === "users" && isAdmin ? (
           <UserManager />
         ) : (
           <>
