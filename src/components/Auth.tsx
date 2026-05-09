@@ -5,15 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Mail, Lock, ShieldCheck, WifiOff } from "lucide-react";
+import { Mail, Lock, ShieldCheck, WifiOff, Activity, CheckCircle2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export function Auth() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSlowConnection, setIsSlowConnection] = useState(false);
-  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error'>('checking');
+  const [lastError, setLastError] = useState<string | null>(null);
+  const [showDiagnostic, setShowDiagnostic] = useState(false);
 
   useEffect(() => {
     const checkConnection = async () => {
