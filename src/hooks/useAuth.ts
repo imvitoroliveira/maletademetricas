@@ -49,6 +49,14 @@ export function useAuth() {
   useEffect(() => {
     let mounted = true;
 
+    // Failsafe: nunca deixar o loading travado para sempre
+    const failsafe = setTimeout(() => {
+      if (mounted) {
+        addLog("Failsafe: liberando loading após 5s");
+        setLoading(false);
+      }
+    }, 5000);
+
     // 1) Listener primeiro (sem await dentro do callback)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session: Session | null) => {
       if (!mounted) return;
@@ -56,7 +64,6 @@ export function useAuth() {
       const u = session?.user ?? null;
       setUser(u);
       if (u) {
-        // disparar fetch sem bloquear o callback
         setTimeout(() => { if (mounted) loadProfileAndRole(u.id); }, 0);
       } else {
         setProfile(null);
@@ -71,7 +78,9 @@ export function useAuth() {
       setUser(u);
       if (u) {
         addLog("Sessão restaurada");
-        loadProfileAndRole(u.id).finally(() => mounted && setLoading(false));
+        loadProfileAndRole(u.id).finally(() => {
+          if (mounted) setLoading(false);
+        });
       } else {
         addLog("Sem sessão ativa");
         setLoading(false);
@@ -81,7 +90,11 @@ export function useAuth() {
       if (mounted) setLoading(false);
     });
 
-    return () => { mounted = false; subscription.unsubscribe(); };
+    return () => {
+      mounted = false;
+      clearTimeout(failsafe);
+      subscription.unsubscribe();
+    };
   }, [loadProfileAndRole, addLog]);
 
   const signOut = useCallback(async () => {
