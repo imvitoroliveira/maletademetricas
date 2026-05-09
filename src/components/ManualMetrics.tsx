@@ -37,7 +37,7 @@ interface CustomMetric {
 }
 
 export function ManualMetrics({ startDate, endDate }: { startDate?: string, endDate?: string }) {
-  const [isAdmin, setIsAdmin] = React.useState(false);
+  const { user, profile, isAdmin, loading: authLoading } = useAuth();
   const [loading, setLoading] = React.useState(true);
   const [metrics, setMetrics] = React.useState<CustomMetric[]>([]);
 
@@ -45,14 +45,10 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
   const [newMetric, setNewMetric] = React.useState({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0] });
 
   React.useEffect(() => {
-    fetchMetrics();
-    
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAdmin(user?.email === 'ovitoroliveira60@gmail.com');
-    };
-    checkUser();
-  }, [startDate, endDate]);
+    if (!authLoading) {
+      fetchMetrics();
+    }
+  }, [startDate, endDate, authLoading]);
 
   const fetchMetrics = async () => {
     setLoading(true);

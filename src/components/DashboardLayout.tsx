@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 
 interface DashboardLayoutProps {
@@ -27,6 +28,7 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const { profile, isAdmin } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
   const navigation = [
