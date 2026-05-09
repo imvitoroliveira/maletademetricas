@@ -20,15 +20,18 @@ export function Auth() {
 
   useEffect(() => {
     const checkConnection = async () => {
+      setConnectionStatus('checking');
       try {
         const { error } = await supabase.from('profiles').select('id').limit(1);
         if (error && (error.message.includes("fetch") || (error as any).status === 500)) {
           throw error;
         }
-        setConnectionError(null);
+        setConnectionStatus('connected');
+        setLastError(null);
       } catch (err: any) {
         console.error("Supabase connection check failed:", err);
-        setConnectionError("Não foi possível conectar ao servidor. Verifique sua conexão ou tente recarregar.");
+        setConnectionStatus('error');
+        setLastError(err.message || "Falha na comunicação com Supabase");
       }
     };
     checkConnection();
@@ -38,6 +41,7 @@ export function Auth() {
     e.preventDefault();
     if (loading) return;
     
+    setLastError(null);
     setLoading(true);
     setIsSlowConnection(false);
 
@@ -50,6 +54,7 @@ export function Auth() {
       clearTimeout(slowConnTimeout);
       
       if (error) {
+        setLastError(error.message);
         if (error.message.includes("Invalid login credentials")) {
           toast.error("E-mail ou senha incorretos.");
         } else if (error.message.includes("Network request failed")) {
@@ -92,20 +97,60 @@ export function Auth() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {connectionError && (
+          <Collapsible open={showDiagnostic} onOpenChange={setShowDiagnostic} className="w-full">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                {connectionStatus === 'checking' && <Activity className="h-4 w-4 animate-spin text-slate-400" />}
+                {connectionStatus === 'connected' && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+                {connectionStatus === 'error' && <AlertCircle className="h-4 w-4 text-rose-500" />}
+                <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                  Status: {connectionStatus === 'checking' ? 'Sincronizando...' : connectionStatus === 'connected' ? 'Servidor Online' : 'Offline'}
+                </span>
+              </div>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-6 text-[10px] text-indigo-600 hover:text-indigo-700">
+                  {showDiagnostic ? 'Fechar Diagnóstico' : 'Diagnóstico'}
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            
+            <CollapsibleContent className="space-y-3">
+              <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 animate-in slide-in-from-top duration-200">
+                <p className="text-[10px] font-mono text-indigo-400 mb-2 border-b border-slate-800 pb-1">CONSOLE DE AUTENTICAÇÃO</p>
+                <div className="space-y-1 font-mono text-[10px]">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Host:</span>
+                    <span className="text-slate-300">Supabase Cloud</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">URL Conexão:</span>
+                    <span className="text-slate-300">Validada</span>
+                  </div>
+                  {lastError && (
+                    <div className="mt-2 p-2 bg-rose-500/10 border border-rose-500/20 rounded text-rose-400 break-words">
+                      ERRO: {lastError}
+                    </div>
+                  )}
+                  {!lastError && connectionStatus === 'connected' && (
+                    <div className="mt-2 text-emerald-400">Pronto para autenticação.</div>
+                  )}
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
+          {connectionStatus === 'error' && (
             <Alert variant="destructive" className="bg-rose-50 border-rose-100 text-rose-900">
               <WifiOff className="h-4 w-4" />
-              <AlertTitle>Erro de Conexão</AlertTitle>
+              <AlertTitle>Erro Crítico</AlertTitle>
               <AlertDescription className="text-xs">
-                {connectionError}
+                {lastError || "Falha na conexão com o banco de dados."}
                 <Button 
                   variant="link" 
                   className="p-0 h-auto text-rose-700 font-bold ml-1" 
-                  onClick={() => {
-                    window.location.reload();
-                  }}
+                  onClick={() => window.location.reload()}
                 >
-                  Tentar novamente
+                  Recarregar App
                 </Button>
               </AlertDescription>
             </Alert>
