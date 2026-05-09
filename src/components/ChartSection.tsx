@@ -114,6 +114,7 @@ export function ChartSection() {
                   fill="#f43f5e" 
                   radius={[4, 4, 0, 0]}
                   barSize={30}
+                  isAnimationActive={false}
                 />
               </BarChart>
             </ResponsiveContainer>
