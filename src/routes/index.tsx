@@ -14,6 +14,14 @@ import {
   Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Auth } from "@/components/Auth";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { User } from "@supabase/supabase-js";
+
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
