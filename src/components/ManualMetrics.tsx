@@ -37,32 +37,100 @@ interface CustomMetric {
 
 export function ManualMetrics() {
   const [isAdmin, setIsAdmin] = React.useState(true);
-  const [metrics, setMetrics] = React.useState<CustomMetric[]>([
-    { id: '1', name: 'Leads Qualificados (MQL)', value: '142', category: 'Fundo de Funil', status: 'active' },
-    { id: '2', name: 'Taxa de Agendamento', value: '12%', category: 'Conversão', status: 'active' },
-    { id: '3', name: 'Custo por Lead Qualificado', value: 'R$ 42,50', category: 'Financeiro', status: 'active' },
-  ]);
+  const [loading, setLoading] = React.useState(true);
+  const [metrics, setMetrics] = React.useState<CustomMetric[]>([]);
 
   const [isAdding, setIsAdding] = React.useState(false);
   const [newMetric, setNewMetric] = React.useState({ name: '', value: '', category: '' });
 
-  const handleAddMetric = () => {
-    if (newMetric.name && newMetric.value) {
-      setMetrics([
-        ...metrics,
-        {
-          id: Math.random().toString(36).substr(2, 9),
-          ...newMetric,
-          status: 'active'
-        }
-      ]);
-      setNewMetric({ name: '', value: '', category: '' });
-      setIsAdding(false);
+  React.useEffect(() => {
+    fetchMetrics();
+    
+    // Check if user is admin (gestor)
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAdmin(!!user);
+    };
+    checkUser();
+  }, []);
+
+  const fetchMetrics = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('custom_metrics')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setMetrics(data || []);
+    } catch (error: any) {
+      toast.error("Erro ao carregar métricas: " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const removeMetric = (id: string) => {
-    setMetrics(metrics.filter(m => m.id !== id));
+  const handleAddMetric = async () => {
+    if (newMetric.name && newMetric.value) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Você precisa estar logado para adicionar métricas.");
+
+        const { data, error } = await supabase
+          .from('custom_metrics')
+          .insert([{ ...newMetric, user_id: user.id }])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setMetrics([...metrics, data]);
+        setNewMetric({ name: '', value: '', category: '' });
+        setIsAdding(false);
+        toast.success("Métrica adicionada com sucesso!");
+      } catch (error: any) {
+        toast.error("Erro ao adicionar métrica: " + error.message);
+      }
+    }
+  };
+
+  const removeMetric = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('custom_metrics')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      setMetrics(metrics.filter(m => m.id !== id));
+      toast.success("Métrica removida.");
+    } catch (error: any) {
+      toast.error("Erro ao remover métrica: " + error.message);
+    }
+  };
+
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    
+    doc.setFontSize(20);
+    doc.text("Relatório de Tráfego Pago", 14, 22);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Data: ${new Date().toLocaleDateString()}`, 14, 30);
+    
+    const tableData = metrics.map(m => [m.name, m.value, m.category || '-', m.status]);
+    
+    (doc as any).autoTable({
+      startY: 40,
+      head: [['Métrica', 'Valor', 'Categoria', 'Status']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [79, 70, 229] },
+    });
+    
+    doc.save("relatorio-trafego.pdf");
+    toast.success("Relatório PDF exportado!");
   };
 
   return (
