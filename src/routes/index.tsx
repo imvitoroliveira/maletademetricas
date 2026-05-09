@@ -45,20 +45,25 @@ function Dashboard() {
     can_view_insights: true
   };
 
-  if (loading) {
+  if (!session && !loading) {
+    return <Auth />;
+  }
+
+  if (loading && session) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
           <p className="text-sm font-medium text-slate-500 animate-pulse">Carregando dashboard...</p>
-          <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>Resetar Sessão</Button>
+          <div className="flex flex-col gap-2 mt-4">
+            <Button variant="outline" size="sm" onClick={() => {
+              supabase.auth.signOut();
+              window.location.reload();
+            }}>Sair e Resetar</Button>
+          </div>
         </div>
       </div>
     );
-  }
-
-  if (!session) {
-    return <Auth />;
   }
 
   if (profile && !profile.is_active) {
