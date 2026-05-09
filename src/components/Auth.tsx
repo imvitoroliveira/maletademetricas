@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { supabase, resetSupabaseClient } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -19,7 +19,7 @@ export function Auth() {
     const checkConnection = async () => {
       try {
         const { error } = await supabase.from('profiles').select('id').limit(1);
-        if (error && (error.message.includes("fetch") || error.status === 500)) {
+        if (error && (error.message.includes("fetch") || (error as any).status === 500)) {
           throw error;
         }
         setConnectionError(null);
@@ -99,7 +99,6 @@ export function Auth() {
                   variant="link" 
                   className="p-0 h-auto text-rose-700 font-bold ml-1" 
                   onClick={() => {
-                    resetSupabaseClient();
                     window.location.reload();
                   }}
                 >
