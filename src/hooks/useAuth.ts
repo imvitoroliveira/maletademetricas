@@ -8,38 +8,10 @@ export function useAuth() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (sessionUser: User | null) => {
-    if (!sessionUser) {
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*, client_permissions(*)")
-        .eq("id", sessionUser.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        setProfile(null);
-      } else {
-        setProfile(data);
-      }
-    } catch (err) {
-      console.error("Profile fetch error:", err);
-      setProfile(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     let mounted = true;
 
-    const fetchProfile = async (sessionUser: User | null) => {
+    const fetchProfileData = async (sessionUser: User | null) => {
       if (!sessionUser) {
         if (mounted) {
           setProfile(null);
@@ -72,25 +44,37 @@ export function useAuth() {
     };
 
     const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUser = session?.user ?? null;
-      if (mounted) setUser(currentUser);
-      await fetchProfile(currentUser);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const currentUser = session?.user ?? null;
+        if (mounted) {
+          setUser(currentUser);
+          if (!currentUser) {
+            setLoading(false);
+          } else {
+            await fetchProfileData(currentUser);
+          }
+        }
+      } catch (err) {
+        console.error("Init auth error:", err);
+        if (mounted) setLoading(false);
+      }
     };
 
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state change:", event, session?.user?.email);
+      console.log("Auth state change event:", event, session?.user?.email);
       const currentUser = session?.user ?? null;
       if (mounted) setUser(currentUser);
       
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         if (mounted) setLoading(true);
-        await fetchProfile(currentUser);
+        await fetchProfileData(currentUser);
       } else if (event === 'SIGNED_OUT') {
         if (mounted) {
           setProfile(null);
+          setUser(null);
           setLoading(false);
         }
       }
