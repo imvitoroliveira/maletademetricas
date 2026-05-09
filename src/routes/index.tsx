@@ -157,7 +157,7 @@ function Dashboard() {
         {/* Secondary Metrics & Manual Entry */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <ManualMetrics />
+            <ManualMetrics startDate={startDate} endDate={endDate} />
           </div>
           <div className="lg:col-span-1">
              <Card className="h-full shadow-sm border-none bg-indigo-600 text-white overflow-hidden">
