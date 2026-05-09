@@ -33,6 +33,7 @@ interface CustomMetric {
   category: string | null;
   status: string | null;
   user_id: string | null;
+  metric_date?: string | null;
 }
 
 export function ManualMetrics() {
