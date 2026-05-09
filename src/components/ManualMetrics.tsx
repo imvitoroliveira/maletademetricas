@@ -36,32 +36,39 @@ interface CustomMetric {
   metric_date?: string | null;
 }
 
-export function ManualMetrics() {
-  const [isAdmin, setIsAdmin] = React.useState(true);
+export function ManualMetrics({ startDate, endDate }: { startDate?: string, endDate?: string }) {
+  const [isAdmin, setIsAdmin] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [metrics, setMetrics] = React.useState<CustomMetric[]>([]);
 
   const [isAdding, setIsAdding] = React.useState(false);
-  const [newMetric, setNewMetric] = React.useState({ name: '', value: '', category: '' });
+  const [newMetric, setNewMetric] = React.useState({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0] });
 
   React.useEffect(() => {
     fetchMetrics();
     
-    // Check if user is admin (gestor)
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      setIsAdmin(!!user);
+      setIsAdmin(user?.email === 'ovitoroliveira60@gmail.com');
     };
     checkUser();
-  }, []);
+  }, [startDate, endDate]);
 
   const fetchMetrics = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('custom_metrics')
-        .select('*')
-        .order('created_at', { ascending: true });
+        .select('*');
+
+      if (startDate) {
+        query = query.gte('metric_date', startDate);
+      }
+      if (endDate) {
+        query = query.lte('metric_date', endDate);
+      }
+
+      const { data, error } = await query.order('metric_date', { ascending: false });
 
       if (error) throw error;
       setMetrics(data || []);
