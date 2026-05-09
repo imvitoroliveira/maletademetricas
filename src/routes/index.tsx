@@ -24,7 +24,6 @@ import { Auth } from "@/components/Auth";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 
-
 export const Route = createFileRoute("/")({
   component: Dashboard,
 });
@@ -34,7 +33,7 @@ function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
-    d.setDate(d.getDate() - 30);
+    d.setMonth(d.getMonth() - 1);
     return d.toISOString().split('T')[0];
   });
   const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -52,6 +51,7 @@ function Dashboard() {
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
           <p className="text-sm font-medium text-slate-500 animate-pulse">Carregando dashboard...</p>
+          <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>Resetar Sessão</Button>
         </div>
       </div>
     );
@@ -75,7 +75,6 @@ function Dashboard() {
       </div>
     );
   }
-
 
   return (
     <DashboardLayout>
@@ -219,4 +218,3 @@ function Dashboard() {
     </DashboardLayout>
   );
 }
-
