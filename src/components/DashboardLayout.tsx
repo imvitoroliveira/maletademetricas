@@ -44,13 +44,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           isSidebarOpen ? "w-64" : "w-20"
         )}
       >
-        <div className="flex h-16 items-center px-6">
+        <div className="flex h-20 items-center px-6 border-b">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-              {/* Logo Placeholder */}
-              TP
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-200 dark:shadow-none">
+              <TrendingUp className="h-6 w-6" />
             </div>
-            {isSidebarOpen && <span className="text-xl font-bold tracking-tight">TrafficDash</span>}
+            {isSidebarOpen && (
+              <div className="flex flex-col">
+                <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50 leading-none">TrafficDash</span>
+                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mt-1">Analytics Pro</span>
+              </div>
+            )}
           </div>
         </div>
 
