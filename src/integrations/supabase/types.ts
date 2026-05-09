@@ -14,12 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_permissions: {
+        Row: {
+          allowed_modules: string[] | null
+          can_view_charts: boolean | null
+          can_view_insights: boolean | null
+          can_view_metrics: boolean | null
+          client_id: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          allowed_modules?: string[] | null
+          can_view_charts?: boolean | null
+          can_view_insights?: boolean | null
+          can_view_metrics?: boolean | null
+          client_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          allowed_modules?: string[] | null
+          can_view_charts?: boolean | null
+          can_view_insights?: boolean | null
+          can_view_metrics?: boolean | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       custom_metrics: {
         Row: {
           category: string | null
           created_at: string
           id: string
+          metric_date: string | null
           name: string
+          period_label: string | null
           status: string | null
           updated_at: string
           user_id: string | null
@@ -29,7 +64,9 @@ export type Database = {
           category?: string | null
           created_at?: string
           id?: string
+          metric_date?: string | null
           name: string
+          period_label?: string | null
           status?: string | null
           updated_at?: string
           user_id?: string | null
@@ -39,7 +76,9 @@ export type Database = {
           category?: string | null
           created_at?: string
           id?: string
+          metric_date?: string | null
           name?: string
+          period_label?: string | null
           status?: string | null
           updated_at?: string
           user_id?: string | null
