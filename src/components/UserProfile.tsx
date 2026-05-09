@@ -1,12 +1,14 @@
+
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { User, Shield, CircleCheck as CheckCircle2, CircleAlert as AlertCircle } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { User, Shield, CheckCircle2, AlertCircle } from "lucide-react";
 
 export function UserProfile() {
   const { profile, user } = useAuth();
@@ -14,7 +16,7 @@ export function UserProfile() {
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.info("Funcionalidade de atualizacao de nome em desenvolvimento.");
+    toast.info("Funcionalidade de atualização de nome em desenvolvimento.");
   };
 
   if (!profile) return null;
@@ -24,16 +26,20 @@ export function UserProfile() {
       <Card className="border-none shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl">
-            <User className="h-6 w-6 text-sky-600" />
+            <User className="h-6 w-6 text-indigo-600" />
             Meu Perfil
           </CardTitle>
-          <CardDescription>Informacoes da sua conta e permissoes no sistema.</CardDescription>
+          <CardDescription>
+            Informações da sua conta e permissões no sistema.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label>E-mail</Label>
-              <div className="p-2 bg-slate-50 rounded-md border text-slate-600">{user?.email}</div>
+              <div className="p-2 bg-slate-50 rounded-md border text-slate-600">
+                {user?.email}
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Status da Conta</Label>
@@ -57,13 +63,13 @@ export function UserProfile() {
           </div>
 
           <form onSubmit={handleUpdateProfile} className="space-y-4 pt-4 border-t">
-            <h3 className="font-medium text-slate-900">Configuracoes Gerais</h3>
+            <h3 className="font-medium text-slate-900">Configurações Gerais</h3>
             <div className="space-y-2">
-              <Label htmlFor="display_name">Nome de Exibicao</Label>
+              <Label htmlFor="display_name">Nome de Exibição</Label>
               <Input id="display_name" placeholder="Seu nome" defaultValue={profile.display_name} />
             </div>
-            <Button type="submit" className="bg-sky-600" disabled={isUpdating}>
-              Salvar Alteracoes
+            <Button type="submit" className="bg-indigo-600" disabled={isUpdating}>
+              Salvar Alterações
             </Button>
           </form>
         </CardContent>
@@ -72,19 +78,19 @@ export function UserProfile() {
       {!profile.is_admin && (
         <Card className="border-none shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg">Minhas Permissoes</CardTitle>
-            <CardDescription>O que voce tem acesso neste dashboard.</CardDescription>
+            <CardTitle className="text-lg">Minhas Permissões</CardTitle>
+            <CardDescription>O que você tem acesso neste dashboard.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {profile.client_permissions?.[0]?.can_view_charts && (
-                <Badge variant="secondary">Graficos de Performance</Badge>
+                <Badge variant="secondary">Gráficos de Performance</Badge>
               )}
               {profile.client_permissions?.[0]?.can_view_metrics && (
-                <Badge variant="secondary">Metricas Personalizadas</Badge>
+                <Badge variant="secondary">Métricas Personalizadas</Badge>
               )}
               {profile.client_permissions?.[0]?.can_view_insights && (
-                <Badge variant="secondary">Insights Estrategicos</Badge>
+                <Badge variant="secondary">Insights Estratégicos</Badge>
               )}
             </div>
           </CardContent>

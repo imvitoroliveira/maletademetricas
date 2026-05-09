@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Mail, Lock, ShieldCheck, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Activity } from "lucide-react";
+import { Mail, Lock, ShieldCheck, CheckCircle2, AlertCircle, Activity } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type ConnStatus = "checking" | "online" | "error";
@@ -18,6 +18,7 @@ export function Auth() {
   const [showDiag, setShowDiag] = useState(false);
 
   useEffect(() => {
+    // Teste de conexão sem tocar em RLS: chama o endpoint público de auth.
     let cancelled = false;
     (async () => {
       try {
@@ -28,12 +29,10 @@ export function Auth() {
       } catch (err: any) {
         if (cancelled) return;
         setConn("error");
-        setLastError(err?.message ?? "Falha ao contatar o servidor de autenticacao.");
+        setLastError(err?.message ?? "Falha ao contatar o servidor de autenticação.");
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -68,10 +67,11 @@ export function Auth() {
 
       if (data.session) {
         toast.success("Acesso liberado!");
+        // O onAuthStateChange já atualiza o estado; sem reload forçado.
       }
     } catch (err: any) {
       setLastError(err?.message ?? "Erro inesperado.");
-      toast.error("Erro de comunicacao. Tente novamente.");
+      toast.error("Erro de comunicação. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -82,7 +82,7 @@ export function Auth() {
       <Card className="w-full max-w-md border-none shadow-2xl">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-6">
-            <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-sky-600 to-blue-500 flex items-center justify-center text-white shadow-xl shadow-sky-200">
+            <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-xl shadow-indigo-200">
               <ShieldCheck className="h-8 w-8" />
             </div>
           </div>
@@ -101,29 +101,19 @@ export function Auth() {
                 {conn === "online" && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
                 {conn === "error" && <AlertCircle className="h-4 w-4 text-rose-500" />}
                 <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
-                  {conn === "checking"
-                    ? "Verificando..."
-                    : conn === "online"
-                      ? "Servidor Online"
-                      : "Servidor Indisponivel"}
+                  {conn === "checking" ? "Verificando..." : conn === "online" ? "Servidor Online" : "Servidor Indisponível"}
                 </span>
               </div>
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-6 text-[10px] text-sky-600">
-                  {showDiag ? "Fechar" : "Diagnostico"}
+                <Button variant="ghost" size="sm" className="h-6 text-[10px] text-indigo-600">
+                  {showDiag ? "Fechar" : "Diagnóstico"}
                 </Button>
               </CollapsibleTrigger>
             </div>
             <CollapsibleContent>
               <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 font-mono text-[10px] space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Endpoint:</span>
-                  <span className="text-slate-300">Auth Cloud</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Status:</span>
-                  <span className="text-slate-300">{conn}</span>
-                </div>
+                <div className="flex justify-between"><span className="text-slate-500">Endpoint:</span><span className="text-slate-300">Auth Cloud</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Status:</span><span className="text-slate-300">{conn}</span></div>
                 {lastError ? (
                   <div className="mt-2 p-2 bg-rose-500/10 border border-rose-500/20 rounded text-rose-400 break-words">
                     {lastError}
@@ -158,7 +148,7 @@ export function Auth() {
                 <Input
                   type="password"
                   autoComplete="current-password"
-                  placeholder="--------"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 h-11"
@@ -168,7 +158,7 @@ export function Auth() {
             </div>
             <Button
               type="submit"
-              className="w-full h-11 bg-sky-600 hover:bg-sky-700 text-white font-semibold"
+              className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
               disabled={loading || conn === "error"}
             >
               {loading ? "Verificando..." : "Entrar no Dashboard"}
@@ -177,7 +167,7 @@ export function Auth() {
 
           <div className="pt-6 border-t border-slate-100 text-center">
             <p className="text-xs text-slate-400 leading-relaxed px-4">
-              O cadastro de novos usuarios e gerenciado pelo administrador.
+              O cadastro de novos usuários é gerenciado pelo administrador.
             </p>
           </div>
         </CardContent>
