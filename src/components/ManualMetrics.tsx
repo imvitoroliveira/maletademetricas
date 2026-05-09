@@ -168,6 +168,18 @@ export function ManualMetrics() {
             </TableRow>
           </TableHeader>
           <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={isAdmin ? 5 : 4} className="h-32 text-center">
+                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Carregando métricas...
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              <>
+
             {isAdding && (
               <TableRow className="bg-blue-50/30 dark:bg-blue-900/10">
                 <TableCell>
