@@ -67,10 +67,17 @@ export function ManualMetrics() {
           <CardTitle className="text-lg font-semibold">Métricas Personalizadas</CardTitle>
           <CardDescription>Métricas inseridas manualmente para o cliente</CardDescription>
         </div>
-        <Button onClick={() => setIsAdding(!isAdding)} size="sm" className="gap-2">
-          {isAdding ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-          {isAdding ? "Cancelar" : "Nova Métrica"}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setIsAdmin(!isAdmin)}>
+            {isAdmin ? "Ver como Cliente" : "Voltar para Gestor"}
+          </Button>
+          {isAdmin && (
+            <Button onClick={() => setIsAdding(!isAdding)} size="sm" className="gap-2">
+              {isAdding ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {isAdding ? "Adicionar Métrica" : "Nova Métrica"}
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="p-0">
         <Table>
