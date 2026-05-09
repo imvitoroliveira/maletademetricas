@@ -199,7 +199,15 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
               <TableRow className="bg-blue-50/30 dark:bg-blue-900/10">
                 <TableCell>
                   <Input 
-                    placeholder="Ex: Leads Qualificados" 
+                    type="date"
+                    value={newMetric.metric_date || ''}
+                    onChange={(e) => setNewMetric({...newMetric, metric_date: e.target.value})}
+                    className="h-8"
+                  />
+                </TableCell>
+                <TableCell>
+                  <Input 
+                    placeholder="Ex: Leads" 
                     value={newMetric.name}
                     onChange={(e) => setNewMetric({...newMetric, name: e.target.value})}
                     className="h-8"
@@ -216,7 +224,7 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
                 <TableCell>
                   <Input 
                     placeholder="Ex: Conversão" 
-                    value={newMetric.category}
+                    value={newMetric.category || ''}
                     onChange={(e) => setNewMetric({...newMetric, category: e.target.value})}
                     className="h-8"
                   />
