@@ -24,7 +24,6 @@ import { Auth } from "@/components/Auth";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 
-
 export const Route = createFileRoute("/")({
   component: Dashboard,
 });
@@ -75,7 +74,6 @@ function Dashboard() {
       </div>
     );
   }
-
 
   return (
     <DashboardLayout>
@@ -219,4 +217,3 @@ function Dashboard() {
     </DashboardLayout>
   );
 }
-
