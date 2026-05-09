@@ -83,5 +83,11 @@ export function useAuth() {
     };
   }, []);
 
+  // Compute final loading state: if there's no user session, we are NOT loading profile
+  const isFinalLoading = loading && (!!user || !user); 
+  // Wait, if loading is true, we want to know if we are waiting for something.
+  // Actually, 'loading' starts as true. initAuth sets it to false if no user.
+  // So 'loading' is correct.
+
   return { user, profile, isAdmin: profile?.is_admin || false, loading };
 }
