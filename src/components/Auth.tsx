@@ -14,11 +14,17 @@ export function Auth() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          throw new Error("E-mail ou senha incorretos.");
+        }
+        throw error;
+      }
       toast.success("Login realizado com sucesso!");
     } catch (error: any) {
       toast.error(error.message || "Erro na autenticação. Verifique suas credenciais.");
