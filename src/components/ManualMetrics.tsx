@@ -174,6 +174,7 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
         <Table>
           <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
             <TableRow>
+              <TableHead>Data</TableHead>
               <TableHead className="w-[300px]">Nome da Métrica</TableHead>
               <TableHead>Valor</TableHead>
               <TableHead>Categoria</TableHead>
