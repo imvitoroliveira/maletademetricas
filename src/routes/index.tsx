@@ -38,23 +38,22 @@ function Dashboard() {
   const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
-    // Immediate check if we're on the server
-    if (typeof window === 'undefined') {
-      return;
-    }
-
     let mounted = true;
 
     const checkSession = async () => {
       try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
         if (mounted) {
           setSession(currentSession?.user ?? null);
           setLoading(false);
         }
       } catch (err) {
         console.error("Auth init error:", err);
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -75,8 +74,11 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
+          <p className="text-sm font-medium text-slate-500 animate-pulse">Carregando dashboard...</p>
+        </div>
       </div>
     );
   }
