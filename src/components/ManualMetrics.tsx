@@ -33,34 +33,42 @@ interface CustomMetric {
   category: string | null;
   status: string | null;
   user_id: string | null;
+  metric_date?: string | null;
 }
 
-export function ManualMetrics() {
-  const [isAdmin, setIsAdmin] = React.useState(true);
+export function ManualMetrics({ startDate, endDate }: { startDate?: string, endDate?: string }) {
+  const [isAdmin, setIsAdmin] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [metrics, setMetrics] = React.useState<CustomMetric[]>([]);
 
   const [isAdding, setIsAdding] = React.useState(false);
-  const [newMetric, setNewMetric] = React.useState({ name: '', value: '', category: '' });
+  const [newMetric, setNewMetric] = React.useState({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0] });
 
   React.useEffect(() => {
     fetchMetrics();
     
-    // Check if user is admin (gestor)
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      setIsAdmin(!!user);
+      setIsAdmin(user?.email === 'ovitoroliveira60@gmail.com');
     };
     checkUser();
-  }, []);
+  }, [startDate, endDate]);
 
   const fetchMetrics = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('custom_metrics')
-        .select('*')
-        .order('created_at', { ascending: true });
+        .select('*');
+
+      if (startDate) {
+        query = query.gte('metric_date', startDate);
+      }
+      if (endDate) {
+        query = query.lte('metric_date', endDate);
+      }
+
+      const { data, error } = await query.order('metric_date', { ascending: false });
 
       if (error) throw error;
       setMetrics(data || []);
@@ -86,7 +94,7 @@ export function ManualMetrics() {
         if (error) throw error;
 
         setMetrics([...metrics, data]);
-        setNewMetric({ name: '', value: '', category: '' });
+        setNewMetric({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0] });
         setIsAdding(false);
         toast.success("Métrica adicionada com sucesso!");
       } catch (error: any) {
@@ -119,16 +127,22 @@ export function ManualMetrics() {
     doc.setTextColor(100);
     doc.text(`Data: ${new Date().toLocaleDateString()}`, 14, 30);
     
-    const tableData = metrics.map(m => [m.name, m.value, m.category || '-', m.status]);
+    const tableData = metrics.map(m => [
+      m.metric_date ? new Date(m.metric_date).toLocaleDateString() : '-',
+      m.name, 
+      m.value, 
+      m.category || '-', 
+      m.status
+    ]);
     
     (doc as any).autoTable({
       startY: 40,
-      head: [['Métrica', 'Valor', 'Categoria', 'Status']],
+      head: [['Data', 'Métrica', 'Valor', 'Categoria', 'Status']],
       body: tableData,
       theme: 'grid',
       headStyles: { fillColor: [79, 70, 229] },
     });
-    
+
     doc.save("relatorio-trafego.pdf");
     toast.success("Relatório PDF exportado!");
   };
@@ -160,6 +174,7 @@ export function ManualMetrics() {
         <Table>
           <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
             <TableRow>
+              <TableHead>Data</TableHead>
               <TableHead className="w-[300px]">Nome da Métrica</TableHead>
               <TableHead>Valor</TableHead>
               <TableHead>Categoria</TableHead>
@@ -170,7 +185,7 @@ export function ManualMetrics() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={isAdmin ? 5 : 4} className="h-32 text-center">
+                <TableCell colSpan={isAdmin ? 6 : 5} className="h-32 text-center">
                   <div className="flex items-center justify-center gap-2 text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Carregando métricas...
@@ -184,7 +199,15 @@ export function ManualMetrics() {
               <TableRow className="bg-blue-50/30 dark:bg-blue-900/10">
                 <TableCell>
                   <Input 
-                    placeholder="Ex: Leads Qualificados" 
+                    type="date"
+                    value={newMetric.metric_date || ''}
+                    onChange={(e) => setNewMetric({...newMetric, metric_date: e.target.value})}
+                    className="h-8"
+                  />
+                </TableCell>
+                <TableCell>
+                  <Input 
+                    placeholder="Ex: Leads" 
                     value={newMetric.name}
                     onChange={(e) => setNewMetric({...newMetric, name: e.target.value})}
                     className="h-8"
@@ -201,7 +224,7 @@ export function ManualMetrics() {
                 <TableCell>
                   <Input 
                     placeholder="Ex: Conversão" 
-                    value={newMetric.category}
+                    value={newMetric.category || ''}
                     onChange={(e) => setNewMetric({...newMetric, category: e.target.value})}
                     className="h-8"
                   />
@@ -220,6 +243,9 @@ export function ManualMetrics() {
             )}
             {metrics.map((metric) => (
               <TableRow key={metric.id} className="group transition-colors">
+                <TableCell className="text-sm text-slate-500">
+                  {metric.metric_date ? new Date(metric.metric_date).toLocaleDateString() : '-'}
+                </TableCell>
                 <TableCell className="font-medium text-slate-700 dark:text-slate-200">
                   {metric.name}
                 </TableCell>

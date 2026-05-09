@@ -30,25 +30,30 @@ export const Route = createFileRoute("/")({
 function Dashboard() {
   const [session, setSession] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
-    // Immediate check if we're on the server
-    if (typeof window === 'undefined') {
-      return;
-    }
-
     let mounted = true;
 
     const checkSession = async () => {
       try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
         if (mounted) {
           setSession(currentSession?.user ?? null);
           setLoading(false);
         }
       } catch (err) {
         console.error("Auth init error:", err);
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -69,8 +74,11 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
+          <p className="text-sm font-medium text-slate-500 animate-pulse">Carregando dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -84,23 +92,29 @@ function Dashboard() {
 
       <div className="flex flex-col gap-8">
         {/* Page Header */}
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Dashboard de Tráfego</h1>
             <p className="text-slate-500 mt-1">Bem-vindo de volta! Aqui está o resumo da performance das campanhas.</p>
           </div>
-          <div className="flex items-center gap-3">
-             <div className="flex items-center gap-2 mr-4">
-                <span className="text-sm text-slate-500">Período:</span>
-                <Input type="date" className="w-auto" />
-                <span className="text-sm text-slate-500">até</span>
-                <Input type="date" className="w-auto" />
+          <div className="flex flex-wrap items-center gap-3">
+             <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-lg border shadow-sm">
+                <span className="text-xs font-medium text-slate-500 uppercase ml-1">Período:</span>
+                <Input 
+                  type="date" 
+                  className="w-auto h-9 border-none bg-transparent focus-visible:ring-0" 
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+                <span className="text-slate-300">|</span>
+                <Input 
+                  type="date" 
+                  className="w-auto h-9 border-none bg-transparent focus-visible:ring-0" 
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
              </div>
-            <Button variant="outline" className="gap-2">
-              <Calendar className="h-4 w-4" />
-              Filtrar
-            </Button>
-            <Button className="gap-2 shadow-sm">
+            <Button className="gap-2 shadow-md bg-indigo-600 hover:bg-indigo-700 h-10 px-5">
               <Zap className="h-4 w-4" />
               Sincronizar
             </Button>
@@ -149,7 +163,7 @@ function Dashboard() {
         {/* Secondary Metrics & Manual Entry */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <ManualMetrics />
+            <ManualMetrics startDate={startDate} endDate={endDate} />
           </div>
           <div className="lg:col-span-1">
              <Card className="h-full shadow-sm border-none bg-indigo-600 text-white overflow-hidden">
