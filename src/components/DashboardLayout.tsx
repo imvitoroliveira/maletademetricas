@@ -3,12 +3,6 @@ import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import { 
   LayoutDashboard, 
-  BarChart3, 
-  Settings, 
-  Users, 
-  Target, 
-  PieChart, 
-  TrendingUp,
   Search,
   Bell,
   Menu,
@@ -18,9 +12,10 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { supabase } from "@/integrations/supabase/client";
+
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import logo from "@/assets/logo.jpg";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -33,11 +28,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Perfil', href: '/perfil', icon: Users },
-    ...(isAdmin ? [
-      { name: 'Campanhas', href: '/campanhas', icon: Target },
-      { name: 'Configurações', href: '/configuracoes', icon: Settings },
-    ] : []),
   ];
 
   return (
@@ -51,13 +41,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       >
         <div className="flex h-20 items-center px-6 border-b">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-200 dark:shadow-none">
-              <TrendingUp className="h-6 w-6" />
+            <div className="h-10 w-10 rounded-xl overflow-hidden shadow-lg shadow-fuchsia-200 ring-2 ring-white">
+              <img src={logo} alt="Maleta de Métricas" className="h-full w-full object-cover" />
             </div>
             {isSidebarOpen && (
               <div className="flex flex-col">
-                <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50 leading-none">TrafficDash</span>
-                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mt-1">Analytics Pro</span>
+                <span className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-50 leading-none">Maleta de Métricas</span>
+                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mt-1">Performance Pro</span>
               </div>
             )}
           </div>
@@ -100,11 +90,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b bg-white/50 dark:bg-slate-900/50 px-8 backdrop-blur-xl">
           <div className="flex-1 max-w-md">
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-fuchsia-500 transition-colors" />
               <Input 
                 type="search" 
                 placeholder="Pesquisar métricas ou campanhas..." 
-                className="pl-10 bg-slate-100/50 border-none dark:bg-slate-800/50 focus-visible:ring-1 focus-visible:ring-indigo-500 h-10"
+                className="pl-10 bg-slate-100/50 border-none dark:bg-slate-800/50 focus-visible:ring-1 focus-visible:ring-fuchsia-500 h-10"
               />
             </div>
           </div>
@@ -113,7 +103,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-[10px] text-slate-300 hover:text-indigo-500"
+              className="text-[10px] text-slate-300 hover:text-fuchsia-500"
               onClick={() => setShowLogs(!showLogs)}
             >
               Logs
@@ -139,8 +129,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <p className="text-xs text-muted-foreground mt-1">{isAdmin ? "Gestor de Tráfego" : "Cliente"}</p>
               </div>
               <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>GT</AvatarFallback>
+                <AvatarImage src={logo} />
+                <AvatarFallback className="bg-fuchsia-100 text-fuchsia-700">MM</AvatarFallback>
               </Avatar>
             </div>
           </div>
@@ -149,9 +139,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Content Area */}
         <div className="p-8">
           {showLogs && (
-            <div className="mb-6 p-4 bg-slate-900 text-slate-50 rounded-lg text-xs font-mono border-l-4 border-indigo-500 shadow-xl animate-in slide-in-from-top duration-300">
+            <div className="mb-6 p-4 bg-slate-900 text-slate-50 rounded-lg text-xs font-mono border-l-4 border-fuchsia-500 shadow-xl animate-in slide-in-from-top duration-300">
               <div className="flex justify-between items-center mb-2">
-                <span className="font-bold text-indigo-400">PAINEL DE DIAGNÓSTICO AUTH</span>
+                <span className="font-bold text-fuchsia-400">PAINEL DE DIAGNÓSTICO AUTH</span>
                 <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => setShowLogs(false)}>Ocultar</Button>
               </div>
               <div className="space-y-1 max-h-40 overflow-y-auto">

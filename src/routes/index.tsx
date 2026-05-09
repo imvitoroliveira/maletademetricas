@@ -84,8 +84,8 @@ function Dashboard() {
       <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
-            <div className="absolute inset-0 h-10 w-10 animate-ping rounded-full bg-indigo-400/20"></div>
+            <Loader2 className="h-10 w-10 animate-spin text-fuchsia-600" />
+            <div className="absolute inset-0 h-10 w-10 animate-ping rounded-full bg-fuchsia-400/20"></div>
           </div>
           <p className="text-sm font-medium text-slate-500 animate-pulse">Sincronizando acesso...</p>
         </div>
@@ -123,21 +123,21 @@ function Dashboard() {
             <Button 
               variant={activeTab === "overview" ? "default" : "ghost"} 
               onClick={() => setActiveTab("overview")}
-              className={activeTab === "overview" ? "bg-indigo-600" : ""}
+              className={activeTab === "overview" ? "bg-fuchsia-600" : ""}
             >
               Visão Geral
             </Button>
             <Button 
               variant={activeTab === "users" ? "default" : "ghost"} 
               onClick={() => setActiveTab("users")}
-              className={activeTab === "users" ? "bg-indigo-600" : ""}
+              className={activeTab === "users" ? "bg-fuchsia-600" : ""}
             >
               Gestão de Clientes
             </Button>
             <Button 
               variant={activeTab === "profile" ? "default" : "ghost"} 
               onClick={() => setActiveTab("profile")}
-              className={activeTab === "profile" ? "bg-indigo-600" : ""}
+              className={activeTab === "profile" ? "bg-fuchsia-600" : ""}
             >
               Meu Perfil
             </Button>
@@ -202,14 +202,14 @@ function Dashboard() {
               
               {(isAdmin || permissions.can_view_insights) && (
                 <div className="lg:col-span-1">
-                  <Card className="h-full shadow-sm border-none bg-indigo-600 text-white overflow-hidden">
+                  <Card className="h-full shadow-sm border-none bg-fuchsia-600 text-white overflow-hidden">
                     <div className="p-6 relative z-10">
                       <h3 className="text-lg font-semibold mb-2">Análise Estratégica</h3>
-                      <p className="text-indigo-100 text-sm leading-relaxed mb-6">
+                      <p className="text-fuchsia-100 text-sm leading-relaxed mb-6">
                         O gestor adicionará aqui os insights baseados na performance real do período selecionado.
                       </p>
                     </div>
-                    <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl"></div>
+                    <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-fuchsia-500/20 rounded-full blur-3xl"></div>
                   </Card>
                 </div>
               )}

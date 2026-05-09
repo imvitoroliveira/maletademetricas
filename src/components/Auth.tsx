@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Mail, Lock, ShieldCheck, CheckCircle2, AlertCircle, Activity } from "lucide-react";
+import { Mail, Lock, CheckCircle2, AlertCircle, Activity } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import logo from "@/assets/logo.jpg";
 
 type ConnStatus = "checking" | "online" | "error";
 
@@ -78,19 +79,19 @@ export function Auth() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 dark:bg-slate-950">
-      <Card className="w-full max-w-md border-none shadow-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 p-4 dark:from-slate-950 dark:via-slate-900 dark:to-purple-950">
+      <Card className="w-full max-w-md border-none shadow-2xl shadow-fuchsia-200/40">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-6">
-            <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-xl shadow-indigo-200">
-              <ShieldCheck className="h-8 w-8" />
+            <div className="h-20 w-20 rounded-2xl overflow-hidden shadow-xl shadow-fuchsia-300/40 ring-4 ring-white">
+              <img src={logo} alt="Maleta de Métricas" className="h-full w-full object-cover" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">
-            Acesso Restrito
+            Maleta de Métricas
           </CardTitle>
           <CardDescription className="text-slate-500">
-            Entre com as credenciais fornecidas pelo gestor.
+            Acesse seu painel exclusivo de performance.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -105,7 +106,7 @@ export function Auth() {
                 </span>
               </div>
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-6 text-[10px] text-indigo-600">
+                <Button variant="ghost" size="sm" className="h-6 text-[10px] text-fuchsia-600">
                   {showDiag ? "Fechar" : "Diagnóstico"}
                 </Button>
               </CollapsibleTrigger>
@@ -158,7 +159,7 @@ export function Auth() {
             </div>
             <Button
               type="submit"
-              className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
+              className="w-full h-11 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-semibold"
               disabled={loading || conn === "error"}
             >
               {loading ? "Verificando..." : "Entrar no Dashboard"}
