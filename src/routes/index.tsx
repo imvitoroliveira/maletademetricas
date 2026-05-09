@@ -220,7 +220,3 @@ function Dashboard() {
   );
 }
 
-}
-
-// Reuse Card component for the insight box
-import { Card } from "@/components/ui/card";

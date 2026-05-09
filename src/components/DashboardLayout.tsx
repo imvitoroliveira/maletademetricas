@@ -22,7 +22,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
-
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
@@ -70,7 +69,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               to={item.href}
               className={cn(
                 "group flex items-center rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50 transition-colors",
-                // Active state would be here
               )}
             >
               <item.icon className={cn("h-5 w-5 shrink-0", isSidebarOpen ? "mr-3" : "mx-auto")} />
@@ -128,8 +126,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </Button>
             <div className="flex items-center gap-3 pl-4 border-l">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium leading-none">Gestor de Tráfego</p>
-                <p className="text-xs text-muted-foreground mt-1">Admin Dashboard</p>
+                <p className="text-sm font-medium leading-none">{profile?.email || "Usuário"}</p>
+                <p className="text-xs text-muted-foreground mt-1">{isAdmin ? "Gestor de Tráfego" : "Cliente"}</p>
               </div>
               <Avatar>
                 <AvatarImage src="https://github.com/shadcn.png" />
