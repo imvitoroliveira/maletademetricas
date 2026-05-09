@@ -31,9 +31,9 @@ export function ChartSection() {
           <CardTitle className="text-lg font-semibold">Investimento vs Conversões</CardTitle>
           <CardDescription>Performance dos últimos 7 dias</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+        <CardContent className="pt-4">
+          <div className="h-[300px] w-full min-h-[300px]">
+            <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={data}>
                 <defs>
                   <linearGradient id="colorInv" x1="0" y1="0" x2="0" y2="1">
