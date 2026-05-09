@@ -1,17 +1,37 @@
 
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
+import { supabase, resetSupabaseClient } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Mail, Lock, LogIn, ShieldCheck } from "lucide-react";
+import { Mail, Lock, LogIn, ShieldCheck, WifiOff, AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function Auth() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSlowConnection, setIsSlowConnection] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const { error } = await supabase.from('profiles').select('id').limit(1);
+        // We don't care if we get a 401 or 403 (unauthorized), that means the connection works
+        // We only care about network errors or 5xx
+        if (error && (error.message.includes("fetch") || error.status === 500)) {
+          throw error;
+        }
+        setConnectionError(null);
+      } catch (err: any) {
+        console.error("Supabase connection check failed:", err);
+        setConnectionError("Não foi possível conectar ao servidor. Verifique sua conexão ou tente recarregar.");
+      }
+    };
+    checkConnection();
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,8 +101,26 @@ export function Auth() {
             Entre com as credenciais fornecidas pelo gestor para acessar o dashboard de métricas.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-5">
+        <CardContent className="space-y-6">
+          {connectionError && (
+            <Alert variant="destructive" className="bg-rose-50 border-rose-100 text-rose-900">
+              <WifiOff className="h-4 w-4" />
+              <AlertTitle>Erro de Conexão</AlertTitle>
+              <AlertDescription className="text-xs">
+                {connectionError}
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-rose-700 font-bold ml-1" 
+                  onClick={() => {
+                    resetSupabaseClient();
+                    window.location.reload();
+                  }}
+                >
+                  Tentar novamente
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 ml-1">E-mail</label>
               <div className="relative">
