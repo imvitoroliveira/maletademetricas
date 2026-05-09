@@ -30,9 +30,9 @@ interface CustomMetric {
   id: string;
   name: string;
   value: string;
-  category: string;
-  status: string;
-  user_id?: string;
+  category: string | null;
+  status: string | null;
+  user_id: string | null;
 }
 
 export function ManualMetrics() {
