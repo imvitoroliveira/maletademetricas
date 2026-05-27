@@ -19,6 +19,12 @@ interface ChartSectionProps {
 }
 
 export function ChartSection({ metrics, loading }: ChartSectionProps) {
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // Logic to transform real metrics into chart data
   const chartData = React.useMemo(() => {
     if (!metrics || metrics.length === 0) return [];
