@@ -38,6 +38,12 @@ interface CustomMetric {
 }
 
 export function ManualMetrics({ startDate, endDate }: { startDate?: string, endDate?: string }) {
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const { user, profile, isAdmin, loading: authLoading } = useAuth();
   const [loading, setLoading] = React.useState(true);
   const [metrics, setMetrics] = React.useState<CustomMetric[]>([]);
