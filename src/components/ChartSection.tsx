@@ -74,6 +74,19 @@ export function ChartSection({ metrics, loading }: ChartSectionProps) {
   // Identify numeric metrics for charts (e.g., Investimento, Leads, ROAS)
   const availableMetrics = Array.from(new Set(metrics.map(m => m.name)));
 
+  if (!isClient) {
+    return (
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="col-span-1 shadow-sm border-none bg-white dark:bg-slate-900 h-[400px] flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-fuchsia-600" />
+        </Card>
+        <Card className="col-span-1 shadow-sm border-none bg-white dark:bg-slate-900 h-[400px] flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-fuchsia-600" />
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Card className="col-span-2 lg:col-span-1 shadow-sm border-none bg-white dark:bg-slate-900 overflow-hidden">
