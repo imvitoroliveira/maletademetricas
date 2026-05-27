@@ -72,7 +72,7 @@ export function useAuth() {
     });
 
     // 2) Hidratar sessão atual
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (!mounted) return;
       const u = session?.user ?? null;
       setUser(u);
