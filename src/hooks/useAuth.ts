@@ -85,7 +85,7 @@ export function useAuth() {
         addLog("Sem sessão ativa");
         setLoading(false);
       }
-    }).catch((err) => {
+    }).catch((err: any) => {
       addLog(`Falha getSession: ${err?.message ?? err}`);
       if (mounted) setLoading(false);
     });
