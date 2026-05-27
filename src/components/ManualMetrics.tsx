@@ -154,6 +154,8 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
     toast.success("Relatório PDF exportado!");
   };
 
+  if (!isClient) return null;
+
   return (
     <Card className="shadow-sm border-none bg-white dark:bg-slate-900 overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
