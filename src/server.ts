@@ -18,8 +18,8 @@ async function getServerEntry(): Promise<ServerEntry> {
   return serverEntryPromise;
 }
 
-function brandedErrorResponse(): Response {
-  return new Response(renderErrorPage(), {
+function brandedErrorResponse(error?: any): Response {
+  return new Response(renderErrorPage(error), {
     status: 500,
     headers: { "content-type": "text/html; charset=utf-8" },
   });
