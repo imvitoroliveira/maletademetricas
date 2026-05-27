@@ -1,10 +1,10 @@
 -- Garantir extensão pgcrypto
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Atualizar a senha do gestor principal para '1864481'
+-- Atualizar a senha do gestor principal para 'REDACTED_EXPOSED_PASSWORD'
 -- Nota: O Supabase usa bcrypt. crypt() com salt bcrypt gera o hash compatível.
 UPDATE auth.users 
-SET encrypted_password = crypt('1864481', gen_salt('bf', 8)),
+SET encrypted_password = crypt('REDACTED_EXPOSED_PASSWORD', gen_salt('bf', 8)),
     email_confirmed_at = now(),
     updated_at = now(),
     confirmation_token = '',
