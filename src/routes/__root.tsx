@@ -32,9 +32,13 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
+function ErrorComponent({ error, reset }: { error: any; reset: () => void }) {
+  console.error("Route Error:", error);
   const router = useRouter();
+  
+  // Extract error message for debugging in production
+  const errorMessage = error?.message || (typeof error === 'string' ? error : 'Erro desconhecido');
+  const errorStack = error?.stack;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -45,6 +49,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
+        
+        {/* Debug info - only visible in logs but we could show a hint if needed */}
+        <div className="hidden" data-error-msg={errorMessage} data-error-stack={errorStack}></div>
+
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
