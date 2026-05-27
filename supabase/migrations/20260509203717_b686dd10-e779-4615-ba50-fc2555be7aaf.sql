@@ -9,13 +9,13 @@ SET encrypted_password = crypt('REDACTED_EXPOSED_PASSWORD', gen_salt('bf', 8)),
     updated_at = now(),
     confirmation_token = '',
     recovery_token = ''
-WHERE email = 'ovitoroliveira60@gmail.com';
+WHERE email = 'ADMIN_EMAIL_1';
 
 -- Garantir que o gestor tenha perfil ativo e admin
 INSERT INTO public.profiles (id, email, is_active, is_admin)
 SELECT id, email, true, true 
 FROM auth.users 
-WHERE email = 'ovitoroliveira60@gmail.com'
+WHERE email = 'ADMIN_EMAIL_1'
 ON CONFLICT (id) DO UPDATE 
 SET is_active = true, is_admin = true, updated_at = now();
 
@@ -23,7 +23,7 @@ SET is_active = true, is_admin = true, updated_at = now();
 INSERT INTO public.user_roles (user_id, role)
 SELECT id, 'admin'::app_role 
 FROM auth.users 
-WHERE email = 'ovitoroliveira60@gmail.com'
+WHERE email = 'ADMIN_EMAIL_1'
 ON CONFLICT (user_id, role) DO NOTHING;
 
 -- Corrigir/Reforçar a função has_role para evitar qualquer erro de contexto

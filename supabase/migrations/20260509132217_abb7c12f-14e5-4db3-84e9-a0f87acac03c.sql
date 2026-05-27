@@ -38,7 +38,7 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
     INSERT INTO public.profiles (id, email, is_admin)
-    VALUES (NEW.id, NEW.email, (NEW.email = 'ovitoroliveira60@gmail.com'));
+    VALUES (NEW.id, NEW.email, (NEW.email = 'ADMIN_EMAIL_1'));
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

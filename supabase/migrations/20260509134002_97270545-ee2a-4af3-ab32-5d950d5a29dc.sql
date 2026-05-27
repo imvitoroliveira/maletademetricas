@@ -6,12 +6,12 @@ BEGIN
     VALUES (
         NEW.id, 
         NEW.email, 
-        (NEW.email = 'ovitoroliveira60@gmail.com' OR NEW.email = 'equipeanalisescia@gmail.com'),
+        (NEW.email = 'ADMIN_EMAIL_1' OR NEW.email = 'ADMIN_EMAIL_2'),
         true
     )
     ON CONFLICT (id) DO UPDATE SET
         email = EXCLUDED.email,
-        is_admin = (EXCLUDED.email = 'ovitoroliveira60@gmail.com' OR EXCLUDED.email = 'equipeanalisescia@gmail.com');
+        is_admin = (EXCLUDED.email = 'ADMIN_EMAIL_1' OR EXCLUDED.email = 'ADMIN_EMAIL_2');
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
@@ -19,4 +19,4 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 -- Update existing profiles just in case
 UPDATE public.profiles 
 SET is_admin = true 
-WHERE email = 'equipeanalisescia@gmail.com';
+WHERE email = 'ADMIN_EMAIL_2';

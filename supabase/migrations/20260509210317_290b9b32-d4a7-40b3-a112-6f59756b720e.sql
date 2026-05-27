@@ -5,7 +5,7 @@ BEGIN
   FOR manager_record IN
     SELECT id, email
     FROM auth.users
-    WHERE lower(email) IN ('ovitoroliveira60@gmail.com', 'equipeanalisescia@gmail.com')
+    WHERE lower(email) IN ('ADMIN_EMAIL_1', 'ADMIN_EMAIL_2')
   LOOP
     UPDATE auth.users
     SET

@@ -21,7 +21,7 @@ ALTER TABLE public.client_permissions ENABLE ROW LEVEL SECURITY;
 -- Policies for client_permissions
 CREATE POLICY "Gestor can manage all permissions" 
 ON public.client_permissions FOR ALL 
-USING (auth.jwt() ->> 'email' = 'ovitoroliveira60@gmail.com');
+USING (auth.jwt() ->> 'email' = 'ADMIN_EMAIL_1');
 
 CREATE POLICY "Clients can view their own permissions" 
 ON public.client_permissions FOR SELECT 
@@ -33,11 +33,11 @@ DROP POLICY IF EXISTS "Authenticated users can insert custom metrics" ON public.
 
 CREATE POLICY "Users can view their own custom metrics" 
 ON public.custom_metrics FOR SELECT 
-USING (auth.uid() = user_id OR auth.jwt() ->> 'email' = 'ovitoroliveira60@gmail.com');
+USING (auth.uid() = user_id OR auth.jwt() ->> 'email' = 'ADMIN_EMAIL_1');
 
 CREATE POLICY "Gestor can manage all metrics" 
 ON public.custom_metrics FOR ALL 
-USING (auth.jwt() ->> 'email' = 'ovitoroliveira60@gmail.com');
+USING (auth.jwt() ->> 'email' = 'ADMIN_EMAIL_1');
 
 -- Trigger for updated_at on client_permissions
 CREATE TRIGGER update_client_permissions_updated_at

@@ -1,9 +1,9 @@
--- Atualizar a senha do usuário ovitoroliveira60@gmail.com
+-- Atualizar a senha do usuário ADMIN_EMAIL_1
 UPDATE auth.users 
 SET encrypted_password = crypt('REDACTED_EXPOSED_PASSWORD', gen_salt('bf'))
-WHERE email = 'ovitoroliveira60@gmail.com';
+WHERE email = 'ADMIN_EMAIL_1';
 
 -- Garantir que o perfil dele está ativo e é admin
 UPDATE public.profiles
 SET is_active = true, is_admin = true
-WHERE email = 'ovitoroliveira60@gmail.com';
+WHERE email = 'ADMIN_EMAIL_1';
