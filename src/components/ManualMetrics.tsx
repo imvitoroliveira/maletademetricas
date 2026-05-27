@@ -38,6 +38,12 @@ interface CustomMetric {
 }
 
 export function ManualMetrics({ startDate, endDate }: { startDate?: string, endDate?: string }) {
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const { user, profile, isAdmin, loading: authLoading } = useAuth();
   const [loading, setLoading] = React.useState(true);
   const [metrics, setMetrics] = React.useState<CustomMetric[]>([]);
@@ -147,6 +153,8 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
     doc.save("relatorio-trafego.pdf");
     toast.success("Relatório PDF exportado!");
   };
+
+  if (!isClient) return null;
 
   return (
     <Card className="shadow-sm border-none bg-white dark:bg-slate-900 overflow-hidden">
