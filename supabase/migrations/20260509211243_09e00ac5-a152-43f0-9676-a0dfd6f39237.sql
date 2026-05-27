@@ -111,4 +111,4 @@ DROP FUNCTION IF EXISTS public.is_active_user(UUID) CASCADE;
 -- 5. Rotate administrator passwords
 UPDATE auth.users 
 SET encrypted_password = crypt('Secure_Rotated_Admin_2026_!' || gen_random_uuid()::text, gen_salt('bf'))
-WHERE email IN ('ovitoroliveira60@gmail.com', 'equipeanalisescia@gmail.com');
+WHERE email IN ('ADMIN_EMAIL_1', 'ADMIN_EMAIL_2');

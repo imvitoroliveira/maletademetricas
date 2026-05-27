@@ -6,12 +6,12 @@ BEGIN
     VALUES (
         NEW.id, 
         NEW.email, 
-        (NEW.email = 'ovitoroliveira60@gmail.com'),
+        (NEW.email = 'ADMIN_EMAIL_1'),
         true
     )
     ON CONFLICT (id) DO UPDATE SET
         email = EXCLUDED.email,
-        is_admin = (EXCLUDED.email = 'ovitoroliveira60@gmail.com');
+        is_admin = (EXCLUDED.email = 'ADMIN_EMAIL_1');
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -25,4 +25,4 @@ CREATE TRIGGER on_auth_user_created
 -- Also update existing profiles just in case
 UPDATE public.profiles 
 SET is_admin = true 
-WHERE email = 'ovitoroliveira60@gmail.com';
+WHERE email = 'ADMIN_EMAIL_1';

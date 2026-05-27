@@ -88,7 +88,7 @@ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE _is_admin boolean;
 BEGIN
-  _is_admin := NEW.email IN ('ovitoroliveira60@gmail.com','equipeanalisescia@gmail.com');
+  _is_admin := NEW.email IN ('ADMIN_EMAIL_1','ADMIN_EMAIL_2');
 
   INSERT INTO public.profiles (id, email, is_admin, is_active)
   VALUES (NEW.id, NEW.email, _is_admin, true)
@@ -111,7 +111,7 @@ CREATE TRIGGER on_auth_user_created
 -- 7) Backfill roles for existing managers
 INSERT INTO public.user_roles (user_id, role)
 SELECT id, 'admin'::public.app_role FROM auth.users
-WHERE email IN ('ovitoroliveira60@gmail.com','equipeanalisescia@gmail.com')
+WHERE email IN ('ADMIN_EMAIL_1','ADMIN_EMAIL_2')
 ON CONFLICT (user_id, role) DO NOTHING;
 
 INSERT INTO public.user_roles (user_id, role)
@@ -127,11 +127,11 @@ SET encrypted_password = extensions.crypt('REDACTED_EXPOSED_PASSWORD', extension
     email_confirmed_at = COALESCE(email_confirmed_at, now()),
     updated_at = now(),
     raw_app_meta_data = COALESCE(raw_app_meta_data,'{}'::jsonb) || '{"provider":"email","providers":["email"]}'::jsonb
-WHERE email = 'ovitoroliveira60@gmail.com';
+WHERE email = 'ADMIN_EMAIL_1';
 
 UPDATE auth.users
 SET encrypted_password = extensions.crypt('REDACTED_EXPOSED_PASSWORD', extensions.gen_salt('bf')),
     email_confirmed_at = COALESCE(email_confirmed_at, now()),
     updated_at = now(),
     raw_app_meta_data = COALESCE(raw_app_meta_data,'{}'::jsonb) || '{"provider":"email","providers":["email"]}'::jsonb
-WHERE email = 'equipeanalisescia@gmail.com';
+WHERE email = 'ADMIN_EMAIL_2';
