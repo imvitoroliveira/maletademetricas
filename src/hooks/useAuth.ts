@@ -58,7 +58,7 @@ export function useAuth() {
     }, 5000);
 
     // 1) Listener primeiro (sem await dentro do callback)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session: Session | null) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
       if (!mounted) return;
       addLog(`Evento: ${event}`);
       const u = session?.user ?? null;
