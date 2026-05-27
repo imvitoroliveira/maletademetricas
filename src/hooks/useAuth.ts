@@ -58,7 +58,7 @@ export function useAuth() {
     }, 5000);
 
     // 1) Listener primeiro (sem await dentro do callback)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session: Session | null) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
       if (!mounted) return;
       addLog(`Evento: ${event}`);
       const u = session?.user ?? null;
@@ -72,7 +72,7 @@ export function useAuth() {
     });
 
     // 2) Hidratar sessão atual
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (!mounted) return;
       const u = session?.user ?? null;
       setUser(u);
@@ -85,7 +85,7 @@ export function useAuth() {
         addLog("Sem sessão ativa");
         setLoading(false);
       }
-    }).catch((err) => {
+    }).catch((err: any) => {
       addLog(`Falha getSession: ${err?.message ?? err}`);
       if (mounted) setLoading(false);
     });
