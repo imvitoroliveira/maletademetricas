@@ -23,14 +23,22 @@ function UpdatePassword() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setHasSession(!!session);
-      setSessionLoading(false);
+      const { data: { session }, error } = await supabase.auth.getSession();
+      console.log("Resultado do getSession no update-password:", !!session, error?.message);
       
-      if (!session) {
-        // Se não houver sessão, o Supabase pode ainda estar processando o hash da URL
-        // Vamos dar um pequeno delay e tentar novamente ou observar mudanças
-        console.log("Nenhuma sessão encontrada inicialmente no update-password.");
+      if (session) {
+        setHasSession(true);
+        setSessionLoading(false);
+      } else {
+        // Se não houver sessão, vamos aguardar um pouco mais, pois o Supabase 
+        // pode estar processando os tokens da URL (especialmente se for hash)
+        setTimeout(async () => {
+          const { data: { session: secondSession } } = await supabase.auth.getSession();
+          if (secondSession) {
+            setHasSession(true);
+          }
+          setSessionLoading(false);
+        }, 1500);
       }
     };
 
