@@ -27,6 +27,7 @@ import "jspdf-autotable";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ErrorHandler } from "@/lib/error-utils";
+import { cn } from "@/lib/utils";
 
 interface CustomMetric {
   id: string;
