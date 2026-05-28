@@ -85,17 +85,17 @@ export function Auth({ authLogs = [] }: AuthProps) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 p-4 dark:from-slate-950 dark:via-slate-900 dark:to-purple-950">
-      <Card className="w-full max-w-md border-none shadow-2xl shadow-fuchsia-200/40">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-6">
-            <div className="h-20 w-20 rounded-2xl overflow-hidden shadow-xl shadow-fuchsia-300/40 ring-4 ring-white">
+      <Card className="w-full max-w-[92vw] sm:max-w-md border-none shadow-2xl shadow-fuchsia-200/40 animate-in fade-in zoom-in duration-500">
+        <CardHeader className="space-y-2 text-center pb-2 sm:pb-6">
+          <div className="flex justify-center mb-2 sm:mb-6">
+            <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl overflow-hidden shadow-xl shadow-fuchsia-300/40 ring-4 ring-white">
               <img src={logo} alt="Maleta de Métricas" className="h-full w-full object-cover" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">
+          <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
             Maleta de Métricas
           </CardTitle>
-          <CardDescription className="text-slate-500">
+          <CardDescription className="text-sm text-slate-500">
             Acesse seu painel exclusivo de performance.
           </CardDescription>
         </CardHeader>
