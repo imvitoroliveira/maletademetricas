@@ -6,8 +6,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 function createSupabaseAdminClient() {
-  const SUPABASE_URL = process.env.EXT_SUPABASE_URL || process.env.SUPABASE_URL;
-  const SUPABASE_SERVICE_ROLE_KEY = process.env.EXT_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const SUPABASE_URL = process.env.EXT_SUPABASE_URL || process.env.SUPABASE_URL || "https://esujxypnyfhcxhfeqpii.supabase.co";
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.EXT_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzdWp4eXBueWZoY3hoZmVxcGlpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODMwOTk5NywiZXhwIjoyMDkzODg1OTk3fQ.Z6L23r8V_3593-v2M3L3_485r3_X-V3L3_485r3_X-A";
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     const missing = [
