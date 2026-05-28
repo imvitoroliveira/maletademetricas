@@ -4,13 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Mail, Lock, CheckCircle2, AlertCircle, Activity } from "lucide-react";
+import { Mail, Lock, CheckCircle2, AlertCircle, Activity, ScrollText } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import logo from "@/assets/logo.jpg";
+import { cn } from "@/lib/utils";
 
 type ConnStatus = "checking" | "online" | "error";
 
-export function Auth() {
+interface AuthProps {
+  authLogs?: { event: string; timestamp: string; type: 'info' | 'error' | 'warn' }[];
+}
+
+export function Auth({ authLogs = [] }: AuthProps) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -112,16 +117,38 @@ export function Auth() {
               </CollapsibleTrigger>
             </div>
             <CollapsibleContent>
-              <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 font-mono text-[10px] space-y-1">
-                <div className="flex justify-between"><span className="text-slate-500">Endpoint:</span><span className="text-slate-300">Auth Cloud</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Status:</span><span className="text-slate-300">{conn}</span></div>
-                {lastError ? (
-                  <div className="mt-2 p-2 bg-rose-500/10 border border-rose-500/20 rounded text-rose-400 break-words">
-                    {lastError}
-                  </div>
+              <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 font-mono text-[10px] space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                <div className="flex items-center gap-2 text-fuchsia-400 border-b border-slate-800 pb-1 mb-2">
+                  <ScrollText className="h-3 w-3" />
+                  <span className="font-bold uppercase tracking-widest">Logs de Acesso (Tempo Real)</span>
+                </div>
+                
+                {authLogs.length > 0 ? (
+                  authLogs.map((log, i) => (
+                    <div key={i} className="flex flex-col border-b border-slate-800/50 pb-1 last:border-0">
+                      <div className="flex justify-between items-start gap-2">
+                        <span className={cn(
+                          "break-words flex-1",
+                          log.type === 'error' ? "text-rose-400" : log.type === 'warn' ? "text-amber-400" : "text-slate-300"
+                        )}>
+                          {log.event}
+                        </span>
+                        <span className="text-slate-600 shrink-0">{log.timestamp}</span>
+                      </div>
+                    </div>
+                  ))
                 ) : (
-                  <div className="text-emerald-400">Pronto para autenticar.</div>
+                  <div className="text-slate-500 italic">Nenhum evento registrado ainda.</div>
                 )}
+
+                <div className="mt-3 pt-2 border-t border-slate-800 text-[9px] text-slate-500">
+                  <div className="flex justify-between"><span>Status:</span><span className="text-slate-300 uppercase">{conn}</span></div>
+                  {lastError && (
+                    <div className="mt-1 text-rose-500 font-bold break-words bg-rose-500/5 p-1 rounded">
+                      ERRO: {lastError}
+                    </div>
+                  )}
+                </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
