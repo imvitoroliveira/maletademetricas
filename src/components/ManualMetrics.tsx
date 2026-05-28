@@ -114,42 +114,14 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
     onError: (error) => ErrorHandler.report(error, "Exclusão de Métrica")
   });
 
-  const handleAddMetric = async () => {
+  const handleAddMetric = () => {
     if (newMetric.name && newMetric.value) {
-      try {
-        if (!user) throw new Error("Você precisa estar logado para adicionar métricas.");
-
-        const { data, error } = await supabase
-          .from('custom_metrics')
-          .insert([{ ...newMetric, user_id: user.id }])
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        setMetrics([...metrics, data]);
-        setNewMetric({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0] });
-        setIsAdding(false);
-        toast.success("Métrica adicionada com sucesso!");
-      } catch (error: any) {
-        toast.error("Erro ao adicionar métrica: " + error.message);
-      }
+      addMutation.mutate(newMetric);
     }
   };
 
-  const removeMetric = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('custom_metrics')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      setMetrics(metrics.filter(m => m.id !== id));
-      toast.success("Métrica removida.");
-    } catch (error: any) {
-      toast.error("Erro ao remover métrica: " + error.message);
-    }
+  const removeMetric = (id: string) => {
+    deleteMutation.mutate(id);
   };
 
   const exportPDF = () => {
