@@ -103,7 +103,26 @@ function UpdatePassword() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {success ? (
+          {sessionLoading ? (
+            <div className="flex flex-col items-center gap-4 py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-fuchsia-600" />
+              <p className="text-sm text-slate-500">Validando sessão...</p>
+            </div>
+          ) : !hasSession ? (
+            <div className="flex flex-col items-center gap-4 py-4 text-center">
+              <div className="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                <AlertCircle className="h-6 w-6" />
+              </div>
+              <p className="text-sm text-slate-600">
+                Sessão de recuperação não encontrada ou expirada.
+              </p>
+              <Button asChild variant="outline" className="w-full mt-2">
+                <Link to="/reset-password">
+                  Solicitar Novo Link
+                </Link>
+              </Button>
+            </div>
+          ) : success ? (
             <div className="flex flex-col items-center gap-4 py-4 text-center">
               <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
                 <CheckCircle2 className="h-6 w-6" />
