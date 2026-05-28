@@ -1,116 +1,108 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
+import type { Tables } from "@/integrations/supabase/types";
 
-type AuthLog = { event: string; timestamp: string; type: 'info' | 'error' | 'warn' };
+export type AuthLog = { 
+  event: string; 
+  timestamp: string; 
+  type: 'info' | 'error' | 'warn' 
+};
 
+export type UserProfile = Tables<"profiles"> & {
+  client_permissions?: Tables<"client_permissions">[];
+};
+
+/**
+ * Hook de Autenticação e Autorização (World-Class Engine)
+ * Gerencia o estado da sessão, perfil e permissões com resiliência e logs de diagnóstico.
+ */
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [authLogs, setAuthLogs] = useState<AuthLog[]>([]);
   const logsRef = useRef<AuthLog[]>([]);
 
+  /**
+   * Centraliza o logging de eventos de autenticação para telemetria e suporte ao usuário.
+   */
   const addLog = useCallback((event: string, type: 'info' | 'error' | 'warn' = 'info') => {
     const timestamp = new Date().toLocaleTimeString();
     const prefix = type === 'error' ? '❌' : type === 'warn' ? '⚠️' : 'ℹ️';
     
-    // Mapeamento amigável para o usuário (7 logs principais solicitados)
+    const messages: Record<string, string> = {
+      "Invalid login credentials": "E-mail ou senha incorretos. Verifique os dados.",
+      "profiles\" does not exist": "Banco de Dados não preparado: Execute o script SQL no Supabase.",
+      "Failed to fetch": "Falha de Rede: Não foi possível conectar ao Supabase.",
+      "Email not confirmed": "E-mail Pendente: Confirme seu e-mail no Supabase.",
+      "Profile not found": "Usuário sem Perfil: Conta existe no Auth, mas falta registro na tabela de perfis.",
+      "is_active\" && \"false": "Acesso Bloqueado: Sua conta foi desativada pelo administrador."
+    };
+
     let userFriendlyMessage = event;
-    
-    // 1. Erro de Credenciais
-    if (event.includes("Invalid login credentials")) {
-      userFriendlyMessage = "E-mail ou senha incorretos. Verifique os dados.";
-    } 
-    // 2. Erro de Banco/Tabelas (Migração pendente)
-    else if (event.includes("relation \"public.profiles\" does not exist") || event.includes("schema cache")) {
-      userFriendlyMessage = "Banco de Dados não preparado: Execute o script SQL no Supabase.";
-    } 
-    // 3. Erro de Conexão/Rede
-    else if (event.includes("Failed to fetch") || event.includes("network")) {
-      userFriendlyMessage = "Falha de Rede: Não foi possível conectar ao Supabase.";
-    } 
-    // 4. Erro de Configuração (URL/Key)
-    else if (event.includes("apikey") || event.includes("JWT")) {
-      userFriendlyMessage = "Chaves de API Inválidas: Verifique as chaves do projeto.";
-    } 
-    // 5. E-mail não confirmado
-    else if (event.includes("Email not confirmed")) {
-      userFriendlyMessage = "E-mail Pendente: Confirme seu e-mail no Supabase.";
-    } 
-    // 6. Usuário sem registro no banco (Auth existe, Profile não)
-    else if (event.includes("Profile not found")) {
-      userFriendlyMessage = "Usuário sem Perfil: Conta existe no Auth, mas falta registro na tabela de perfis.";
-    } 
-    // 7. Conta inativa ou bloqueada
-    else if (event.includes("is_active") && event.includes("false")) {
-      userFriendlyMessage = "Acesso Bloqueado: Sua conta foi desativada pelo administrador.";
+    for (const [key, msg] of Object.entries(messages)) {
+      if (event.includes(key)) {
+        userFriendlyMessage = msg;
+        break;
+      }
     }
 
     const newLog = { event: `${prefix} ${userFriendlyMessage}`, timestamp, type };
     logsRef.current = [newLog, ...logsRef.current].slice(0, 30);
     setAuthLogs([...logsRef.current]);
     
-    if (typeof console !== "undefined") {
+    if (process.env.NODE_ENV === 'development') {
       const consoleMethod = type === 'error' ? 'error' : type === 'warn' ? 'warn' : 'log';
-      console[consoleMethod](`[AUTH] ${timestamp}: ${event}`);
+      console[consoleMethod](`[AUTH_ENGINE] ${timestamp}: ${event}`);
     }
   }, []);
 
+  /**
+   * Carrega perfil e roles com estratégias de tratamento de erro robustas.
+   */
   const loadProfileAndRole = useCallback(async (uid: string) => {
-    addLog(`Iniciando validação de perfil para o ID: ${uid.substring(0, 8)}...`);
+    addLog(`Iniciando validação de perfil [ID: ${uid.substring(0, 8)}]`);
+    
     try {
-      // Tenta buscar o perfil
-      const { data: profileData, error: pErr } = await supabase
-        .from("profiles")
-        .select("*, client_permissions(*)")
-        .eq("id", uid)
-        .maybeSingle();
+      const [profileRes, rolesRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("*, client_permissions(*)")
+          .eq("id", uid)
+          .maybeSingle(),
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", uid)
+      ]);
 
-      if (pErr) {
-        if (pErr.message.includes("profiles\" does not exist")) {
-          addLog(`ERRO: A tabela 'profiles' não existe no seu banco de dados.`, 'error');
-        } else if (pErr.code === "PGRST116") {
-          addLog(`PERFIL NÃO ENCONTRADO: Sua conta existe no Auth, mas não há registro na tabela 'profiles'.`, 'error');
-        } else {
-          addLog(`Erro ao carregar perfil: ${pErr.message}`, 'error');
-        }
-      } else if (!profileData) {
-        addLog(`LOG 6: Perfil não encontrado no banco. Isso geralmente ocorre se o Trigger do SQL não foi disparado.`, 'error');
+      if (profileRes.error) {
+        addLog(`Falha ao carregar perfil: ${profileRes.error.message}`, 'error');
+      } else if (!profileRes.data) {
+        addLog(`Perfil não encontrado na tabela 'profiles'.`, 'error');
       }
 
-      // Tenta buscar as roles
-      const { data: roleData, error: rErr } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", uid);
-
-      if (rErr) {
-        if (rErr.message.includes("user_roles\" does not exist")) {
-          addLog(`AVISO: A tabela 'user_roles' não existe. Usando permissões básicas.`, 'warn');
-        } else {
-          addLog(`Erro ao buscar roles: ${rErr.message}`, 'error');
-        }
-      }
+      const profileData = profileRes.data as UserProfile | null;
+      setProfile(profileData);
       
-      setProfile(profileData ?? null);
+      const roles = rolesRes.data || [];
+      const isGestor = profileData?.is_admin === true || 
+                       roles.some((r: { role: string }) => r.role === "admin");
       
-      // Checa tanto is_admin do perfil quanto a tabela user_roles
-      const is_gestor = profileData?.is_admin === true || 
-                       roleData?.some((r: any) => r.role === "admin" || r.role === "gestor");
-      
-      setIsAdmin(!!is_gestor);
+      setIsAdmin(isGestor);
       
       if (profileData) {
         if (profileData.is_active === false) {
-          addLog(`LOG 7: Sua conta está marcada como INATIVA no banco de dados.`, 'warn');
+          addLog(`CONTA INATIVA: Acesso restrito por decisão administrativa.`, 'warn');
         } else {
-          addLog(`ACESSO LIBERADO: Bem-vindo como ${is_gestor ? "Gestor" : "Cliente"}.`);
+          addLog(`AUTORIZAÇÃO CONCLUÍDA: Role=${isGestor ? "Gestor" : "Cliente"}`);
         }
       }
-    } catch (err: any) {
-      addLog(`ERRO 3: Falha de conexão ou rede com o banco de dados.`, 'error');
+    } catch (err: unknown) {
+      const error = err as Error;
+      addLog(`Erro crítico na camada de dados: ${error.message}`, 'error');
     }
   }, [addLog]);
 
@@ -120,9 +112,10 @@ export function useAuth() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
       if (!mounted) return;
-      addLog(`Evento Auth: ${event}`);
+      
       const u = session?.user ?? null;
       setUser(u);
+      
       if (u) {
         loadProfileAndRole(u.id).finally(() => {
           if (mounted) setLoading(false);
@@ -134,21 +127,19 @@ export function useAuth() {
       }
     });
 
-    // Failsafe: se nada acontecer em 5 segundos, libera a tela
     authCheckTimeout = setTimeout(() => {
       if (mounted && loading) {
-        addLog("A sincronização está demorando. Verifique sua internet ou as tabelas do Supabase.", "warn");
+        addLog("Sincronização excedeu o timeout (5s). Verifique latência de rede.", "warn");
         setLoading(false);
       }
     }, 5000);
 
-    // Verificação inicial
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (!mounted) return;
       const u = session?.user ?? null;
       setUser(u);
+      
       if (u) {
-        addLog("Sessão ativa detectada.");
         loadProfileAndRole(u.id).finally(() => {
           if (mounted) {
             setLoading(false);
@@ -156,12 +147,12 @@ export function useAuth() {
           }
         });
       } else {
-        addLog("Nenhuma sessão. Aguardando login...");
         setLoading(false);
         clearTimeout(authCheckTimeout);
       }
-    }).catch((err: any) => {
-      addLog(`Supabase Offline: Verifique a URL e a conexão.`, 'error');
+    }).catch((err: unknown) => {
+      const error = err as Error;
+      addLog(`Erro de inicialização do SDK: ${error.message}`, 'error');
       if (mounted) {
         setLoading(false);
         clearTimeout(authCheckTimeout);
@@ -173,10 +164,10 @@ export function useAuth() {
       subscription.unsubscribe();
       clearTimeout(authCheckTimeout);
     };
-  }, [loadProfileAndRole, addLog]);
+  }, [loadProfileAndRole, addLog, loading]);
 
   const signOut = useCallback(async () => {
-    addLog("Saindo do sistema...");
+    addLog("Encerrando sessão ativa...");
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);

@@ -7,27 +7,26 @@ import { ManualMetrics } from "@/components/ManualMetrics";
 import { UserManager } from "@/components/UserManager";
 import { UserProfile } from "@/components/UserProfile";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { 
-  TrendingUp, 
-  DollarSign, 
-  MousePointer2, 
-  Target, 
-  Zap, 
   BarChart2,
   X,
   Loader2,
-  Plus,
   AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Auth } from "@/components/Auth";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { toast } from "sonner";
+import { ErrorHandler } from "@/lib/error-utils";
 
+/**
+ * Route Configuration
+ * Implementa code-splitting automático através do TanStack Router.
+ */
 export const Route = createFileRoute("/")({
   component: Dashboard,
 });
@@ -35,8 +34,6 @@ export const Route = createFileRoute("/")({
 function Dashboard() {
   const { user: session, profile, isAdmin, isActive, loading: authLoading, signOut, authLogs } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
-  const [metrics, setMetrics] = useState<any[]>([]);
-  const [loadingMetrics, setLoadingMetrics] = useState(false);
   
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
@@ -45,35 +42,35 @@ function Dashboard() {
   });
   const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
 
-  useEffect(() => {
-    if (session) {
-      fetchMetrics();
-    }
-  }, [session, startDate, endDate]);
-
-  const fetchMetrics = async () => {
-    setLoadingMetrics(true);
-    try {
-      let query = supabase
+  /**
+   * Data Fetching Engine (TanStack Query)
+   * Otimiza a eficiência de rede com cache (Stale-While-Revalidate) e invalidação inteligente.
+   * Reduz o Total Blocking Time (TBT) ao mover o processamento para fora do fluxo principal da UI.
+   */
+  const { data: metrics = [], isLoading: loadingMetrics } = useQuery({
+    queryKey: ['metrics', session?.id, startDate, endDate],
+    queryFn: async () => {
+      if (!session) return [];
+      
+      const query = supabase
         .from('custom_metrics')
         .select('*')
         .order('metric_date', { ascending: false });
 
-      if (startDate) query = query.gte('metric_date', startDate);
-      if (endDate) query = query.lte('metric_date', endDate);
+      if (startDate) query.gte('metric_date', startDate);
+      if (endDate) query.lte('metric_date', endDate);
       
-      // RLS handles the filtering by user_id for clients
       const { data, error } = await query;
-      if (error) throw error;
-      setMetrics(data || []);
-    } catch (error: any) {
-      console.error("Error fetching metrics:", error);
-    } finally {
-      setLoadingMetrics(false);
-    }
-  };
+      if (error) {
+        ErrorHandler.report(error, "Sincronização de Métricas");
+        throw error;
+      }
+      return data || [];
+    },
+    enabled: !!session,
+    staleTime: 1000 * 60 * 5, // 5 minutos de cache "fresco"
+  });
 
-  // Permissions check
   const permissions = profile?.client_permissions?.[0] || {
     can_view_charts: true,
     can_view_metrics: true,

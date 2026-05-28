@@ -66,7 +66,7 @@ export function UserProfile() {
             <h3 className="font-medium text-slate-900">Configurações Gerais</h3>
             <div className="space-y-2">
               <Label htmlFor="display_name">Nome de Exibição</Label>
-              <Input id="display_name" placeholder="Seu nome" defaultValue={profile.display_name} />
+              <Input id="display_name" placeholder="Seu nome" defaultValue={profile.email.split('@')[0]} />
             </div>
             <Button type="submit" className="bg-fuchsia-600" disabled={isUpdating}>
               Salvar Alterações
