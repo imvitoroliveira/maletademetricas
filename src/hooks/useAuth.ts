@@ -104,7 +104,7 @@ export function useAuth() {
   useEffect(() => {
     let mounted = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
       if (!mounted) return;
       addLog(`Evento Auth: ${event}`);
       const u = session?.user ?? null;
@@ -118,7 +118,7 @@ export function useAuth() {
     });
 
     // Verificação inicial
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (!mounted) return;
       const u = session?.user ?? null;
       setUser(u);
@@ -131,7 +131,7 @@ export function useAuth() {
         addLog("Nenhuma sessão. Aguardando login...");
         setLoading(false);
       }
-    }).catch((err) => {
+    }).catch((err: any) => {
       addLog(`Supabase Offline: Verifique a URL e a conexão.`, 'error');
       if (mounted) setLoading(false);
     });
