@@ -175,7 +175,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Dynamic Content Area */}
-        <div className="p-4 md:p-8 flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden">
+        <div className="p-4 md:p-8 flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden min-w-0">
           {showLogs && (
             <div className="mb-6 p-4 bg-slate-900 text-slate-50 rounded-xl text-xs font-mono border-l-4 border-fuchsia-500 shadow-2xl animate-in slide-in-from-top duration-300">
               <div className="flex justify-between items-center mb-2">

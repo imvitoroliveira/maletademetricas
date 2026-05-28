@@ -207,7 +207,8 @@ export function UserManager() {
       </div>
 
       <Card className="border-none shadow-sm overflow-hidden">
-        <Table>
+        <div className="overflow-x-auto custom-scrollbar">
+          <Table className="min-w-[800px] lg:min-w-full">
           <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
             <TableRow>
               <TableHead>Cliente / E-mail</TableHead>
@@ -297,7 +298,8 @@ export function UserManager() {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+          </Table>
+        </div>
       </Card>
 
       {/* Permissions Dialog */}
