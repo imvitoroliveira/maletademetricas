@@ -98,6 +98,36 @@ function Dashboard() {
     return <Auth authLogs={authLogs} />;
   }
 
+  if (session && !profile && !authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 dark:bg-slate-950">
+        <Card className="w-full max-w-md p-8 text-center space-y-4 border-none shadow-2xl">
+          <div className="mx-auto w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 shadow-inner">
+            <AlertCircle className="h-10 w-10" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900">Perfil não Encontrado</h2>
+          <p className="text-slate-500 text-sm">
+            Sua conta de autenticação foi criada, mas seu perfil de acesso no banco de dados ainda não existe ou o banco não foi configurado.
+          </p>
+          <div className="bg-slate-900 p-4 rounded-lg text-left overflow-hidden">
+            <p className="text-[10px] font-mono text-slate-400 uppercase mb-2">Logs de Diagnóstico:</p>
+            <div className="space-y-1 max-h-40 overflow-y-auto">
+              {authLogs.map((log, i) => (
+                <div key={i} className="text-[10px] font-mono text-slate-300 border-b border-slate-800 pb-1">
+                  {log.event}
+                </div>
+              ))}
+            </div>
+          </div>
+          <Button variant="outline" onClick={() => signOut()} className="w-full h-11 transition-all">
+            Sair e Tentar Novamente
+          </Button>
+          <p className="text-[10px] text-slate-400">Dica: Execute o script SQL consolidado no seu Supabase.</p>
+        </Card>
+      </div>
+    );
+  }
+
   if (profile && !isActive) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 dark:bg-slate-950">
