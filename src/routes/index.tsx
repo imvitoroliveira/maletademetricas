@@ -178,27 +178,29 @@ function Dashboard() {
           <UserManager />
         ) : (
           <>
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Dashboard de Performance</h1>
-                <p className="text-slate-500 mt-1">Gestão de Tráfego Pago e Métricas de Conversão.</p>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Dashboard de Performance</h1>
+                <p className="text-sm md:text-base text-slate-500 mt-1">Gestão de Tráfego Pago e Métricas de Conversão.</p>
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-lg border shadow-sm">
-                    <span className="text-xs font-medium text-slate-500 uppercase ml-1">Período:</span>
-                    <Input 
-                      type="date" 
-                      className="w-auto h-9 border-none bg-transparent focus-visible:ring-0" 
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                    />
-                    <span className="text-slate-300">|</span>
-                    <Input 
-                      type="date" 
-                      className="w-auto h-9 border-none bg-transparent focus-visible:ring-0" 
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                    />
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl border shadow-sm w-full sm:w-auto">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase ml-2">Período</span>
+                    <div className="flex items-center gap-1 flex-1">
+                      <Input 
+                        type="date" 
+                        className="w-full sm:w-auto h-9 border-none bg-transparent focus-visible:ring-0 text-xs font-medium" 
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                      />
+                      <span className="text-slate-200">/</span>
+                      <Input 
+                        type="date" 
+                        className="w-full sm:w-auto h-9 border-none bg-transparent focus-visible:ring-0 text-xs font-medium" 
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                      />
+                    </div>
                 </div>
               </div>
             </div>
