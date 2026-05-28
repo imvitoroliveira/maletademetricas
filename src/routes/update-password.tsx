@@ -35,7 +35,7 @@ function UpdatePassword() {
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log("Auth event no update-password:", event);
       if (session) {
         setHasSession(true);
