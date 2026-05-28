@@ -95,7 +95,7 @@ function Dashboard() {
 
   if (!session) {
     // Sessão não detectada ou invalidada
-    return <Auth />;
+    return <Auth authLogs={authLogs} />;
   }
 
   if (profile && !isActive) {
