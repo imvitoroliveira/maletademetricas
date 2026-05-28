@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Lock, Loader2, CheckCircle2 } from "lucide-react";
+import { Lock, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 
 export const Route = createFileRoute("/update-password")({
@@ -15,12 +16,55 @@ export const Route = createFileRoute("/update-password")({
 function UpdatePassword() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [hasSession, setHasSession] = useState(false);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      // Pequeno delay para permitir que o SDK processe tokens da URL
+      await new Promise(r => setTimeout(r, 500));
+      
+      const { data: { session }, error } = await supabase.auth.getSession();
+      console.log("Check session result:", !!session, error?.message);
+      
+      if (session) {
+        setHasSession(true);
+        setSessionLoading(false);
+      } else {
+        // Fallback: observar se a sessão aparece via onAuthStateChange
+        setTimeout(() => {
+          if (sessionLoading) {
+            setSessionLoading(false);
+          }
+        }, 2000);
+      }
+    };
+
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      console.log("Auth event:", event, !!session);
+      if (session) {
+        setHasSession(true);
+        setSessionLoading(false);
+      } else if (event === 'SIGNED_OUT') {
+        setHasSession(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
+
+    if (!hasSession) {
+      toast.error("Sessão expirada. Solicite um novo link.");
+      return;
+    }
 
     if (password.length < 6) {
       toast.error("A senha deve ter pelo menos 6 caracteres.");
@@ -69,7 +113,26 @@ function UpdatePassword() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {success ? (
+          {sessionLoading ? (
+            <div className="flex flex-col items-center gap-4 py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-fuchsia-600" />
+              <p className="text-sm text-slate-500">Validando link de acesso...</p>
+            </div>
+          ) : !hasSession ? (
+            <div className="flex flex-col items-center gap-4 py-4 text-center">
+              <div className="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                <AlertCircle className="h-6 w-6" />
+              </div>
+              <p className="text-sm text-slate-600">
+                Link de recuperação inválido ou expirado.
+              </p>
+              <Button asChild variant="outline" className="w-full mt-2">
+                <Link to="/reset-password">
+                  Solicitar Novo Link
+                </Link>
+              </Button>
+            </div>
+          ) : success ? (
             <div className="flex flex-col items-center gap-4 py-4 text-center">
               <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
                 <CheckCircle2 className="h-6 w-6" />
