@@ -89,7 +89,7 @@ export function useAuth() {
       
       const roles = rolesRes.data || [];
       const isGestor = profileData?.is_admin === true || 
-                       roles.some(r => r.role === "admin");
+                       roles.some((r: { role: string }) => r.role === "admin");
       
       setIsAdmin(isGestor);
       
@@ -134,7 +134,7 @@ export function useAuth() {
       }
     }, 5000);
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (!mounted) return;
       const u = session?.user ?? null;
       setUser(u);
