@@ -94,7 +94,7 @@ export function ChartSection({ metrics, loading }: ChartSectionProps) {
           <CardTitle className="text-lg font-bold">Investimento e Performance</CardTitle>
           <CardDescription>Evolução das métricas por período</CardDescription>
         </CardHeader>
-        <CardContent className="h-[300px] pt-4">
+        <CardContent className="h-[250px] sm:h-[300px] pt-4 px-2 sm:px-6">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
               <defs>
@@ -143,7 +143,7 @@ export function ChartSection({ metrics, loading }: ChartSectionProps) {
           <CardTitle className="text-lg font-bold">Distribuição por Categoria</CardTitle>
           <CardDescription>Volume de dados agrupados</CardDescription>
         </CardHeader>
-        <CardContent className="h-[300px] pt-4">
+        <CardContent className="h-[250px] sm:h-[300px] pt-4 px-2 sm:px-6">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />

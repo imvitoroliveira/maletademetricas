@@ -184,7 +184,7 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
       </CardHeader>
       <CardContent className="p-0">
         <div className="w-full overflow-x-auto custom-scrollbar">
-          <Table className="min-w-[700px] lg:min-w-full">
+          <Table className="min-w-[800px] lg:min-w-full">
             <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
               <TableRow>
                 <TableHead className="text-[10px] font-bold uppercase tracking-wider h-12">Data</TableHead>

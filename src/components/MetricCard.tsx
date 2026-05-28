@@ -31,7 +31,7 @@ export const MetricCard = React.memo(({ title, value, description, trend, icon, 
         {icon && <div className="text-slate-400 group-hover:text-fuchsia-500 transition-colors">{icon}</div>}
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{value}</div>
+        <div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{value}</div>
         {(description || trend) && (
           <p className="mt-2 text-xs text-slate-500 flex items-center gap-1.5">
             {trend && (
