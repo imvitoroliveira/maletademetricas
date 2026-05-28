@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Mail, Lock, CheckCircle2, AlertCircle, Activity, ScrollText } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import logo from "@/assets/logo.jpg";
+import { cn } from "@/lib/utils";
 
 type ConnStatus = "checking" | "online" | "error";
 
