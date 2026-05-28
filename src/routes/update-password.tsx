@@ -23,32 +23,34 @@ function UpdatePassword() {
 
   useEffect(() => {
     const checkSession = async () => {
+      // Pequeno delay para permitir que o SDK processe tokens da URL
+      await new Promise(r => setTimeout(r, 500));
+      
       const { data: { session }, error } = await supabase.auth.getSession();
-      console.log("Resultado do getSession no update-password:", !!session, error?.message);
+      console.log("Check session result:", !!session, error?.message);
       
       if (session) {
         setHasSession(true);
         setSessionLoading(false);
       } else {
-        // Se não houver sessão, vamos aguardar um pouco mais, pois o Supabase 
-        // pode estar processando os tokens da URL (especialmente se for hash)
-        setTimeout(async () => {
-          const { data: { session: secondSession } } = await supabase.auth.getSession();
-          if (secondSession) {
-            setHasSession(true);
+        // Fallback: observar se a sessão aparece via onAuthStateChange
+        setTimeout(() => {
+          if (sessionLoading) {
+            setSessionLoading(false);
           }
-          setSessionLoading(false);
-        }, 1500);
+        }, 2000);
       }
     };
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
-      console.log("Auth event no update-password:", event);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      console.log("Auth event:", event, !!session);
       if (session) {
         setHasSession(true);
         setSessionLoading(false);
+      } else if (event === 'SIGNED_OUT') {
+        setHasSession(false);
       }
     });
 
@@ -60,7 +62,7 @@ function UpdatePassword() {
     if (loading) return;
 
     if (!hasSession) {
-      toast.error("Sessão de autenticação expirada ou inválida. Solicite um novo link de recuperação.");
+      toast.error("Sessão expirada. Solicite um novo link.");
       return;
     }
 
@@ -114,7 +116,7 @@ function UpdatePassword() {
           {sessionLoading ? (
             <div className="flex flex-col items-center gap-4 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-fuchsia-600" />
-              <p className="text-sm text-slate-500">Validando sessão...</p>
+              <p className="text-sm text-slate-500">Validando link de acesso...</p>
             </div>
           ) : !hasSession ? (
             <div className="flex flex-col items-center gap-4 py-4 text-center">
@@ -122,7 +124,7 @@ function UpdatePassword() {
                 <AlertCircle className="h-6 w-6" />
               </div>
               <p className="text-sm text-slate-600">
-                Sessão de recuperação não encontrada ou expirada.
+                Link de recuperação inválido ou expirado.
               </p>
               <Button asChild variant="outline" className="w-full mt-2">
                 <Link to="/reset-password">
