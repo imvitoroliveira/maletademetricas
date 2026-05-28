@@ -59,9 +59,9 @@ export function useAuth() {
   }, []);
 
   const loadProfileAndRole = useCallback(async (uid: string) => {
-    addLog(`Validando permissões para o ID: ${uid.substring(0, 8)}...`);
+    addLog(`Iniciando validação de perfil para o ID: ${uid.substring(0, 8)}...`);
     try {
-      // Usar query individual para melhor depuração se um falhar
+      // Tenta buscar o perfil
       const { data: profileData, error: pErr } = await supabase
         .from("profiles")
         .select("*, client_permissions(*)")
@@ -69,20 +69,29 @@ export function useAuth() {
         .maybeSingle();
 
       if (pErr) {
-        addLog(`Erro ao carregar perfil: ${pErr.message}`, 'error');
+        if (pErr.message.includes("profiles\" does not exist")) {
+          addLog(`ERRO: A tabela 'profiles' não existe no seu banco de dados.`, 'error');
+        } else if (pErr.code === "PGRST116") {
+          addLog(`PERFIL NÃO ENCONTRADO: Sua conta existe no Auth, mas não há registro na tabela 'profiles'.`, 'error');
+        } else {
+          addLog(`Erro ao carregar perfil: ${pErr.message}`, 'error');
+        }
       } else if (!profileData) {
-        addLog(`Profile not found: O usuário ${uid} não tem registro na tabela 'profiles'.`, 'error');
-      } else if (profileData.is_active === false) {
-        addLog(`is_active: false - Este acesso está bloqueado.`, 'warn');
+        addLog(`LOG 6: Perfil não encontrado no banco. Isso geralmente ocorre se o Trigger do SQL não foi disparado.`, 'error');
       }
 
+      // Tenta buscar as roles
       const { data: roleData, error: rErr } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", uid);
 
       if (rErr) {
-        addLog(`Erro ao buscar roles: ${rErr.message}`, 'error');
+        if (rErr.message.includes("user_roles\" does not exist")) {
+          addLog(`AVISO: A tabela 'user_roles' não existe. Usando permissões básicas.`, 'warn');
+        } else {
+          addLog(`Erro ao buscar roles: ${rErr.message}`, 'error');
+        }
       }
       
       setProfile(profileData ?? null);
@@ -93,11 +102,15 @@ export function useAuth() {
       
       setIsAdmin(!!is_gestor);
       
-      if (profileData && profileData.is_active !== false) {
-        addLog(`Login bem-sucedido: ${is_gestor ? "Gestor" : "Cliente"}.`);
+      if (profileData) {
+        if (profileData.is_active === false) {
+          addLog(`LOG 7: Sua conta está marcada como INATIVA no banco de dados.`, 'warn');
+        } else {
+          addLog(`ACESSO LIBERADO: Bem-vindo como ${is_gestor ? "Gestor" : "Cliente"}.`);
+        }
       }
     } catch (err: any) {
-      addLog(`Erro crítico no banco: ${err?.message ?? err}`, 'error');
+      addLog(`ERRO 3: Falha de conexão ou rede com o banco de dados.`, 'error');
     }
   }, [addLog]);
 
