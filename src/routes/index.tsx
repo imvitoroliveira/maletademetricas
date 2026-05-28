@@ -147,25 +147,25 @@ function Dashboard() {
     <DashboardLayout>
       <div className="flex flex-col gap-8">
         {isAdmin && (
-          <div className="flex gap-2 border-b pb-4">
+          <div className="flex gap-2 border-b pb-4 overflow-x-auto custom-scrollbar whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
             <Button 
               variant={activeTab === "overview" ? "default" : "ghost"} 
               onClick={() => setActiveTab("overview")}
-              className={activeTab === "overview" ? "bg-fuchsia-600" : ""}
+              className={cn("shrink-0", activeTab === "overview" ? "bg-fuchsia-600" : "")}
             >
               Visão Geral
             </Button>
             <Button 
               variant={activeTab === "users" ? "default" : "ghost"} 
               onClick={() => setActiveTab("users")}
-              className={activeTab === "users" ? "bg-fuchsia-600" : ""}
+              className={cn("shrink-0", activeTab === "users" ? "bg-fuchsia-600" : "")}
             >
               Gestão de Clientes
             </Button>
             <Button 
               variant={activeTab === "profile" ? "default" : "ghost"} 
               onClick={() => setActiveTab("profile")}
-              className={activeTab === "profile" ? "bg-fuchsia-600" : ""}
+              className={cn("shrink-0", activeTab === "profile" ? "bg-fuchsia-600" : "")}
             >
               Meu Perfil
             </Button>
@@ -184,24 +184,24 @@ function Dashboard() {
                 <p className="text-sm md:text-base text-slate-500 mt-1">Gestão de Tráfego Pago e Métricas de Conversão.</p>
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl border shadow-sm w-full sm:w-auto">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase ml-2">Período</span>
-                    <div className="flex items-center gap-1 flex-1">
-                      <Input 
-                        type="date" 
-                        className="w-full sm:w-auto h-9 border-none bg-transparent focus-visible:ring-0 text-xs font-medium" 
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                      />
-                      <span className="text-slate-200">/</span>
-                      <Input 
-                        type="date" 
-                        className="w-full sm:w-auto h-9 border-none bg-transparent focus-visible:ring-0 text-xs font-medium" 
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                      />
-                    </div>
-                </div>
+              <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl border shadow-sm w-full sm:w-auto overflow-hidden">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase ml-2 shrink-0">Período</span>
+                  <div className="flex items-center gap-1 flex-1 min-w-0">
+                    <Input 
+                      type="date" 
+                      className="w-full sm:w-auto h-9 border-none bg-transparent focus-visible:ring-0 text-[10px] sm:text-xs font-medium px-1" 
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                    <span className="text-slate-200 shrink-0">/</span>
+                    <Input 
+                      type="date" 
+                      className="w-full sm:w-auto h-9 border-none bg-transparent focus-visible:ring-0 text-[10px] sm:text-xs font-medium px-1" 
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </div>
+              </div>
               </div>
             </div>
 
