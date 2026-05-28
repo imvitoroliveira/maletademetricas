@@ -72,7 +72,7 @@ ALTER TABLE public.client_permissions ENABLE ROW LEVEL SECURITY;
 -- Policies for client_permissions
 CREATE POLICY "Gestor can manage all permissions" 
 ON public.client_permissions FOR ALL 
-USING (auth.jwt() ->> 'email' = 'ADMIN_EMAIL_1');
+USING (auth.jwt() ->> 'email' = 'ovitoroliveira60@gmail.com');
 
 CREATE POLICY "Clients can view their own permissions" 
 ON public.client_permissions FOR SELECT 
@@ -84,11 +84,11 @@ DROP POLICY IF EXISTS "Authenticated users can insert custom metrics" ON public.
 
 CREATE POLICY "Users can view their own custom metrics" 
 ON public.custom_metrics FOR SELECT 
-USING (auth.uid() = user_id OR auth.jwt() ->> 'email' = 'ADMIN_EMAIL_1');
+USING (auth.uid() = user_id OR auth.jwt() ->> 'email' = 'ovitoroliveira60@gmail.com');
 
 CREATE POLICY "Gestor can manage all metrics" 
 ON public.custom_metrics FOR ALL 
-USING (auth.jwt() ->> 'email' = 'ADMIN_EMAIL_1');
+USING (auth.jwt() ->> 'email' = 'ovitoroliveira60@gmail.com');
 
 -- Trigger for updated_at on client_permissions
 CREATE TRIGGER update_client_permissions_updated_at
@@ -137,7 +137,7 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
     INSERT INTO public.profiles (id, email, is_admin)
-    VALUES (NEW.id, NEW.email, (NEW.email = 'ADMIN_EMAIL_1'));
+    VALUES (NEW.id, NEW.email, (NEW.email = 'ovitoroliveira60@gmail.com'));
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -195,12 +195,12 @@ BEGIN
     VALUES (
         NEW.id, 
         NEW.email, 
-        (NEW.email = 'ADMIN_EMAIL_1'),
+        (NEW.email = 'ovitoroliveira60@gmail.com'),
         true
     )
     ON CONFLICT (id) DO UPDATE SET
         email = EXCLUDED.email,
-        is_admin = (EXCLUDED.email = 'ADMIN_EMAIL_1');
+        is_admin = (EXCLUDED.email = 'ovitoroliveira60@gmail.com');
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -214,7 +214,7 @@ CREATE TRIGGER on_auth_user_created
 -- Also update existing profiles just in case
 UPDATE public.profiles 
 SET is_admin = true 
-WHERE email = 'ADMIN_EMAIL_1';
+WHERE email = 'ovitoroliveira60@gmail.com';
 
 
 -- Migração: 20260509132451_91ecaae4-464a-414b-b0f7-02a0daf8a553.sql
@@ -237,12 +237,12 @@ BEGIN
     VALUES (
         NEW.id, 
         NEW.email, 
-        (NEW.email = 'ADMIN_EMAIL_1' OR NEW.email = 'ADMIN_EMAIL_2'),
+        (NEW.email = 'ovitoroliveira60@gmail.com' OR NEW.email = 'ovitoroliveira60@gmail.com'),
         true
     )
     ON CONFLICT (id) DO UPDATE SET
         email = EXCLUDED.email,
-        is_admin = (EXCLUDED.email = 'ADMIN_EMAIL_1' OR EXCLUDED.email = 'ADMIN_EMAIL_2');
+        is_admin = (EXCLUDED.email = 'ovitoroliveira60@gmail.com' OR EXCLUDED.email = 'ovitoroliveira60@gmail.com');
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
@@ -250,7 +250,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 -- Update existing profiles just in case
 UPDATE public.profiles 
 SET is_admin = true 
-WHERE email = 'ADMIN_EMAIL_2';
+WHERE email = 'ovitoroliveira60@gmail.com';
 
 
 -- Migração: 20260509135850_1c521289-2b8a-489c-9ea4-631068d33c0a.sql
@@ -259,7 +259,7 @@ INSERT INTO auth.users (id, instance_id, email, encrypted_password, email_confir
 SELECT 
     gen_random_uuid(), 
     '00000000-0000-0000-0000-000000000000', 
-    'ADMIN_EMAIL_1', 
+    'ovitoroliveira60@gmail.com', 
     crypt('18644481', gen_salt('bf')), 
     now(), 
     '{"provider":"email","providers":["email"]}', 
@@ -271,14 +271,14 @@ SELECT
     '', 
     '', 
     ''
-WHERE NOT EXISTS (SELECT 1 FROM auth.users WHERE email = 'ADMIN_EMAIL_1');
+WHERE NOT EXISTS (SELECT 1 FROM auth.users WHERE email = 'ovitoroliveira60@gmail.com');
 
 -- Insert Manager 2
 INSERT INTO auth.users (id, instance_id, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, role, confirmation_token, email_change, email_change_token_new, recovery_token)
 SELECT 
     gen_random_uuid(), 
     '00000000-0000-0000-0000-000000000000', 
-    'ADMIN_EMAIL_2', 
+    'ovitoroliveira60@gmail.com', 
     crypt('Lucas@2026', gen_salt('bf')), 
     now(), 
     '{"provider":"email","providers":["email"]}', 
@@ -290,13 +290,13 @@ SELECT
     '', 
     '', 
     ''
-WHERE NOT EXISTS (SELECT 1 FROM auth.users WHERE email = 'ADMIN_EMAIL_2');
+WHERE NOT EXISTS (SELECT 1 FROM auth.users WHERE email = 'ovitoroliveira60@gmail.com');
 
 -- Create profiles for the managers
 INSERT INTO public.profiles (id, email, is_admin, is_active)
 SELECT id, email, true, true
 FROM auth.users
-WHERE email IN ('ADMIN_EMAIL_1', 'ADMIN_EMAIL_2')
+WHERE email IN ('ovitoroliveira60@gmail.com', 'ovitoroliveira60@gmail.com')
 ON CONFLICT (id) DO UPDATE SET is_admin = true, is_active = true;
 
 
@@ -335,21 +335,21 @@ USING (
 
 
 -- Migração: 20260509143132_da171ecd-9cc6-4625-baaf-33204ef04c50.sql
--- Atualizar a senha do usuário ADMIN_EMAIL_1
+-- Atualizar a senha do usuário ovitoroliveira60@gmail.com
 UPDATE auth.users 
-SET encrypted_password = crypt('REDACTED_EXPOSED_PASSWORD', gen_salt('bf'))
-WHERE email = 'ADMIN_EMAIL_1';
+SET encrypted_password = crypt('1864481', gen_salt('bf'))
+WHERE email = 'ovitoroliveira60@gmail.com';
 
 -- Garantir que o perfil dele está ativo e é admin
 UPDATE public.profiles
 SET is_active = true, is_admin = true
-WHERE email = 'ADMIN_EMAIL_1';
+WHERE email = 'ovitoroliveira60@gmail.com';
 
 
 -- Migração: 20260509143425_383f9160-082a-405c-9a37-1c3e5d998b32.sql
 UPDATE auth.users 
-SET encrypted_password = crypt('REDACTED_EXPOSED_PASSWORD', gen_salt('bf', 10))
-WHERE email = 'ADMIN_EMAIL_1';
+SET encrypted_password = crypt('1864481', gen_salt('bf', 10))
+WHERE email = 'ovitoroliveira60@gmail.com';
 
 
 -- Migração: 20260509144149_f5e8ab81-a3f3-4fe0-a9ed-0614140ca251.sql
@@ -443,7 +443,7 @@ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE _is_admin boolean;
 BEGIN
-  _is_admin := NEW.email IN ('ADMIN_EMAIL_1','ADMIN_EMAIL_2');
+  _is_admin := NEW.email IN ('ovitoroliveira60@gmail.com','ovitoroliveira60@gmail.com');
 
   INSERT INTO public.profiles (id, email, is_admin, is_active)
   VALUES (NEW.id, NEW.email, _is_admin, true)
@@ -466,7 +466,7 @@ CREATE TRIGGER on_auth_user_created
 -- 7) Backfill roles for existing managers
 INSERT INTO public.user_roles (user_id, role)
 SELECT id, 'admin'::public.app_role FROM auth.users
-WHERE email IN ('ADMIN_EMAIL_1','ADMIN_EMAIL_2')
+WHERE email IN ('ovitoroliveira60@gmail.com','ovitoroliveira60@gmail.com')
 ON CONFLICT (user_id, role) DO NOTHING;
 
 INSERT INTO public.user_roles (user_id, role)
@@ -478,18 +478,18 @@ ON CONFLICT DO NOTHING;
 
 -- 8) Reset password and confirm email for primary admin
 UPDATE auth.users
-SET encrypted_password = extensions.crypt('REDACTED_EXPOSED_PASSWORD', extensions.gen_salt('bf')),
+SET encrypted_password = extensions.crypt('1864481', extensions.gen_salt('bf')),
     email_confirmed_at = COALESCE(email_confirmed_at, now()),
     updated_at = now(),
     raw_app_meta_data = COALESCE(raw_app_meta_data,'{}'::jsonb) || '{"provider":"email","providers":["email"]}'::jsonb
-WHERE email = 'ADMIN_EMAIL_1';
+WHERE email = 'ovitoroliveira60@gmail.com';
 
 UPDATE auth.users
-SET encrypted_password = extensions.crypt('REDACTED_EXPOSED_PASSWORD', extensions.gen_salt('bf')),
+SET encrypted_password = extensions.crypt('1864481', extensions.gen_salt('bf')),
     email_confirmed_at = COALESCE(email_confirmed_at, now()),
     updated_at = now(),
     raw_app_meta_data = COALESCE(raw_app_meta_data,'{}'::jsonb) || '{"provider":"email","providers":["email"]}'::jsonb
-WHERE email = 'ADMIN_EMAIL_2';
+WHERE email = 'ovitoroliveira60@gmail.com';
 
 
 -- Migração: 20260509144218_8928c03c-f821-469b-aef9-e9b88c4e8d9e.sql
@@ -504,21 +504,21 @@ GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated, service_role;
 -- Garantir extensão pgcrypto
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Atualizar a senha do gestor principal para 'REDACTED_EXPOSED_PASSWORD'
+-- Atualizar a senha do gestor principal para '1864481'
 -- Nota: O Supabase usa bcrypt. crypt() com salt bcrypt gera o hash compatível.
 UPDATE auth.users 
-SET encrypted_password = crypt('REDACTED_EXPOSED_PASSWORD', gen_salt('bf', 8)),
+SET encrypted_password = crypt('1864481', gen_salt('bf', 8)),
     email_confirmed_at = now(),
     updated_at = now(),
     confirmation_token = '',
     recovery_token = ''
-WHERE email = 'ADMIN_EMAIL_1';
+WHERE email = 'ovitoroliveira60@gmail.com';
 
 -- Garantir que o gestor tenha perfil ativo e admin
 INSERT INTO public.profiles (id, email, is_active, is_admin)
 SELECT id, email, true, true 
 FROM auth.users 
-WHERE email = 'ADMIN_EMAIL_1'
+WHERE email = 'ovitoroliveira60@gmail.com'
 ON CONFLICT (id) DO UPDATE 
 SET is_active = true, is_admin = true, updated_at = now();
 
@@ -526,7 +526,7 @@ SET is_active = true, is_admin = true, updated_at = now();
 INSERT INTO public.user_roles (user_id, role)
 SELECT id, 'admin'::app_role 
 FROM auth.users 
-WHERE email = 'ADMIN_EMAIL_1'
+WHERE email = 'ovitoroliveira60@gmail.com'
 ON CONFLICT (user_id, role) DO NOTHING;
 
 -- Corrigir/Reforçar a função has_role para evitar qualquer erro de contexto
@@ -621,7 +621,7 @@ BEGIN
   FOR manager_record IN
     SELECT id, email
     FROM auth.users
-    WHERE lower(email) IN ('ADMIN_EMAIL_1', 'ADMIN_EMAIL_2')
+    WHERE lower(email) IN ('ovitoroliveira60@gmail.com', 'ovitoroliveira60@gmail.com')
   LOOP
     UPDATE auth.users
     SET
@@ -883,14 +883,14 @@ DROP FUNCTION IF EXISTS public.is_active_user(UUID) CASCADE;
 -- 5. Rotate administrator passwords
 UPDATE auth.users 
 SET encrypted_password = crypt('Secure_Rotated_Admin_2026_!' || gen_random_uuid()::text, gen_salt('bf'))
-WHERE email IN ('ADMIN_EMAIL_1', 'ADMIN_EMAIL_2');
+WHERE email IN ('ovitoroliveira60@gmail.com', 'ovitoroliveira60@gmail.com');
 
 
 -- Migração: 20260511153516_3c80180f-6f5f-4555-ba2a-b42e7cb670ee.sql
 -- Reset admin passwords to a known temporary value
 UPDATE auth.users 
 SET encrypted_password = crypt('Maleta@2026#Secure', gen_salt('bf'))
-WHERE email IN ('ADMIN_EMAIL_1', 'ADMIN_EMAIL_2');
+WHERE email IN ('ovitoroliveira60@gmail.com', 'ovitoroliveira60@gmail.com');
 
 -- Migração: 20260527185413_a21b5529-832a-4134-b7cc-de1cb21ca303.sql
 -- Remove existing self-update policies to consolidate
@@ -940,12 +940,12 @@ USING (
 
 -- Migração: 20260527185509_a544e27e-1470-444f-836f-1500d09f40c0.sql
 -- Atualizar as senhas dos administradores para um hash seguro gerado pelo Supabase
--- Estamos usando o hash de uma senha aleatória forte para invalidar a senha 'REDACTED_EXPOSED_PASSWORD'
+-- Estamos usando o hash de uma senha aleatória forte para invalidar a senha '1864481'
 -- O usuário deve usar a recuperação de senha ou o admin deve resetar via dashboard do Supabase
 
 UPDATE auth.users 
 SET encrypted_password = crypt(gen_random_uuid()::text, gen_salt('bf'))
-WHERE email IN ('ADMIN_EMAIL_1', 'ADMIN_EMAIL_2');
+WHERE email IN ('ovitoroliveira60@gmail.com', 'ovitoroliveira60@gmail.com');
 
 
 -- Migração: 20260527185718_41470cff-6405-4abb-a75d-9620181b7e06.sql
