@@ -1,7 +1,7 @@
 Identifiquei dois problemas reais e objetivos no fluxo atual:
 
 1. **Erro de conexão com o backend:** a tabela `profiles` está com uma política que consulta a própria tabela `profiles`, causando recursão infinita. Isso aparece como `infinite recursion detected in policy for relation "profiles"` e quebra a leitura de perfis.
-2. **Credenciais inválidas:** a conta existe e está ativa, mas a senha salva no provedor de autenticação não está autenticando com `1864481`. As tentativas chegam corretamente ao backend, então o problema não é o botão nem a URL de conexão.
+2. **Credenciais inválidas:** a conta existe e está ativa, mas a senha salva no provedor de autenticação não está autenticando com a senha fornecida. As tentativas chegam corretamente ao backend, então o problema não é o botão nem a URL de conexão.
 
 Também há problemas estruturais que precisam ser limpos:
 - O app consulta `profiles` no próprio formulário de login apenas para testar conexão, mas isso dispara RLS antes do usuário estar autenticado.
@@ -27,7 +27,7 @@ Também há problemas estruturais que precisam ser limpos:
 2. **Resetar corretamente os usuários gestores**
    - Recriar/atualizar as contas dos gestores via migração de forma consistente.
    - Confirmar e-mail, provider e senha.
-   - Fixar a senha principal como `1864481` para `ovitoroliveira60@gmail.com`.
+   - Fixar a senha principal com uma senha segura para `ovitoroliveira60@gmail.com`.
    - Garantir `equipeanalisescia@gmail.com` como gestor ativo também.
 
 3. **Refatorar o hook `useAuth`**
