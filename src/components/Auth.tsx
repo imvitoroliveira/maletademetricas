@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Mail, Lock, CheckCircle2, AlertCircle, Activity, ScrollText } from "lucide-react";
+import { Mail, Lock, CheckCircle2, AlertCircle, Activity, ScrollText, KeyRound } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import logo from "@/assets/logo.jpg";
 import { cn } from "@/lib/utils";
@@ -184,12 +185,36 @@ export function Auth({ authLogs = [] }: AuthProps) {
                 />
               </div>
             </div>
+            {lastError && (
+              <div className="bg-rose-50 dark:bg-rose-950/30 p-3 rounded-lg flex gap-2 items-start border border-rose-100 dark:border-rose-900/30 animate-in fade-in slide-in-from-top-1">
+                <AlertCircle className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-rose-600 dark:text-rose-400 font-medium">
+                  {lastError.includes("Invalid login credentials") 
+                    ? "E-mail ou senha incorretos. Verifique seus dados." 
+                    : lastError}
+                </p>
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Link 
+                to="/reset-password" 
+                className="text-xs text-fuchsia-600 hover:text-fuchsia-700 font-medium flex items-center gap-1 transition-colors"
+              >
+                <KeyRound className="h-3 w-3" />
+                Esqueci minha senha
+              </Link>
+            </div>
             <Button
               type="submit"
-              className="w-full h-11 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-semibold"
+              className="w-full h-11 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-semibold shadow-lg shadow-fuchsia-200 dark:shadow-none transition-all active:scale-[0.98]"
               disabled={loading || conn === "error"}
             >
-              {loading ? "Verificando..." : "Entrar no Dashboard"}
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 animate-spin" />
+                  <span>Verificando...</span>
+                </div>
+              ) : "Entrar no Dashboard"}
             </Button>
           </form>
 
