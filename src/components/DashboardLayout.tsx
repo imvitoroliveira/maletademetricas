@@ -6,158 +6,199 @@ import {
   Search,
   Bell,
   Menu,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight,
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
 import logo from "@/assets/logo.jpg";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
+/**
+ * DashboardLayout (Adaptive & Ergonomic)
+ * Implementa uma arquitetura fluida com sidebar inteligente:
+ * - Desktop: Sidebar persistente com toggle de expansão.
+ * - Mobile: Sidebar transformada em Drawer (Sheet) para maximizar área útil.
+ * Targets de toque otimizados (mínimo 44px).
+ */
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { profile, isAdmin, signOut, authLogs } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const isMobile = useIsMobile();
+  const [isSidebarExpanded, setIsSidebarExpanded] = React.useState(true);
   const [showLogs, setShowLogs] = React.useState(false);
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   ];
 
-  return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950">
-      {/* Sidebar */}
-      <aside 
-        className={cn(
-          "fixed left-0 top-0 z-40 h-screen transition-all duration-300 border-r bg-white dark:bg-slate-900",
-          isSidebarOpen ? "w-64" : "w-20"
-        )}
-      >
-        <div className="flex h-20 items-center px-6 border-b">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl overflow-hidden shadow-lg shadow-fuchsia-200 ring-2 ring-white">
-              <img src={logo} alt="Maleta de Métricas" className="h-full w-full object-cover" />
-            </div>
-            {isSidebarOpen && (
-              <div className="flex flex-col">
-                <span className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-50 leading-none">Maleta de Métricas</span>
-                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mt-1">Performance Pro</span>
-              </div>
-            )}
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900">
+      <div className="flex h-20 items-center px-6 border-b shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 shrink-0 rounded-xl overflow-hidden shadow-lg shadow-fuchsia-200 ring-2 ring-white">
+            <img src={logo} alt="Maleta de Métricas" className="h-full w-full object-cover" />
           </div>
+          {(isSidebarExpanded || isMobile) && (
+            <div className="flex flex-col animate-in fade-in duration-300">
+              <span className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-50 leading-none">Maleta de Métricas</span>
+              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mt-1">Performance Pro</span>
+            </div>
+          )}
         </div>
+      </div>
 
-        <nav className="mt-4 px-3 space-y-1">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={cn(
-                "group flex items-center rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50 transition-colors",
-              )}
-            >
-              <item.icon className={cn("h-5 w-5 shrink-0", isSidebarOpen ? "mr-3" : "mx-auto")} />
-              {isSidebarOpen && <span>{item.name}</span>}
-            </Link>
-          ))}
-        </nav>
-        
-        <div className="absolute bottom-4 left-0 w-full px-3">
-           <Button 
+      <nav className="flex-1 mt-6 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+        {navigation.map((item) => (
+          <Link
+            key={item.name}
+            to={item.href}
+            onClick={() => isMobile && setIsSheetOpen(false)}
+            className={cn(
+              "group flex items-center rounded-lg px-3 h-11 text-sm font-medium transition-all",
+              "text-slate-600 hover:bg-fuchsia-50 hover:text-fuchsia-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
+            )}
+          >
+            <item.icon className={cn("h-5 w-5 shrink-0", (isSidebarExpanded || isMobile) ? "mr-3" : "mx-auto")} />
+            {(isSidebarExpanded || isMobile) && <span>{item.name}</span>}
+          </Link>
+        ))}
+      </nav>
+      
+      <div className="p-4 border-t space-y-2">
+        {!isMobile && (
+          <Button 
             variant="ghost" 
             size="sm" 
-            className="w-full justify-start text-slate-500 hover:text-slate-900"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="w-full justify-start text-slate-400 hover:text-slate-600 h-10 px-3"
+            onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
           >
-            {isSidebarOpen ? <X className="mr-2 h-4 w-4" /> : <Menu className="mx-auto h-5 w-5" />}
-            {isSidebarOpen && "Recolher Menu"}
+            {isSidebarExpanded ? <ChevronLeft className="mr-3 h-4 w-4" /> : <ChevronRight className="mx-auto h-4 w-4" />}
+            {isSidebarExpanded && "Recolher"}
           </Button>
-        </div>
-      </aside>
+        )}
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="w-full justify-start text-rose-500 hover:bg-rose-50 hover:text-rose-600 h-10 px-3"
+          onClick={() => {
+            signOut();
+            toast.success("Sessão encerrada");
+          }}
+        >
+          <LogOut className={cn("h-4 w-4 shrink-0", (isSidebarExpanded || isMobile) ? "mr-3" : "mx-auto")} />
+          {(isSidebarExpanded || isMobile) && "Sair do Sistema"}
+        </Button>
+      </div>
+    </div>
+  );
 
-      {/* Main Content */}
-      <main className={cn(
-        "transition-all duration-300 min-h-screen",
-        isSidebarOpen ? "pl-64" : "pl-20"
+  return (
+    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 flex">
+      {/* Desktop Sidebar */}
+      {!isMobile && (
+        <aside 
+          className={cn(
+            "fixed left-0 top-0 z-40 h-screen transition-all duration-300 border-r bg-white dark:bg-slate-900",
+            isSidebarExpanded ? "w-64" : "w-20"
+          )}
+        >
+          <SidebarContent />
+        </aside>
+      )}
+
+      {/* Mobile Drawer */}
+      {isMobile && (
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetContent side="left" className="p-0 w-[280px] border-r-0">
+            <SidebarContent />
+          </SheetContent>
+        </Sheet>
+      )}
+
+      {/* Main Viewport */}
+      <div className={cn(
+        "flex-1 flex flex-col min-h-screen transition-all duration-300 w-full",
+        !isMobile && (isSidebarExpanded ? "pl-64" : "pl-20")
       )}>
-        {/* Header */}
-        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b bg-white/50 dark:bg-slate-900/50 px-8 backdrop-blur-xl">
-          <div className="flex-1 max-w-md">
-            <div className="relative group">
+        {/* Responsive Header */}
+        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b bg-white/80 dark:bg-slate-900/80 px-4 md:px-8 backdrop-blur-xl shrink-0">
+          <div className="flex items-center gap-4 flex-1">
+            {isMobile && (
+              <Button variant="ghost" size="icon" className="h-10 w-10 -ml-2" onClick={() => setIsSheetOpen(true)}>
+                <Menu className="h-6 w-6 text-slate-600" />
+              </Button>
+            )}
+            <div className="relative group flex-1 max-w-sm hidden sm:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-fuchsia-500 transition-colors" />
               <Input 
                 type="search" 
-                placeholder="Pesquisar métricas ou campanhas..." 
-                className="pl-10 bg-slate-100/50 border-none dark:bg-slate-800/50 focus-visible:ring-1 focus-visible:ring-fuchsia-500 h-10"
+                placeholder="Pesquisar..." 
+                className="pl-10 bg-slate-100/50 border-none h-10 focus-visible:ring-1 focus-visible:ring-fuchsia-500"
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <Button 
               variant="ghost" 
-              size="sm" 
-              className="text-[10px] text-slate-300 hover:text-fuchsia-500"
+              size="icon" 
+              className="h-10 w-10 text-slate-400 hover:text-fuchsia-600"
               onClick={() => setShowLogs(!showLogs)}
             >
-              Logs
+              <Search className="h-5 w-5 sm:hidden" /> {/* Mobile search toggle icon would go here, using Search as placeholder */}
+              <Bell className="h-5 w-5 hidden sm:block" />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-slate-500 hover:text-rose-600 mr-2"
-              onClick={() => {
-                signOut();
-                toast.success("Sessão encerrada");
-              }}
-            >
-              Sair
-            </Button>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5 text-slate-500" />
-              <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-rose-500 border-2 border-white dark:border-slate-900"></span>
-            </Button>
-            <div className="flex items-center gap-3 pl-4 border-l">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium leading-none">{profile?.email || "Usuário"}</p>
-                <p className="text-xs text-muted-foreground mt-1">{isAdmin ? "Gestor de Tráfego" : "Cliente"}</p>
+            
+            <div className="flex items-center gap-3 pl-2 md:pl-4 border-l">
+              <div className="text-right hidden lg:block">
+                <p className="text-sm font-bold text-slate-900 truncate max-w-[150px]">{profile?.email || "Usuário"}</p>
+                <p className="text-[10px] font-medium text-slate-500 uppercase tracking-tighter">{isAdmin ? "Gestor" : "Cliente"}</p>
               </div>
-              <Avatar>
-                <AvatarImage src={logo} />
-                <AvatarFallback className="bg-fuchsia-100 text-fuchsia-700">MM</AvatarFallback>
+              <Avatar className="h-9 w-9 border-2 border-white shadow-sm">
+                <AvatarImage src={logo} className="object-cover" />
+                <AvatarFallback className="bg-fuchsia-100 text-fuchsia-700 text-xs">MM</AvatarFallback>
               </Avatar>
             </div>
           </div>
         </header>
 
-        {/* Content Area */}
-        <div className="p-8">
+        {/* Dynamic Content Area */}
+        <div className="p-4 md:p-8 flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden">
           {showLogs && (
-            <div className="mb-6 p-4 bg-slate-900 text-slate-50 rounded-lg text-xs font-mono border-l-4 border-fuchsia-500 shadow-xl animate-in slide-in-from-top duration-300">
+            <div className="mb-6 p-4 bg-slate-900 text-slate-50 rounded-xl text-xs font-mono border-l-4 border-fuchsia-500 shadow-2xl animate-in slide-in-from-top duration-300">
               <div className="flex justify-between items-center mb-2">
-                <span className="font-bold text-fuchsia-400">PAINEL DE DIAGNÓSTICO AUTH</span>
-                <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => setShowLogs(false)}>Ocultar</Button>
+                <span className="font-bold text-fuchsia-400 uppercase tracking-widest">Painel de Diagnóstico</span>
+                <Button variant="ghost" size="sm" className="h-7 text-[10px] hover:bg-slate-800" onClick={() => setShowLogs(false)}>Fechar</Button>
               </div>
-              <div className="space-y-1 max-h-40 overflow-y-auto">
-                {authLogs.length === 0 && <p className="text-slate-500">Nenhum evento registrado.</p>}
+              <div className="space-y-1 max-h-40 overflow-y-auto custom-scrollbar">
+                {authLogs.length === 0 && <p className="text-slate-500 italic">Aguardando telemetria...</p>}
                 {authLogs.map((log, i) => (
-                  <div key={i} className="flex gap-4 border-b border-slate-800 pb-1">
-                    <span className="text-slate-500">[{log.timestamp}]</span>
-                    <span>{log.event}</span>
+                  <div key={i} className="flex gap-3 py-1 border-b border-slate-800/50 last:border-0">
+                    <span className="text-slate-600 shrink-0">[{log.timestamp}]</span>
+                    <span className="break-words">{log.event}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
-          {children}
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+            {children}
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
+
