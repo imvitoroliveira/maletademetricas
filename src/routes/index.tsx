@@ -7,27 +7,26 @@ import { ManualMetrics } from "@/components/ManualMetrics";
 import { UserManager } from "@/components/UserManager";
 import { UserProfile } from "@/components/UserProfile";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { 
-  TrendingUp, 
-  DollarSign, 
-  MousePointer2, 
-  Target, 
-  Zap, 
   BarChart2,
   X,
   Loader2,
-  Plus,
   AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Auth } from "@/components/Auth";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { toast } from "sonner";
+import { ErrorHandler } from "@/lib/error-utils";
 
+/**
+ * Route Configuration
+ * Implementa code-splitting automático através do TanStack Router.
+ */
 export const Route = createFileRoute("/")({
   component: Dashboard,
 });
