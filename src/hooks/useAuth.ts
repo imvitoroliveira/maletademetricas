@@ -116,6 +116,7 @@ export function useAuth() {
 
   useEffect(() => {
     let mounted = true;
+    let authCheckTimeout: ReturnType<typeof setTimeout>;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
       if (!mounted) return;
@@ -123,12 +124,23 @@ export function useAuth() {
       const u = session?.user ?? null;
       setUser(u);
       if (u) {
-        loadProfileAndRole(u.id);
+        loadProfileAndRole(u.id).finally(() => {
+          if (mounted) setLoading(false);
+        });
       } else {
         setProfile(null);
         setIsAdmin(false);
+        setLoading(false);
       }
     });
+
+    // Failsafe: se nada acontecer em 5 segundos, libera a tela
+    authCheckTimeout = setTimeout(() => {
+      if (mounted && loading) {
+        addLog("A sincronização está demorando. Verifique sua internet ou as tabelas do Supabase.", "warn");
+        setLoading(false);
+      }
+    }, 5000);
 
     // Verificação inicial
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
@@ -138,20 +150,28 @@ export function useAuth() {
       if (u) {
         addLog("Sessão ativa detectada.");
         loadProfileAndRole(u.id).finally(() => {
-          if (mounted) setLoading(false);
+          if (mounted) {
+            setLoading(false);
+            clearTimeout(authCheckTimeout);
+          }
         });
       } else {
         addLog("Nenhuma sessão. Aguardando login...");
         setLoading(false);
+        clearTimeout(authCheckTimeout);
       }
     }).catch((err: any) => {
       addLog(`Supabase Offline: Verifique a URL e a conexão.`, 'error');
-      if (mounted) setLoading(false);
+      if (mounted) {
+        setLoading(false);
+        clearTimeout(authCheckTimeout);
+      }
     });
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      clearTimeout(authCheckTimeout);
     };
   }, [loadProfileAndRole, addLog]);
 
