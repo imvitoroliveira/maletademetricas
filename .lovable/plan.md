@@ -27,8 +27,8 @@ Também há problemas estruturais que precisam ser limpos:
 2. **Resetar corretamente os usuários gestores**
    - Recriar/atualizar as contas dos gestores via migração de forma consistente.
    - Confirmar e-mail, provider e senha.
-   - Fixar a senha principal com uma senha segura para `ovitoroliveira60@gmail.com`.
-   - Garantir `equipeanalisescia@gmail.com` como gestor ativo também.
+   - Fixar a senha principal com uma senha segura para `ADMIN_EMAIL`.
+   - Garantir `ADMIN_EMAIL` como gestor ativo também.
 
 3. **Refatorar o hook `useAuth`**
    - Configurar `onAuthStateChange` antes da verificação inicial da sessão.
