@@ -37,55 +37,82 @@ interface CustomMetric {
   metric_date?: string | null;
 }
 
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ErrorHandler } from "@/lib/error-utils";
+
 export function ManualMetrics({ startDate, endDate }: { startDate?: string, endDate?: string }) {
-  const [isClient, setIsClient] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const { user, profile, isAdmin, loading: authLoading } = useAuth();
-  const [loading, setLoading] = React.useState(true);
-  const [metrics, setMetrics] = React.useState<CustomMetric[]>([]);
-
+  const queryClient = useQueryClient();
+  const { user, isAdmin, loading: authLoading } = useAuth();
+  
   const [isAdding, setIsAdding] = React.useState(false);
-  const [newMetric, setNewMetric] = React.useState({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0] });
+  const [newMetric, setNewMetric] = React.useState({ 
+    name: '', 
+    value: '', 
+    category: '', 
+    metric_date: new Date().toISOString().split('T')[0] 
+  });
 
-  React.useEffect(() => {
-    if (!authLoading) {
-      fetchMetrics();
-    }
-  }, [startDate, endDate, authLoading]);
-
-  const fetchMetrics = async () => {
-    setLoading(true);
-    try {
+  /**
+   * World-Class Data Engine
+   * Utiliza TanStack Query para gerenciar cache, sincronização e estados de loading.
+   */
+  const { data: metrics = [], isLoading: loading } = useQuery({
+    queryKey: ['custom_metrics', user?.id, startDate, endDate],
+    queryFn: async () => {
+      if (!user) return [];
+      
       let query = supabase
         .from('custom_metrics')
         .select('*');
 
-      if (startDate) {
-        query = query.gte('metric_date', startDate);
-      }
-      if (endDate) {
-        query = query.lte('metric_date', endDate);
-      }
-
-      // If client, ensure they only see their metrics (RLS handles this but filter for clarity)
-      if (!isAdmin && user) {
-        query = query.eq('user_id', user.id);
-      }
+      if (startDate) query = query.gte('metric_date', startDate);
+      if (endDate) query = query.lte('metric_date', endDate);
+      if (!isAdmin) query = query.eq('user_id', user.id);
 
       const { data, error } = await query.order('metric_date', { ascending: false });
 
+      if (error) {
+        ErrorHandler.report(error, "Carga de Métricas");
+        throw error;
+      }
+      return data as CustomMetric[] || [];
+    },
+    enabled: !authLoading && !!user,
+  });
+
+  const addMutation = useMutation({
+    mutationFn: async (metricData: Omit<CustomMetric, 'id' | 'user_id'>) => {
+      if (!user) throw new Error("Sessão inválida");
+      const { data, error } = await supabase
+        .from('custom_metrics')
+        .insert([{ ...metricData, user_id: user.id }])
+        .select()
+        .single();
       if (error) throw error;
-      setMetrics(data || []);
-    } catch (error: any) {
-      toast.error("Erro ao carregar métricas: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom_metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['metrics'] }); // Invalida o dashboard principal
+      setIsAdding(false);
+      setNewMetric({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0] });
+      toast.success("Métrica inserida com sucesso.");
+    },
+    onError: (error) => ErrorHandler.report(error, "Inserção de Métrica")
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('custom_metrics').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom_metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['metrics'] });
+      toast.success("Métrica removida.");
+    },
+    onError: (error) => ErrorHandler.report(error, "Exclusão de Métrica")
+  });
 
   const handleAddMetric = async () => {
     if (newMetric.name && newMetric.value) {
