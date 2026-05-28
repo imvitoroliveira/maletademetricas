@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
-type AuthLog = { event: string; timestamp: string };
+type AuthLog = { event: string; timestamp: string; type: 'info' | 'error' | 'warn' };
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -15,17 +15,36 @@ export function useAuth() {
   const addLog = useCallback((event: string, type: 'info' | 'error' | 'warn' = 'info') => {
     const timestamp = new Date().toLocaleTimeString();
     const prefix = type === 'error' ? '❌' : type === 'warn' ? '⚠️' : 'ℹ️';
-    logsRef.current = [{ event: `${prefix} ${event}`, timestamp }, ...logsRef.current].slice(0, 30);
-    setAuthLogs(logsRef.current);
+    
+    // Mapeamento amigável para o usuário
+    let userFriendlyMessage = event;
+    if (event.includes("Invalid login credentials")) {
+      userFriendlyMessage = "E-mail ou senha incorretos. Verifique os dados digitados.";
+    } else if (event.includes("relation \"public.profiles\" does not exist") || event.includes("schema cache")) {
+      userFriendlyMessage = "Erro de Banco de Dados: As tabelas não foram encontradas. Verifique se executou o script SQL no Supabase.";
+    } else if (event.includes("Failed to fetch") || event.includes("network")) {
+      userFriendlyMessage = "Erro de Conexão: Não foi possível alcançar o servidor. Verifique sua internet ou as chaves do Supabase.";
+    } else if (event.includes("JWT") || event.includes("apikey")) {
+      userFriendlyMessage = "Erro de Autenticação: Chave de acesso (Anon Key) inválida ou expirada.";
+    } else if (event.includes("Email not confirmed")) {
+      userFriendlyMessage = "E-mail não confirmado. Verifique sua caixa de entrada ou desative a confirmação no Supabase.";
+    } else if (event.includes("Profile not found")) {
+      userFriendlyMessage = "Usuário sem perfil: Sua conta existe, mas não possui permissões no banco de dados.";
+    } else if (event.includes("is_active") && event.includes("false")) {
+      userFriendlyMessage = "Conta Inativa: Seu acesso foi desativado pelo administrador.";
+    }
+
+    logsRef.current = [{ event: `${prefix} ${userFriendlyMessage}`, timestamp, type }, ...logsRef.current].slice(0, 30);
+    setAuthLogs([...logsRef.current]);
+    
     if (typeof console !== "undefined") {
       const consoleMethod = type === 'error' ? 'error' : type === 'warn' ? 'warn' : 'log';
       console[consoleMethod](`[AUTH] ${timestamp}: ${event}`);
     }
   }, []);
 
-  // Carrega perfil + role. Não desloga se falhar — apenas loga.
   const loadProfileAndRole = useCallback(async (uid: string) => {
-    addLog(`Carregando perfil e permissões para: ${uid}`);
+    addLog(`Validando permissões para o ID: ${uid.substring(0, 8)}...`);
     try {
       const [{ data: profileData, error: pErr }, { data: roleData, error: rErr }] = await Promise.all([
         supabase
@@ -39,66 +58,67 @@ export function useAuth() {
           .eq("user_id", uid),
       ]);
 
-      if (pErr) addLog(`Erro ao buscar perfil: ${pErr.message}`, 'error');
-      else if (!profileData) addLog(`Atenção: Perfil não encontrado no banco de dados para o ID ${uid}`, 'warn');
-      else addLog(`Perfil carregado com sucesso (${profileData.email})`);
+      if (pErr) {
+        addLog(`Erro ao carregar perfil: ${pErr.message}`, 'error');
+      } else if (!profileData) {
+        addLog(`Profile not found: O usuário não tem registro na tabela 'profiles'.`, 'error');
+      } else if (profileData.is_active === false) {
+        addLog(`is_active: false - Este acesso está bloqueado.`, 'warn');
+      }
 
       if (rErr) addLog(`Erro ao buscar roles: ${rErr.message}`, 'error');
       
       setProfile(profileData ?? null);
       const admin = !!roleData?.some((r: any) => r.role === "admin");
       setIsAdmin(admin);
-      addLog(`Permissões identificadas: ${admin ? "Gestor" : "Cliente"}`);
-      addLog(`Sessão pronta e validada`);
+      
+      if (profileData && profileData.is_active !== false) {
+        addLog(`Acesso liberado como ${admin ? "Gestor" : "Cliente"}.`);
+      }
     } catch (err: any) {
-      addLog(`Erro fatal ao carregar dados: ${err?.message ?? err}`, 'error');
+      addLog(`Erro inesperado no banco: ${err?.message ?? err}`, 'error');
     }
   }, [addLog]);
 
   useEffect(() => {
     let mounted = true;
 
-    // Failsafe: nunca deixar o loading travado para sempre
     const failsafe = setTimeout(() => {
-      if (mounted) {
-        addLog("Failsafe: liberando loading após 5s");
+      if (mounted && loading) {
+        addLog("O servidor está demorando para responder. Verifique sua conexão.", "warn");
         setLoading(false);
       }
-    }, 5000);
+    }, 8000);
 
-    // 1) Listener primeiro (sem await dentro do callback)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
       if (!mounted) return;
-      addLog(`Evento Auth: ${event}`);
+      addLog(`Estado da Autenticação: ${event}`);
       const u = session?.user ?? null;
       setUser(u);
       if (u) {
-        addLog(`Usuário autenticado: ${u.email}`);
         setTimeout(() => { if (mounted) loadProfileAndRole(u.id); }, 0);
       } else {
-        addLog("Usuário deslogado ou sem sessão");
         setProfile(null);
         setIsAdmin(false);
       }
     });
 
-    // 2) Hidratar sessão atual
-    addLog("Verificando sessão persistente...");
+    addLog("Iniciando verificação de segurança...");
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (!mounted) return;
       const u = session?.user ?? null;
       setUser(u);
       if (u) {
-        addLog(`Sessão restaurada para: ${u.email}`);
+        addLog("Sessão anterior encontrada.");
         loadProfileAndRole(u.id).finally(() => {
           if (mounted) setLoading(false);
         });
       } else {
-        addLog("Nenhuma sessão persistente encontrada");
+        addLog("Nenhuma sessão ativa. Por favor, faça login.");
         setLoading(false);
       }
     }).catch((err: any) => {
-      addLog(`Erro crítico ao recuperar sessão: ${err?.message ?? err}`, 'error');
+      addLog(`Failed to fetch: Erro de rede ou URL do Supabase incorreta.`, 'error');
       if (mounted) setLoading(false);
     });
 
@@ -110,7 +130,7 @@ export function useAuth() {
   }, [loadProfileAndRole, addLog]);
 
   const signOut = useCallback(async () => {
-    addLog("Encerrando sessão...");
+    addLog("Saindo do sistema...");
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
