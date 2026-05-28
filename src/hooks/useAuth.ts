@@ -53,7 +53,7 @@ export function useAuth() {
     logsRef.current = [newLog, ...logsRef.current].slice(0, 30);
     setAuthLogs([...logsRef.current]);
     
-    if (process.env.NODE_ENV === 'development') {
+    if (typeof console !== "undefined") {
       const consoleMethod = type === 'error' ? 'error' : type === 'warn' ? 'warn' : 'log';
       console[consoleMethod](`[AUTH_ENGINE] ${timestamp}: ${event}`);
     }
@@ -66,28 +66,31 @@ export function useAuth() {
     addLog(`Iniciando validação de perfil [ID: ${uid.substring(0, 8)}]`);
     
     try {
-      const [profileRes, rolesRes] = await Promise.all([
-        supabase
+      // Usamos chamadas sequenciais para evitar problemas de concorrência no cliente JS inicial
+      const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("*, client_permissions(*)")
           .eq("id", uid)
-          .maybeSingle(),
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", uid)
-      ]);
+          .maybeSingle();
 
-      if (profileRes.error) {
-        addLog(`Falha ao carregar perfil: ${profileRes.error.message}`, 'error');
-      } else if (!profileRes.data) {
+      if (profileError) {
+        addLog(`Falha ao carregar perfil: ${profileError.message}`, 'error');
+      } else if (!profileData) {
         addLog(`Perfil não encontrado na tabela 'profiles'.`, 'error');
       }
 
-      const profileData = profileRes.data as UserProfile | null;
-      setProfile(profileData);
+      setProfile(profileData as UserProfile | null);
       
-      const roles = rolesRes.data || [];
+      const { data: rolesData, error: rolesError } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", uid);
+
+      if (rolesError) {
+        addLog(`Falha ao carregar roles: ${rolesError.message}`, 'warn');
+      }
+      
+      const roles = rolesData || [];
       const isGestor = profileData?.is_admin === true || 
                        roles.some((r: { role: string }) => r.role === "admin");
       
@@ -117,6 +120,7 @@ export function useAuth() {
       setUser(u);
       
       if (u) {
+        addLog(`Evento Auth: ${event}`);
         loadProfileAndRole(u.id).finally(() => {
           if (mounted) setLoading(false);
         });
@@ -127,9 +131,10 @@ export function useAuth() {
       }
     });
 
+    // Failsafe: Libera a tela se nada responder em 5s
     authCheckTimeout = setTimeout(() => {
       if (mounted && loading) {
-        addLog("Sincronização excedeu o timeout (5s). Verifique latência de rede.", "warn");
+        addLog("Sincronização excedeu o timeout (5s). Verificando fallback...", "warn");
         setLoading(false);
       }
     }, 5000);
@@ -140,6 +145,7 @@ export function useAuth() {
       setUser(u);
       
       if (u) {
+        addLog("Sessão ativa detectada. Sincronizando perfil...");
         loadProfileAndRole(u.id).finally(() => {
           if (mounted) {
             setLoading(false);
@@ -152,7 +158,7 @@ export function useAuth() {
       }
     }).catch((err: unknown) => {
       const error = err as Error;
-      addLog(`Erro de inicialização do SDK: ${error.message}`, 'error');
+      addLog(`Erro de inicialização: ${error.message}`, 'error');
       if (mounted) {
         setLoading(false);
         clearTimeout(authCheckTimeout);
@@ -164,7 +170,7 @@ export function useAuth() {
       subscription.unsubscribe();
       clearTimeout(authCheckTimeout);
     };
-  }, [loadProfileAndRole, addLog, loading]);
+  }, [loadProfileAndRole, addLog]); // Removido 'loading' das dependências para evitar loops
 
   const signOut = useCallback(async () => {
     addLog("Encerrando sessão ativa...");
