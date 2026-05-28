@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { 
   Plus, 
@@ -26,6 +25,8 @@ import { toast } from "sonner";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ErrorHandler } from "@/lib/error-utils";
 
 interface CustomMetric {
   id: string;
@@ -37,9 +38,10 @@ interface CustomMetric {
   metric_date?: string | null;
 }
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ErrorHandler } from "@/lib/error-utils";
-
+/**
+ * World-Class Manual Metrics Engine
+ * Otimizado para performance de renderização e integridade de dados através do TanStack Query.
+ */
 export function ManualMetrics({ startDate, endDate }: { startDate?: string, endDate?: string }) {
   const queryClient = useQueryClient();
   const { user, isAdmin, loading: authLoading } = useAuth();
@@ -52,10 +54,6 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
     metric_date: new Date().toISOString().split('T')[0] 
   });
 
-  /**
-   * World-Class Data Engine
-   * Utiliza TanStack Query para gerenciar cache, sincronização e estados de loading.
-   */
   const { data: metrics = [], isLoading: loading } = useQuery({
     queryKey: ['custom_metrics', user?.id, startDate, endDate],
     queryFn: async () => {
@@ -81,11 +79,11 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
   });
 
   const addMutation = useMutation({
-    mutationFn: async (metricData: Omit<CustomMetric, 'id' | 'user_id'>) => {
+    mutationFn: async (metricData: Omit<CustomMetric, 'id' | 'user_id' | 'status'>) => {
       if (!user) throw new Error("Sessão inválida");
       const { data, error } = await supabase
         .from('custom_metrics')
-        .insert([{ ...metricData, user_id: user.id }])
+        .insert([{ ...metricData, user_id: user.id, status: 'active' }])
         .select()
         .single();
       if (error) throw error;
@@ -93,7 +91,7 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom_metrics'] });
-      queryClient.invalidateQueries({ queryKey: ['metrics'] }); // Invalida o dashboard principal
+      queryClient.invalidateQueries({ queryKey: ['metrics'] });
       setIsAdding(false);
       setNewMetric({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0] });
       toast.success("Métrica inserida com sucesso.");
@@ -126,7 +124,6 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
 
   const exportPDF = () => {
     const doc = new jsPDF();
-    
     doc.setFontSize(20);
     doc.text("Relatório de Tráfego Pago", 14, 22);
     doc.setFontSize(11);
@@ -138,7 +135,7 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
       m.name, 
       m.value, 
       m.category || '-', 
-      m.status
+      m.status || 'Pendente'
     ]);
     
     (doc as any).autoTable({
@@ -153,24 +150,22 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
     toast.success("Relatório PDF exportado!");
   };
 
-  if (!isClient) return null;
-
   return (
     <Card className="shadow-sm border-none bg-white dark:bg-slate-900 overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
         <div>
-          <CardTitle className="text-lg font-semibold">Métricas Personalizadas</CardTitle>
-          <CardDescription>Métricas inseridas manualmente para o cliente</CardDescription>
+          <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-50">Métricas Personalizadas</CardTitle>
+          <CardDescription>Gestão granular de KPIs por período.</CardDescription>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={exportPDF} className="gap-2">
+          <Button variant="outline" size="sm" onClick={exportPDF} className="gap-2 border-slate-200">
             <FileText className="h-4 w-4" />
-            PDF
+            Exportar PDF
           </Button>
           {isAdmin && (
-            <Button onClick={() => setIsAdding(!isAdding)} size="sm" className="gap-2">
+            <Button onClick={() => setIsAdding(!isAdding)} size="sm" className="gap-2 bg-fuchsia-600 hover:bg-fuchsia-700">
               {isAdding ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-              {isAdding ? "Cancelar" : "Nova Métrica"}
+              {isAdding ? "Cancelar" : "Adicionar"}
             </Button>
           )}
         </div>
@@ -179,119 +174,113 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
         <Table>
           <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
             <TableRow>
-              <TableHead>Data</TableHead>
-              <TableHead className="w-[300px]">Nome da Métrica</TableHead>
-              <TableHead>Valor</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Status</TableHead>
-              {isAdmin && <TableHead className="text-right">Ações</TableHead>}
+              <TableHead className="text-[11px] font-bold uppercase tracking-wider">Data</TableHead>
+              <TableHead className="w-[300px] text-[11px] font-bold uppercase tracking-wider">Métrica</TableHead>
+              <TableHead className="text-[11px] font-bold uppercase tracking-wider">Valor</TableHead>
+              <TableHead className="text-[11px] font-bold uppercase tracking-wider">Categoria</TableHead>
+              <TableHead className="text-[11px] font-bold uppercase tracking-wider">Status</TableHead>
+              {isAdmin && <TableHead className="text-right text-[11px] font-bold uppercase tracking-wider">Ações</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={isAdmin ? 6 : 5} className="h-32 text-center">
-                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Carregando métricas...
+                <TableCell colSpan={isAdmin ? 6 : 5} className="h-40 text-center">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <Loader2 className="h-8 w-8 animate-spin text-fuchsia-600" />
+                    <span className="text-sm font-medium text-slate-400">Sincronizando dados...</span>
                   </div>
                 </TableCell>
               </TableRow>
             ) : (
               <>
                 {isAdding && (
-                  <TableRow className="bg-blue-50/30 dark:bg-blue-900/10">
+                  <TableRow className="bg-fuchsia-50/20 animate-in fade-in duration-300">
                     <TableCell>
                       <Input 
                         type="date"
                         value={newMetric.metric_date || ''}
                         onChange={(e) => setNewMetric({...newMetric, metric_date: e.target.value})}
-                        className="h-8"
+                        className="h-9 border-fuchsia-100"
                       />
                     </TableCell>
                     <TableCell>
                       <Input 
-                        placeholder="Ex: Leads" 
+                        placeholder="Ex: Conversões" 
                         value={newMetric.name}
                         onChange={(e) => setNewMetric({...newMetric, name: e.target.value})}
-                        className="h-8"
+                        className="h-9 border-fuchsia-100"
                       />
                     </TableCell>
                     <TableCell>
                       <Input 
-                        placeholder="Ex: 142" 
+                        placeholder="Ex: 52" 
                         value={newMetric.value}
                         onChange={(e) => setNewMetric({...newMetric, value: e.target.value})}
-                        className="h-8"
+                        className="h-9 border-fuchsia-100"
                       />
                     </TableCell>
                     <TableCell>
                       <Input 
-                        placeholder="Ex: Conversão" 
+                        placeholder="Ex: Facebook Ads" 
                         value={newMetric.category || ''}
                         onChange={(e) => setNewMetric({...newMetric, category: e.target.value})}
-                        className="h-8"
+                        className="h-9 border-fuchsia-100"
                       />
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">Pendente</Badge>
+                      <Badge variant="outline" className="text-fuchsia-600 bg-fuchsia-50 border-fuchsia-100">Pendente</Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-emerald-600" onClick={handleAddMetric}>
-                          <Check className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <Button size="icon" variant="ghost" className="h-9 w-9 text-emerald-600 hover:bg-emerald-50" onClick={handleAddMetric}>
+                        <Check className="h-5 w-5" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 )}
                 {metrics.map((metric) => (
-                  <TableRow key={metric.id} className="group transition-colors">
-                    <TableCell className="text-sm text-slate-500">
+                  <TableRow key={metric.id} className="group hover:bg-slate-50 transition-colors">
+                    <TableCell className="text-sm text-slate-500 font-mono">
                       {metric.metric_date ? new Date(metric.metric_date).toLocaleDateString() : '-'}
                     </TableCell>
-                    <TableCell className="font-medium text-slate-700 dark:text-slate-200">
+                    <TableCell className="font-semibold text-slate-800 dark:text-slate-200">
                       {metric.name}
                     </TableCell>
-                    <TableCell className="text-slate-600 dark:text-slate-400">
+                    <TableCell className="font-medium text-slate-600">
                       {metric.value}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="font-normal border-slate-200 text-slate-500">
-                        {metric.category}
+                      <Badge variant="outline" className="font-normal border-slate-200 text-slate-400 bg-white">
+                        {metric.category || 'N/A'}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={metric.status === 'active' ? 'secondary' : 'default'} className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400">
-                        {metric.status === 'active' ? 'Ativo' : 'Pendente'}
+                      <Badge className={cn(
+                        "font-medium",
+                        metric.status === 'active' 
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
+                          : "bg-amber-50 text-amber-700 border-amber-100"
+                      )}>
+                        {metric.status === 'active' ? 'Publicado' : 'Revisão'}
                       </Badge>
                     </TableCell>
                     {isAdmin && (
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-slate-600">
-                            <Edit2 className="h-3.5 w-3.5" />
-                          </Button>
+                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
                           <Button 
                             size="icon" 
                             variant="ghost" 
-                            className="h-8 w-8 text-slate-400 hover:text-rose-600"
+                            className="h-8 w-8 text-rose-400 hover:text-rose-600 hover:bg-rose-50"
                             onClick={() => removeMetric(metric.id)}
+                            disabled={deleteMutation.isPending}
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
                     )}
                   </TableRow>
                 ))}
-                {metrics.length === 0 && !isAdding && (
-                  <TableRow>
-                    <TableCell colSpan={isAdmin ? 6 : 5} className="h-32 text-center text-muted-foreground">
-                      Nenhuma métrica personalizada encontrada para este período.
-                    </TableCell>
-                  </TableRow>
-                )}
               </>
             )}
           </TableBody>
