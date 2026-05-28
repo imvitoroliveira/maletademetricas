@@ -16,7 +16,8 @@ import {
   BarChart2,
   X,
   Loader2,
-  Plus
+  Plus,
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
