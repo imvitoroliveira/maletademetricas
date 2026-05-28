@@ -4,13 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Mail, Lock, CheckCircle2, AlertCircle, Activity } from "lucide-react";
+import { Mail, Lock, CheckCircle2, AlertCircle, Activity, ScrollText } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import logo from "@/assets/logo.jpg";
 
 type ConnStatus = "checking" | "online" | "error";
 
-export function Auth() {
+interface AuthProps {
+  authLogs?: { event: string; timestamp: string; type: 'info' | 'error' | 'warn' }[];
+}
+
+export function Auth({ authLogs = [] }: AuthProps) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
