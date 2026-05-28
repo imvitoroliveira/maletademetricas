@@ -114,9 +114,13 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
   });
 
   const handleAddMetric = () => {
-    if (newMetric.name && newMetric.value) {
-      addMutation.mutate(newMetric);
+    if (!newMetric.name || !newMetric.value) {
+      toast.error("Por favor, preencha o nome e o valor da métrica.");
+      return;
     }
+    
+    console.log("[ManualMetrics] Iniciando inserção de métrica:", newMetric);
+    addMutation.mutate(newMetric);
   };
 
   const removeMetric = (id: string) => {
@@ -164,7 +168,14 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
             <span className="hidden xs:inline">PDF</span>
           </Button>
           {isAdmin && (
-            <Button onClick={() => setIsAdding(!isAdding)} size="sm" className="flex-1 sm:flex-none gap-2 bg-fuchsia-600 hover:bg-fuchsia-700 h-10 px-4">
+            <Button 
+              onClick={() => {
+                console.log("[ManualMetrics] Toggle isAdding:", !isAdding);
+                setIsAdding(!isAdding);
+              }} 
+              size="sm" 
+              className="flex-1 sm:flex-none gap-2 bg-fuchsia-600 hover:bg-fuchsia-700 h-10 px-4"
+            >
               {isAdding ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
               <span>{isAdding ? "Cancelar" : "Novo"}</span>
             </Button>
@@ -185,6 +196,58 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
               </TableRow>
             </TableHeader>
             <TableBody>
+              {/* Add Row - Always visible if isAdding is true, regardless of query loading state */}
+              {isAdding && (
+                <TableRow className="bg-fuchsia-50/20 animate-in fade-in duration-300">
+                  <TableCell>
+                    <Input 
+                      type="date"
+                      value={newMetric.metric_date || ''}
+                      onChange={(e) => setNewMetric({...newMetric, metric_date: e.target.value})}
+                      className="h-9 border-fuchsia-100 min-w-[120px]"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Input 
+                      placeholder="Ex: Leads" 
+                      value={newMetric.name}
+                      onChange={(e) => setNewMetric({...newMetric, name: e.target.value})}
+                      className="h-9 border-fuchsia-100"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Input 
+                      placeholder="Ex: 52" 
+                      value={newMetric.value}
+                      onChange={(e) => setNewMetric({...newMetric, value: e.target.value})}
+                      className="h-9 border-fuchsia-100"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Input 
+                      placeholder="Ex: Facebook Ads" 
+                      value={newMetric.category || ''}
+                      onChange={(e) => setNewMetric({...newMetric, category: e.target.value})}
+                      className="h-9 border-fuchsia-100"
+                    />
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="outline" className="text-fuchsia-600 bg-fuchsia-50 border-fuchsia-100">Pendente</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button 
+                      size="icon" 
+                      variant="ghost" 
+                      className="h-10 w-10 text-emerald-600 hover:bg-emerald-50" 
+                      onClick={handleAddMetric}
+                      disabled={addMutation.isPending}
+                    >
+                      {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-5 w-5" />}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )}
+
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={isAdmin ? 6 : 5} className="h-40 text-center">
@@ -196,50 +259,6 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
                 </TableRow>
               ) : (
                 <>
-                  {isAdding && (
-                    <TableRow className="bg-fuchsia-50/20 animate-in fade-in duration-300">
-                      <TableCell>
-                        <Input 
-                          type="date"
-                          value={newMetric.metric_date || ''}
-                          onChange={(e) => setNewMetric({...newMetric, metric_date: e.target.value})}
-                          className="h-9 border-fuchsia-100 min-w-[120px]"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input 
-                          placeholder="Ex: Leads" 
-                          value={newMetric.name}
-                          onChange={(e) => setNewMetric({...newMetric, name: e.target.value})}
-                          className="h-9 border-fuchsia-100"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input 
-                          placeholder="Ex: 52" 
-                          value={newMetric.value}
-                          onChange={(e) => setNewMetric({...newMetric, value: e.target.value})}
-                          className="h-9 border-fuchsia-100"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input 
-                          placeholder="Ex: Facebook Ads" 
-                          value={newMetric.category || ''}
-                          onChange={(e) => setNewMetric({...newMetric, category: e.target.value})}
-                          className="h-9 border-fuchsia-100"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="outline" className="text-fuchsia-600 bg-fuchsia-50 border-fuchsia-100">Pendente</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button size="icon" variant="ghost" className="h-10 w-10 text-emerald-600 hover:bg-emerald-50" onClick={handleAddMetric}>
-                          <Check className="h-5 w-5" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  )}
                   {metrics.map((metric) => (
                     <TableRow key={metric.id} className="group hover:bg-slate-50 transition-colors">
                       <TableCell className="text-sm text-slate-500 font-mono py-4">
