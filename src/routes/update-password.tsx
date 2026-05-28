@@ -15,12 +15,45 @@ export const Route = createFileRoute("/update-password")({
 function UpdatePassword() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [hasSession, setHasSession] = useState(false);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setHasSession(!!session);
+      setSessionLoading(false);
+      
+      if (!session) {
+        // Se não houver sessão, o Supabase pode ainda estar processando o hash da URL
+        // Vamos dar um pequeno delay e tentar novamente ou observar mudanças
+        console.log("Nenhuma sessão encontrada inicialmente no update-password.");
+      }
+    };
+
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth event no update-password:", event);
+      if (session) {
+        setHasSession(true);
+        setSessionLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
+
+    if (!hasSession) {
+      toast.error("Sessão de autenticação expirada ou inválida. Solicite um novo link de recuperação.");
+      return;
+    }
 
     if (password.length < 6) {
       toast.error("A senha deve ter pelo menos 6 caracteres.");
