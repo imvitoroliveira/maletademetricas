@@ -143,6 +143,7 @@ export type Database = {
           is_active: boolean | null
           is_admin: boolean | null
           updated_at: string
+          vault_password: string | null
         }
         Insert: {
           created_at?: string
@@ -151,6 +152,7 @@ export type Database = {
           is_active?: boolean | null
           is_admin?: boolean | null
           updated_at?: string
+          vault_password?: string | null
         }
         Update: {
           created_at?: string
@@ -159,6 +161,7 @@ export type Database = {
           is_active?: boolean | null
           is_admin?: boolean | null
           updated_at?: string
+          vault_password?: string | null
         }
         Relationships: []
       }
