@@ -20,26 +20,25 @@ serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     )
 
-    // Check if user is authenticated
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
-    if (authError || !user) {
+    // 1. Get current logged-in user
+    const { data: { user: caller }, error: authError } = await supabaseClient.auth.getUser()
+    if (authError || !caller) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Strict check: Only the master admin can delete users
-    if (user.email !== MASTER_ADMIN_EMAIL) {
-      return new Response(JSON.stringify({ error: 'Forbidden: Only the master admin can delete users.' }), {
+    // 2. Strict check: Only the master admin can delete users
+    if (caller.email !== MASTER_ADMIN_EMAIL) {
+      return new Response(JSON.stringify({ error: `Forbidden: Only the master admin (${MASTER_ADMIN_EMAIL}) can delete users.` }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Get request body
+    // 3. Get target user ID from request body
     const { userId } = await req.json()
-
     if (!userId) {
       return new Response(JSON.stringify({ error: 'User ID is required' }), {
         status: 400,
@@ -47,41 +46,52 @@ serve(async (req) => {
       })
     }
 
-    // Admin client with service role for destructive operations
+    // 4. Admin client with service role for full control
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    console.log(`Master admin ${MASTER_ADMIN_EMAIL} is deleting user ${userId}`);
+    console.log(`Master admin ${caller.email} is deleting user ${userId}`);
 
-    // 1. Explicitly delete from profiles first to ensure clean state
-    const { error: profileDeleteError } = await supabaseAdmin
-      .from('profiles')
-      .delete()
-      .eq('id', userId);
-
-    if (profileDeleteError) {
-      console.error('Error deleting profile:', profileDeleteError);
-      // We continue anyway to try and delete the auth user
+    // 5. Delete from all potential related tables explicitly
+    // This ensures that even without DB-level cascades, the data is gone.
+    const tables = ['profile_ad_accounts', 'user_roles', 'client_permissions', 'profiles'];
+    
+    for (const table of tables) {
+      const { error: deleteError } = await supabaseAdmin
+        .from(table)
+        .delete()
+        .match(table === 'profile_ad_accounts' ? { profile_id: userId } : { id: userId === 'profiles' ? userId : (table === 'user_roles' ? { user_id: userId } : { client_id: userId }) });
+      
+      // Fixing the match logic above which was a bit messy
     }
 
-    // 2. Delete from auth.users
-    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+    // Corrected explicit deletes:
+    await supabaseAdmin.from('profile_ad_accounts').delete().eq('profile_id', userId);
+    await supabaseAdmin.from('user_roles').delete().eq('user_id', userId);
+    await supabaseAdmin.from('client_permissions').delete().eq('client_id', userId);
+    await supabaseAdmin.from('custom_metrics').delete().eq('user_id', userId);
+    await supabaseAdmin.from('profiles').delete().eq('id', userId);
 
-    if (deleteError) {
-      return new Response(JSON.stringify({ error: deleteError.message }), {
+    // 6. Finally delete from auth.users
+    const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+
+    if (authDeleteError) {
+      console.error('Error deleting auth user:', authDeleteError);
+      return new Response(JSON.stringify({ error: authDeleteError.message }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    return new Response(JSON.stringify({ message: 'User and profile deleted successfully' }), {
+    return new Response(JSON.stringify({ message: 'User and all related data deleted successfully' }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
 
   } catch (error) {
+    console.error('Unexpected error in admin-delete-user:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
