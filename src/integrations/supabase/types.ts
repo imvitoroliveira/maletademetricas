@@ -55,6 +55,39 @@ export type Database = {
           },
         ]
       }
+      contingency_vault: {
+        Row: {
+          access_url: string | null
+          created_at: string
+          credentials: Json | null
+          id: string
+          name: string
+          notes: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_url?: string | null
+          created_at?: string
+          credentials?: Json | null
+          id?: string
+          name: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_url?: string | null
+          created_at?: string
+          credentials?: Json | null
+          id?: string
+          name?: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       custom_metrics: {
         Row: {
           category: string | null
