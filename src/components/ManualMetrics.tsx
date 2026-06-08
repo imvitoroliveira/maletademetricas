@@ -37,6 +37,7 @@ interface CustomMetric {
   status: string | null;
   user_id: string | null;
   metric_date?: string | null;
+  ad_account_id?: string | null;
 }
 
 /**
@@ -52,7 +53,31 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
     name: '', 
     value: '', 
     category: '', 
-    metric_date: new Date().toISOString().split('T')[0] 
+    metric_date: new Date().toISOString().split('T')[0],
+    ad_account_id: '' 
+  });
+
+  const { data: adAccounts = [] } = useQuery({
+    queryKey: ['ad_accounts'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('ad_accounts').select('*').order('name');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const { data: userAdAccountIds = [] } = useQuery({
+    queryKey: ['user_ad_accounts', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('profile_ad_accounts')
+        .select('ad_account_id')
+        .eq('profile_id', user.id);
+      if (error) throw error;
+      return data?.map((d: any) => d.ad_account_id) || [];
+    },
+    enabled: !!user
   });
 
   const { data: metrics = [], isLoading: loading } = useQuery({
@@ -66,7 +91,14 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
 
       if (startDate) query = query.gte('metric_date', startDate);
       if (endDate) query = query.lte('metric_date', endDate);
-      if (!isAdmin) query = query.eq('user_id', user.id);
+      if (!isAdmin) {
+        // Filter by user_id OR by ad_accounts the user has access to
+        if (userAdAccountIds.length > 0) {
+          query = query.or(`user_id.eq.${user.id},ad_account_id.in.(${userAdAccountIds.join(',')})`);
+        } else {
+          query = query.eq('user_id', user.id);
+        }
+      }
 
       const { data, error } = await query.order('metric_date', { ascending: false });
 
@@ -94,7 +126,7 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
       queryClient.invalidateQueries({ queryKey: ['custom_metrics'] });
       queryClient.invalidateQueries({ queryKey: ['metrics'] });
       setIsAdding(false);
-      setNewMetric({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0] });
+      setNewMetric({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0], ad_account_id: '' });
       toast.success("Métrica inserida com sucesso.");
     },
     onError: (error) => ErrorHandler.report(error, "Inserção de Métrica")
@@ -190,7 +222,7 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
                 <TableHead className="text-[10px] font-bold uppercase tracking-wider h-12">Data</TableHead>
                 <TableHead className="w-[250px] lg:w-auto text-[10px] font-bold uppercase tracking-wider h-12">Métrica</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase tracking-wider h-12">Valor</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase tracking-wider h-12">Categoria</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase tracking-wider h-12">Conta / Categoria</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase tracking-wider h-12 text-center">Status</TableHead>
                 {isAdmin && <TableHead className="text-right text-[10px] font-bold uppercase tracking-wider h-12">Ações</TableHead>}
               </TableRow>
@@ -223,9 +255,19 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
                       className="h-9 border-fuchsia-100"
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="space-y-1">
+                    <select 
+                      className="w-full h-9 rounded-md border border-fuchsia-100 bg-white px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-fuchsia-400"
+                      value={newMetric.ad_account_id}
+                      onChange={(e) => setNewMetric({...newMetric, ad_account_id: e.target.value})}
+                    >
+                      <option value="">Sem conta específica</option>
+                      {adAccounts.map((acc: any) => (
+                        <option key={acc.id} value={acc.id}>{acc.name}</option>
+                      ))}
+                    </select>
                     <Input 
-                      placeholder="Ex: Facebook Ads" 
+                      placeholder="Categoria (ex: FB Ads)" 
                       value={newMetric.category || ''}
                       onChange={(e) => setNewMetric({...newMetric, category: e.target.value})}
                       className="h-9 border-fuchsia-100"
@@ -271,9 +313,16 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
                         {metric.value}
                       </TableCell>
                       <TableCell className="py-4">
-                        <Badge variant="outline" className="font-normal border-slate-200 text-slate-400 bg-white">
-                          {metric.category || 'N/A'}
-                        </Badge>
+                        <div className="flex flex-col gap-1">
+                          {metric.ad_account_id && (
+                            <Badge variant="outline" className="w-fit text-[10px] bg-blue-50 text-blue-600 border-blue-100">
+                              {adAccounts.find((a: any) => a.id === metric.ad_account_id)?.name || 'Conta Vinculada'}
+                            </Badge>
+                          )}
+                          <Badge variant="outline" className="w-fit font-normal border-slate-200 text-slate-400 bg-white">
+                            {metric.category || 'N/A'}
+                          </Badge>
+                        </div>
                       </TableCell>
                       <TableCell className="text-center py-4">
                         <Badge className={cn(

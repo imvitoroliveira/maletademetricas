@@ -12,7 +12,9 @@ import {
   Lock,
   Mail,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  ExternalLink,
+  Target
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -47,6 +49,12 @@ export function UserManager() {
   
   // Selected user for permissions
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
+  const [selectedProfileForAccounts, setSelectedProfileForAccounts] = useState<any>(null);
+  const [adAccounts, setAdAccounts] = useState<any[]>([]);
+  const [linkedAccountIds, setLinkedAccountIds] = useState<string[]>([]);
+  const [isAddingAccount, setIsAddingAccount] = useState(false);
+  const [newAccountName, setNewAccountName] = useState("");
+  const [newAccountExternalId, setNewAccountExternalId] = useState("");
   const [permissions, setPermissions] = useState<any>({
     can_view_charts: true,
     can_view_metrics: true,
@@ -55,7 +63,90 @@ export function UserManager() {
 
   useEffect(() => {
     fetchProfiles();
+    fetchAdAccounts();
   }, []);
+
+  const fetchAdAccounts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("ad_accounts")
+        .select("*")
+        .order("name");
+      if (error) throw error;
+      setAdAccounts(data || []);
+    } catch (error: any) {
+      console.error("Erro ao carregar contas de anúncio:", error);
+    }
+  };
+
+  const fetchLinkedAccounts = async (profileId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profile_ad_accounts")
+        .select("ad_account_id")
+        .eq("profile_id", profileId);
+      if (error) throw error;
+      setLinkedAccountIds(data?.map((d: any) => d.ad_account_id) || []);
+    } catch (error: any) {
+      console.error("Erro ao carregar contas vinculadas:", error);
+    }
+  };
+
+  const handleCreateAdAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const { data, error } = await supabase
+        .from("ad_accounts")
+        .insert({
+          name: newAccountName,
+          account_id: newAccountExternalId
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      toast.success("Conta de anúncio criada!");
+      setAdAccounts([...adAccounts, data]);
+      setNewAccountName("");
+      setNewAccountExternalId("");
+      setIsAddingAccount(false);
+    } catch (error: any) {
+      toast.error("Erro ao criar conta: " + error.message);
+    }
+  };
+
+  const toggleAccountLink = async (accountId: string) => {
+    if (!selectedProfileForAccounts) return;
+    
+    const isLinked = linkedAccountIds.includes(accountId);
+    try {
+      if (isLinked) {
+        const { error } = await supabase
+          .from("profile_ad_accounts")
+          .delete()
+          .match({ 
+            profile_id: selectedProfileForAccounts.id, 
+            ad_account_id: accountId 
+          });
+        if (error) throw error;
+        setLinkedAccountIds(linkedAccountIds.filter(id => id !== accountId));
+        toast.success("Conta desvinculada");
+      } else {
+        const { error } = await supabase
+          .from("profile_ad_accounts")
+          .insert({ 
+            profile_id: selectedProfileForAccounts.id, 
+            ad_account_id: accountId 
+          });
+        if (error) throw error;
+        setLinkedAccountIds([...linkedAccountIds, accountId]);
+        toast.success("Conta vinculada");
+      }
+    } catch (error: any) {
+      toast.error("Erro ao atualizar vínculo: " + error.message);
+    }
+  };
 
   const fetchProfiles = async () => {
     setLoading(true);
@@ -166,6 +257,11 @@ export function UserManager() {
       can_view_insights: true
     };
     setPermissions(userPerms);
+  };
+
+  const openAccountBinding = (profile: any) => {
+    setSelectedProfileForAccounts(profile);
+    fetchLinkedAccounts(profile.id);
   };
 
   return (
@@ -305,6 +401,14 @@ export function UserManager() {
                         </Button>
                         <Button 
                           variant="ghost" 
+                          size="sm" 
+                          onClick={() => openAccountBinding(profile)}
+                          className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          Contas
+                        </Button>
+                        <Button 
+                          variant="ghost" 
                           size="icon" 
                           onClick={() => toggleUserStatus(profile.id, profile.is_active)}
                           className={profile.is_active ? "text-rose-500" : "text-emerald-500"}
@@ -398,6 +502,90 @@ export function UserManager() {
           <DialogFooter className="pt-4">
             <Button onClick={handleUpdatePermissions} className="w-full bg-fuchsia-600">Salvar Permissões</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ad Account Binding Dialog */}
+      <Dialog open={!!selectedProfileForAccounts} onOpenChange={() => setSelectedProfileForAccounts(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Contas de Anúncio</DialogTitle>
+            <CardDescription>
+              Vincule as contas de anúncio que o cliente {selectedProfileForAccounts?.email} pode visualizar.
+            </CardDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 pt-4">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-sm font-semibold">Contas Disponíveis</h3>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setIsAddingAccount(true)}
+                className="text-xs h-7"
+              >
+                Nova Conta
+              </Button>
+            </div>
+
+            <div className="max-h-[300px] overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+              {adAccounts.length === 0 ? (
+                <div className="text-center py-8 border rounded-lg border-dashed">
+                  <Target className="h-8 w-8 mx-auto text-slate-300 mb-2" />
+                  <p className="text-sm text-slate-500">Nenhuma conta cadastrada.</p>
+                </div>
+              ) : adAccounts.map((account) => (
+                <div 
+                  key={account.id} 
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{account.name}</span>
+                    <span className="text-xs text-slate-500">ID: {account.account_id}</span>
+                  </div>
+                  <Checkbox 
+                    checked={linkedAccountIds.includes(account.id)}
+                    onCheckedChange={() => toggleAccountLink(account.id)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter className="pt-4">
+            <Button onClick={() => setSelectedProfileForAccounts(null)} className="w-full">Concluir</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Ad Account Dialog */}
+      <Dialog open={isAddingAccount} onOpenChange={setIsAddingAccount}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nova Conta de Anúncio</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateAdAccount} className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nome da Conta</label>
+              <Input 
+                placeholder="Ex: Meta Ads - Loja X" 
+                value={newAccountName}
+                onChange={(e) => setNewAccountName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">ID da Conta (Externo)</label>
+              <Input 
+                placeholder="Ex: act_123456789" 
+                value={newAccountExternalId}
+                onChange={(e) => setNewAccountExternalId(e.target.value)}
+                required
+              />
+            </div>
+            <DialogFooter className="pt-4">
+              <Button type="submit" className="w-full bg-blue-600">Cadastrar Conta</Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
