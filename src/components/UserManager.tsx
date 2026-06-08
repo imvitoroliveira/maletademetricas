@@ -65,7 +65,15 @@ export function UserManager() {
   useEffect(() => {
     fetchProfiles();
     fetchAdAccounts();
+    getCurrentUser();
   }, []);
+
+  const getCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      setCurrentUserEmail(user.email || null);
+    }
+  };
 
   const fetchAdAccounts = async () => {
     try {
