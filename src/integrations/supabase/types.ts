@@ -172,6 +172,44 @@ export type Database = {
           },
         ]
       }
+      meta_api_logs: {
+        Row: {
+          ad_account_id: string | null
+          created_at: string
+          id: string
+          metric_date: string
+          metric_name: string
+          raw_response: Json
+          raw_value: number
+        }
+        Insert: {
+          ad_account_id?: string | null
+          created_at?: string
+          id?: string
+          metric_date: string
+          metric_name: string
+          raw_response: Json
+          raw_value: number
+        }
+        Update: {
+          ad_account_id?: string | null
+          created_at?: string
+          id?: string
+          metric_date?: string
+          metric_name?: string
+          raw_response?: Json
+          raw_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_api_logs_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "ad_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_ad_accounts: {
         Row: {
           ad_account_id: string
