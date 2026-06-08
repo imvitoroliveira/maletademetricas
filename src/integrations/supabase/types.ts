@@ -144,6 +144,8 @@ export type Database = {
           is_admin: boolean | null
           updated_at: string
           vault_password: string | null
+          vault_recovery_expires: string | null
+          vault_recovery_token: string | null
         }
         Insert: {
           created_at?: string
@@ -153,6 +155,8 @@ export type Database = {
           is_admin?: boolean | null
           updated_at?: string
           vault_password?: string | null
+          vault_recovery_expires?: string | null
+          vault_recovery_token?: string | null
         }
         Update: {
           created_at?: string
@@ -162,6 +166,8 @@ export type Database = {
           is_admin?: boolean | null
           updated_at?: string
           vault_password?: string | null
+          vault_recovery_expires?: string | null
+          vault_recovery_token?: string | null
         }
         Relationships: []
       }
