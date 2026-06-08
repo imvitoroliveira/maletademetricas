@@ -42,6 +42,7 @@ import { toast } from "sonner";
 
 export function UserManager() {
   const [profiles, setProfiles] = useState<any[]>([]);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newEmail, setNewEmail] = useState("");
@@ -64,7 +65,15 @@ export function UserManager() {
   useEffect(() => {
     fetchProfiles();
     fetchAdAccounts();
+    getCurrentUser();
   }, []);
+
+  const getCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      setCurrentUserEmail(user.email || null);
+    }
+  };
 
   const fetchAdAccounts = async () => {
     try {
@@ -210,17 +219,25 @@ export function UserManager() {
     if (!confirm("Tem certeza que deseja excluir permanentemente este usuário e todos os seus dados? Esta ação não pode ser desfeita.")) return;
     
     try {
-      // Use the admin-delete-user Edge Function to delete from auth.users
+      console.log("Solicitando exclusão do usuário:", id);
       const { data, error } = await supabase.functions.invoke("admin-delete-user", {
         body: { userId: id }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro na Edge Function:", error);
+        throw new Error(error.message || "Erro desconhecido ao excluir usuário");
+      }
       
-      setProfiles(profiles.filter(p => p.id !== id));
+      console.log("Resposta da exclusão:", data);
+      setProfiles(prev => prev.filter(p => p.id !== id));
       toast.success("Usuário excluído com sucesso");
+      
+      // Opcional: recarregar a lista para garantir sincronia
+      setTimeout(() => fetchProfiles(), 1000);
     } catch (error: any) {
-      toast.error("Erro ao excluir usuário: " + error.message);
+      console.error("Erro ao excluir:", error);
+      toast.error(error.message || "Erro ao excluir usuário");
     }
   };
 
@@ -413,18 +430,21 @@ export function UserManager() {
                         >
                           {profile.is_active ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleDeleteUser(profile.id)}
-                          className="text-slate-400 hover:text-rose-600 transition-colors"
-                          title="Excluir Usuário"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        
+                        {currentUserEmail === 'ovitoroliveira60@gmail.com' && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleDeleteUser(profile.id)}
+                            className="text-slate-400 hover:text-rose-600 transition-colors"
+                            title="Excluir Usuário"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </>
                     )}
-                    {profile.is_admin && profile.id !== (supabase.auth.getUser() as any)?.data?.user?.id && (
+                    {profile.is_admin && profile.id !== (supabase.auth.getUser() as any)?.data?.user?.id && currentUserEmail === 'ovitoroliveira60@gmail.com' && (
                        <Button 
                           variant="ghost" 
                           size="icon" 
