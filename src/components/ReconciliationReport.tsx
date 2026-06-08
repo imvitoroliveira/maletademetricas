@@ -33,8 +33,8 @@ export function ReconciliationReport() {
       if (metricsError) throw metricsError;
 
       // Join data for comparison
-      const report = logs?.map(log => {
-        const matchingMetric = metrics?.find(m => 
+      const report = logs?.map((log: any) => {
+        const matchingMetric = metrics?.find((m: any) => 
           m.ad_account_id === log.ad_account_id && 
           m.metric_date === log.metric_date && 
           m.name === log.metric_name
