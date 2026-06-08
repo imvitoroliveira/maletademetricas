@@ -422,18 +422,21 @@ export function UserManager() {
                         >
                           {profile.is_active ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleDeleteUser(profile.id)}
-                          className="text-slate-400 hover:text-rose-600 transition-colors"
-                          title="Excluir Usuário"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        
+                        {currentUserEmail === 'ovitoroliveira60@gmail.com' && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleDeleteUser(profile.id)}
+                            className="text-slate-400 hover:text-rose-600 transition-colors"
+                            title="Excluir Usuário"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </>
                     )}
-                    {profile.is_admin && profile.id !== (supabase.auth.getUser() as any)?.data?.user?.id && (
+                    {profile.is_admin && profile.id !== (supabase.auth.getUser() as any)?.data?.user?.id && currentUserEmail === 'ovitoroliveira60@gmail.com' && (
                        <Button 
                           variant="ghost" 
                           size="icon" 
