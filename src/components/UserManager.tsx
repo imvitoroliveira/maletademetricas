@@ -210,13 +210,10 @@ export function UserManager() {
     if (!confirm("Tem certeza que deseja excluir permanentemente este usuário e todos os seus dados? Esta ação não pode ser desfeita.")) return;
     
     try {
-      // In a real app with Supabase Auth, you'd usually call an edge function to delete the auth user
-      // For now, we'll delete the profile which is handled by RLS/Cascade if configured, 
-      // but usually we need an admin function to delete from auth.users.
-      const { error } = await supabase
-        .from("profiles")
-        .delete()
-        .eq("id", id);
+      // Use the admin-delete-user Edge Function to delete from auth.users
+      const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+        body: { userId: id }
+      });
 
       if (error) throw error;
       
