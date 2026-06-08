@@ -86,7 +86,7 @@ export function UserManager() {
         .select("ad_account_id")
         .eq("profile_id", profileId);
       if (error) throw error;
-      setLinkedAccountIds(data?.map(d => d.ad_account_id) || []);
+      setLinkedAccountIds(data?.map((d: any) => d.ad_account_id) || []);
     } catch (error: any) {
       console.error("Erro ao carregar contas vinculadas:", error);
     }
