@@ -17,12 +17,12 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const { email, type, token, newPassword } = await req.json();
+    const body = await req.json();
+    const { email, type, token, newPassword } = body;
 
     if (type === "request") {
-      // Generate a random token
-      const recoveryToken = crypto.randomUUID();
-      const expires = new Date(Date.now() + 3600000); // 1 hour expiration
+      const recoveryToken = crypto.randomUUID().substring(0, 8).toUpperCase();
+      const expires = new Date(Date.now() + 3600000);
 
       const { data: profile, error: profileError } = await supabaseClient
         .from("profiles")
@@ -38,13 +38,10 @@ serve(async (req) => {
         throw new Error("Usuário não encontrado.");
       }
 
-      // In a real scenario, we would send an email here. 
-      // For this implementation, we'll return a success message 
-      // and the frontend will simulate the email flow or use the token if in dev.
       return new Response(
         JSON.stringify({ 
           message: "Token de recuperação gerado com sucesso.",
-          token: recoveryToken // In production, this would only be sent via email
+          token: recoveryToken 
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -64,7 +61,7 @@ serve(async (req) => {
       const now = new Date();
       const expires = new Date(profile.vault_recovery_expires);
 
-      if (profile.vault_recovery_token !== token || now > expires) {
+      if (!profile.vault_recovery_token || profile.vault_recovery_token !== token || now > expires) {
         throw new Error("Token inválido ou expirado.");
       }
 
