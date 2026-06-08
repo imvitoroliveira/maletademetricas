@@ -126,7 +126,7 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
       queryClient.invalidateQueries({ queryKey: ['custom_metrics'] });
       queryClient.invalidateQueries({ queryKey: ['metrics'] });
       setIsAdding(false);
-      setNewMetric({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0] });
+      setNewMetric({ name: '', value: '', category: '', metric_date: new Date().toISOString().split('T')[0], ad_account_id: '' });
       toast.success("Métrica inserida com sucesso.");
     },
     onError: (error) => ErrorHandler.report(error, "Inserção de Métrica")
