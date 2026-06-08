@@ -222,8 +222,6 @@ export function UserManager() {
     } catch (error: any) {
       toast.error("Erro ao excluir usuário: " + error.message);
     }
-      toast.error("Erro ao excluir usuário: " + error.message);
-    }
   };
 
   const handleUpdatePermissions = async () => {
