@@ -8,15 +8,38 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { User, Shield, CheckCircle2, AlertCircle } from "lucide-react";
+import { User, Shield, CheckCircle2, AlertCircle, Key, Lock, Loader2 } from "lucide-react";
 
 export function UserProfile() {
   const { profile, user } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [vaultPassword, setVaultPassword] = useState("");
+  const [loadingVault, setLoadingVault] = useState(false);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     toast.info("Funcionalidade de atualização de nome em desenvolvimento.");
+  };
+
+  const handleUpdateVaultPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile) return;
+    
+    setLoadingVault(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ vault_password: vaultPassword } as any)
+        .eq("id", profile.id);
+
+      if (error) throw error;
+      toast.success("Senha do cofre atualizada com sucesso!");
+      setVaultPassword("");
+    } catch (error: any) {
+      toast.error("Erro ao atualizar senha do cofre: " + error.message);
+    } finally {
+      setLoadingVault(false);
+    }
   };
 
   if (!profile) return null;
@@ -93,6 +116,43 @@ export function UserProfile() {
                 <Badge variant="secondary">Insights Estratégicos</Badge>
               )}
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {profile.is_admin && (
+        <Card className="border-none shadow-sm border-l-4 border-l-fuchsia-500">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Lock className="h-5 w-5 text-fuchsia-600" />
+              <CardTitle className="text-xl">Segurança do Cofre</CardTitle>
+            </div>
+            <CardDescription>Defina uma senha mestre para acessar a área de contingência.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleUpdateVaultPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="vault_pass">Nova Senha do Cofre</Label>
+                <div className="relative">
+                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input 
+                    id="vault_pass"
+                    type="password" 
+                    placeholder="Digite a senha mestre..." 
+                    className="pl-10 h-11"
+                    value={vaultPassword}
+                    onChange={(e) => setVaultPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Esta senha será solicitada sempre que você tentar acessar a aba "Cofre".
+                </p>
+              </div>
+              <Button type="submit" disabled={loadingVault} className="w-full bg-fuchsia-600 hover:bg-fuchsia-700 h-11">
+                {loadingVault ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Salvar Senha do Cofre"}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       )}
