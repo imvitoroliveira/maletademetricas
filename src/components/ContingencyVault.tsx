@@ -11,9 +11,12 @@ import {
   Search,
   Loader2,
   X,
-  Check
+  Check,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,6 +102,57 @@ export function ContingencyVault() {
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.notes && item.notes.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center py-20 animate-in fade-in duration-500">
+        <Card className="w-full max-w-md border-none shadow-2xl p-8 space-y-6 text-center">
+          <div className="mx-auto w-16 h-16 bg-fuchsia-100 rounded-full flex items-center justify-center text-fuchsia-600 mb-2">
+            <Lock className="h-8 w-8" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Área Restrita</h2>
+            <p className="text-sm text-slate-500 mt-2">
+              Insira a senha mestre do cofre para visualizar os perfis de contingência.
+            </p>
+          </div>
+          
+          <form onSubmit={handleVaultAuth} className="space-y-4">
+            <div className="relative">
+              <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input 
+                type={showPassword ? "text" : "password"} 
+                placeholder="Senha mestre..." 
+                className="pl-10 pr-10 h-12 text-center text-lg tracking-widest"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <Button type="submit" className="w-full h-12 bg-fuchsia-600 hover:bg-fuchsia-700 text-lg font-bold">
+              Desbloquear Cofre
+            </Button>
+          </form>
+          
+          {!profile?.vault_password && (
+            <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg flex items-start gap-3 text-left">
+              <Shield className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <p className="text-[10px] text-amber-700">
+                Parece que você ainda não definiu uma senha para o cofre. Vá na aba <strong>"Meu Perfil"</strong> para configurar sua senha mestre.
+              </p>
+            </div>
+          )}
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
