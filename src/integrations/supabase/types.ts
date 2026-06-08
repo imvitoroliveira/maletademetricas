@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_accounts: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          name: string
+          platform: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          name: string
+          platform?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          platform?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_permissions: {
         Row: {
           allowed_modules: string[] | null
@@ -90,6 +117,7 @@ export type Database = {
       }
       custom_metrics: {
         Row: {
+          ad_account_id: string | null
           category: string | null
           created_at: string
           id: string
@@ -102,6 +130,7 @@ export type Database = {
           value: string
         }
         Insert: {
+          ad_account_id?: string | null
           category?: string | null
           created_at?: string
           id?: string
@@ -114,6 +143,7 @@ export type Database = {
           value: string
         }
         Update: {
+          ad_account_id?: string | null
           category?: string | null
           created_at?: string
           id?: string
@@ -127,8 +157,45 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "custom_metrics_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "custom_metrics_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_ad_accounts: {
+        Row: {
+          ad_account_id: string
+          profile_id: string
+        }
+        Insert: {
+          ad_account_id: string
+          profile_id: string
+        }
+        Update: {
+          ad_account_id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_ad_accounts_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_ad_accounts_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
