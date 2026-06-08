@@ -42,6 +42,7 @@ import { toast } from "sonner";
 
 export function UserManager() {
   const [profiles, setProfiles] = useState<any[]>([]);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newEmail, setNewEmail] = useState("");
