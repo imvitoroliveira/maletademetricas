@@ -44,14 +44,31 @@ import { cn } from "@/lib/utils";
 
 export function ContingencyVault() {
   const queryClient = useQueryClient();
+  const { profile } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
   const [newProfile, setNewProfile] = useState({
     name: "",
     access_url: "",
     credentials: { login: "", password: "" },
     notes: ""
   });
+
+  const handleVaultAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (profile?.vault_password === passwordInput) {
+      setIsAuthenticated(true);
+      toast.success("Acesso ao cofre liberado!");
+    } else if (!profile?.vault_password) {
+      toast.error("Nenhuma senha definida. Defina uma senha no seu Perfil.");
+    } else {
+      toast.error("Senha incorreta!");
+    }
+  };
 
   const { data: vault = [], isLoading } = useQuery({
     queryKey: ["contingency_vault"],
@@ -62,14 +79,15 @@ export function ContingencyVault() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: isAuthenticated
   });
 
   const addMutation = useMutation({
-    mutationFn: async (profile: any) => {
+    mutationFn: async (profileData: any) => {
       const { data, error } = await supabase
         .from("contingency_vault")
-        .insert([profile])
+        .insert([profileData])
         .select()
         .single();
       if (error) throw error;
