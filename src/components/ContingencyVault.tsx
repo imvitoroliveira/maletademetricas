@@ -78,7 +78,7 @@ export function ContingencyVault() {
       setNewProfile({ name: "", access_url: "", credentials: { login: "", password: "" }, notes: "" });
       toast.success("Perfil de contingência adicionado.");
     },
-    error: (err: any) => toast.error("Erro ao adicionar: " + err.message)
+    onError: (err: any) => toast.error("Erro ao adicionar: " + err.message)
   });
 
   const deleteMutation = useMutation({
@@ -95,7 +95,7 @@ export function ContingencyVault() {
     }
   });
 
-  const filteredVault = vault.filter(item => 
+  const filteredVault = vault.filter((item: any) => 
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.notes && item.notes.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -218,7 +218,7 @@ export function ContingencyVault() {
                     <Loader2 className="h-6 w-6 animate-spin text-fuchsia-600 mx-auto" />
                   </TableCell>
                 </TableRow>
-              ) : filteredVault.map((item) => (
+              ) : filteredVault.map((item: any) => (
                 <TableRow key={item.id} className="group hover:bg-slate-50/50 transition-colors">
                   <TableCell>
                     <div className="flex flex-col">

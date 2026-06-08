@@ -6,6 +6,7 @@ import { ChartSection } from "@/components/ChartSection";
 import { ManualMetrics } from "@/components/ManualMetrics";
 import { UserManager } from "@/components/UserManager";
 import { UserProfile } from "@/components/UserProfile";
+import { ContingencyVault } from "@/components/ContingencyVault";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { 
@@ -163,6 +164,13 @@ function Dashboard() {
               Gestão de Clientes
             </Button>
             <Button 
+              variant={activeTab === "vault" ? "default" : "ghost"} 
+              onClick={() => setActiveTab("vault")}
+              className={cn("shrink-0", activeTab === "vault" ? "bg-fuchsia-600" : "")}
+            >
+              Cofre
+            </Button>
+            <Button 
               variant={activeTab === "profile" ? "default" : "ghost"} 
               onClick={() => setActiveTab("profile")}
               className={cn("shrink-0", activeTab === "profile" ? "bg-fuchsia-600" : "")}
@@ -174,6 +182,8 @@ function Dashboard() {
 
         {activeTab === "profile" ? (
           <UserProfile />
+        ) : activeTab === "vault" && isAdmin ? (
+          <ContingencyVault />
         ) : activeTab === "users" && isAdmin ? (
           <UserManager />
         ) : (
