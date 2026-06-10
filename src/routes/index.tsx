@@ -7,6 +7,7 @@ import { ManualMetrics } from "@/components/ManualMetrics";
 import { UserManager } from "@/components/UserManager";
 import { UserProfile } from "@/components/UserProfile";
 import { ContingencyVault } from "@/components/ContingencyVault";
+import { CampaignList } from "@/components/CampaignList";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { 
@@ -231,6 +232,12 @@ function Dashboard() {
 
             {(isAdmin || permissions.can_view_charts) && (
               <ChartSection metrics={metrics} loading={loadingMetrics} />
+            )}
+
+            {(isAdmin || permissions.can_view_metrics) && (
+              <div className="grid gap-6">
+                <CampaignList />
+              </div>
             )}
 
             <div className="grid gap-6 lg:grid-cols-3">
