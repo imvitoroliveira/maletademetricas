@@ -1,11 +1,6 @@
 import * as React from "react";
 import { 
-  BarChart3, 
   Target, 
-  TrendingUp, 
-  Users, 
-  MousePointer2,
-  DollarSign,
   Loader2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -21,9 +16,14 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { Tables } from "@/integrations/supabase/types";
+
+type Campaign = Tables<"campaigns"> & {
+  ad_accounts: { name: string } | null;
+};
 
 export function CampaignList() {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
 
   const { data: campaigns = [], isLoading } = useQuery({
     queryKey: ['campaigns', user?.id],
@@ -41,7 +41,7 @@ export function CampaignList() {
         .order('spent', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data as unknown) as Campaign[];
     },
     enabled: !!user
   });
@@ -60,8 +60,8 @@ export function CampaignList() {
     return (
       <Card className="shadow-sm border-none bg-white dark:bg-slate-900">
         <CardHeader>
-          <CardTitle className="text-lg font-bold">Campanhas do Meta Ads</CardTitle>
-          <CardDescription>Visualize a performance das campanhas vinculadas.</CardDescription>
+          <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-50">Campanhas do Meta Ads</CardTitle>
+          <CardDescription className="text-sm">Visualize a performance das campanhas vinculadas.</CardDescription>
         </CardHeader>
         <CardContent className="h-40 flex items-center justify-center text-slate-400 italic">
           Nenhuma campanha encontrada para as contas vinculadas.
