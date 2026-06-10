@@ -16,7 +16,9 @@ export type Database = {
     Tables: {
       ad_accounts: {
         Row: {
+          access_token: string | null
           account_id: string
+          app_secret: string | null
           created_at: string
           id: string
           name: string
@@ -24,7 +26,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_token?: string | null
           account_id: string
+          app_secret?: string | null
           created_at?: string
           id?: string
           name: string
@@ -32,7 +36,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_token?: string | null
           account_id?: string
+          app_secret?: string | null
           created_at?: string
           id?: string
           name?: string

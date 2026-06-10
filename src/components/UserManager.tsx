@@ -56,6 +56,8 @@ export function UserManager() {
   const [isAddingAccount, setIsAddingAccount] = useState(false);
   const [newAccountName, setNewAccountName] = useState("");
   const [newAccountExternalId, setNewAccountExternalId] = useState("");
+  const [newAccountAccessToken, setNewAccountAccessToken] = useState("");
+  const [newAccountAppSecret, setNewAccountAppSecret] = useState("");
   const [permissions, setPermissions] = useState<any>({
     can_view_charts: true,
     can_view_metrics: true,
@@ -108,7 +110,9 @@ export function UserManager() {
         .from("ad_accounts")
         .insert({
           name: newAccountName,
-          account_id: newAccountExternalId
+          account_id: newAccountExternalId,
+          access_token: newAccountAccessToken,
+          app_secret: newAccountAppSecret
         })
         .select()
         .single();
@@ -119,6 +123,8 @@ export function UserManager() {
       setAdAccounts([...adAccounts, data]);
       setNewAccountName("");
       setNewAccountExternalId("");
+      setNewAccountAccessToken("");
+      setNewAccountAppSecret("");
       setIsAddingAccount(false);
     } catch (error: any) {
       toast.error("Erro ao criar conta: " + error.message);
