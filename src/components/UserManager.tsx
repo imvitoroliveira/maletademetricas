@@ -631,9 +631,6 @@ export function UserManager() {
           </form>
         </DialogContent>
       </Dialog>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
