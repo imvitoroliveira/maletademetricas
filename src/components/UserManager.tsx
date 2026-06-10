@@ -605,9 +605,32 @@ export function UserManager() {
                 required
               />
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Meta Access Token</label>
+              <Input 
+                type="password"
+                placeholder="Insira o Access Token" 
+                value={newAccountAccessToken}
+                onChange={(e) => setNewAccountAccessToken(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">App Secret</label>
+              <Input 
+                type="password"
+                placeholder="Insira o App Secret" 
+                value={newAccountAppSecret}
+                onChange={(e) => setNewAccountAppSecret(e.target.value)}
+                required
+              />
+            </div>
             <DialogFooter className="pt-4">
               <Button type="submit" className="w-full bg-blue-600">Cadastrar Conta</Button>
             </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
           </form>
         </DialogContent>
       </Dialog>
