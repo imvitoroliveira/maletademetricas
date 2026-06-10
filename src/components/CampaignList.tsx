@@ -97,7 +97,7 @@ export function CampaignList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {campaigns.map((campaign) => (
+              {campaigns.map((campaign: Campaign) => (
                 <TableRow key={campaign.id} className="group hover:bg-slate-50 transition-colors">
                   <TableCell className="py-4">
                     <div className="flex flex-col gap-0.5">
