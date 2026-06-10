@@ -41,6 +41,65 @@ export type Database = {
         }
         Relationships: []
       }
+      campaigns: {
+        Row: {
+          ad_account_id: string
+          budget: number | null
+          clicks: number | null
+          created_at: string
+          ctr: number | null
+          id: string
+          impressions: number | null
+          name: string
+          objective: string | null
+          reach: number | null
+          remote_campaign_id: string
+          spent: number | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          ad_account_id: string
+          budget?: number | null
+          clicks?: number | null
+          created_at?: string
+          ctr?: number | null
+          id?: string
+          impressions?: number | null
+          name: string
+          objective?: string | null
+          reach?: number | null
+          remote_campaign_id: string
+          spent?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ad_account_id?: string
+          budget?: number | null
+          clicks?: number | null
+          created_at?: string
+          ctr?: number | null
+          id?: string
+          impressions?: number | null
+          name?: string
+          objective?: string | null
+          reach?: number | null
+          remote_campaign_id?: string
+          spent?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "ad_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_permissions: {
         Row: {
           allowed_modules: string[] | null
