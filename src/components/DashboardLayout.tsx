@@ -133,7 +133,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main Viewport */}
       <div className={cn(
-        "flex-1 flex flex-col min-h-screen transition-all duration-300 w-full",
+        "flex-1 flex flex-col min-h-dvh transition-all duration-300 w-full min-w-0",
         !isMobile && (isSidebarExpanded ? "pl-64" : "pl-20")
       )}>
         {/* Responsive Header */}
