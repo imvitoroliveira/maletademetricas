@@ -24,6 +24,9 @@ export function useAuth() {
   const [loading, setLoading] = useState<boolean>(true);
   const [authLogs, setAuthLogs] = useState<AuthLog[]>([]);
   const logsRef = useRef<AuthLog[]>([]);
+  // Evita inicializações concorrentes (getSession + onAuthStateChange disparam juntos no load)
+  const loadedUidRef = useRef<string | null>(null);
+  const inFlightUidRef = useRef<string | null>(null);
 
   /**
    * Centraliza o logging de eventos de autenticação para telemetria e suporte ao usuário.
