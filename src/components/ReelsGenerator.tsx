@@ -64,7 +64,22 @@ export function ReelsGenerator() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="topic">Tema do Reels</Label>
+              <Label htmlFor="referenceUrl" className="flex items-center gap-1.5">
+                <Link2 className="h-3.5 w-3.5" /> Link do vídeo de referência (opcional)
+              </Label>
+              <Input
+                id="referenceUrl"
+                type="url"
+                placeholder="Cole o link de um Reels, TikTok ou YouTube"
+                value={referenceUrl}
+                onChange={(e) => setReferenceUrl(e.target.value)}
+              />
+              <p className="text-[11px] text-slate-400">
+                A IA lê o conteúdo do vídeo e cria um roteiro novo inspirado nele.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="topic">Tema do Reels {referenceUrl.trim() ? "(opcional)" : ""}</Label>
               <Input
                 id="topic"
                 placeholder="Ex: 3 erros que travam o seu tráfego pago"
