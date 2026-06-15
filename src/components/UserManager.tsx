@@ -39,26 +39,38 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { Tables } from "@/integrations/supabase/types";
+
+type ProfileRow = Tables<"profiles"> & {
+  client_permissions?: Tables<"client_permissions">[];
+};
+type AdAccount = Tables<"ad_accounts">;
+type PermissionState = {
+  can_view_charts: boolean;
+  can_view_metrics: boolean;
+  can_view_insights: boolean;
+};
 
 export function UserManager() {
-  const [profiles, setProfiles] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   
   // Selected user for permissions
-  const [selectedProfile, setSelectedProfile] = useState<any>(null);
-  const [selectedProfileForAccounts, setSelectedProfileForAccounts] = useState<any>(null);
-  const [adAccounts, setAdAccounts] = useState<any[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState<ProfileRow | null>(null);
+  const [selectedProfileForAccounts, setSelectedProfileForAccounts] = useState<ProfileRow | null>(null);
+  const [adAccounts, setAdAccounts] = useState<AdAccount[]>([]);
   const [linkedAccountIds, setLinkedAccountIds] = useState<string[]>([]);
   const [isAddingAccount, setIsAddingAccount] = useState(false);
   const [newAccountName, setNewAccountName] = useState("");
   const [newAccountExternalId, setNewAccountExternalId] = useState("");
   const [newAccountAccessToken, setNewAccountAccessToken] = useState("");
   const [newAccountAppSecret, setNewAccountAppSecret] = useState("");
-  const [permissions, setPermissions] = useState<any>({
+  const [permissions, setPermissions] = useState<PermissionState>({
     can_view_charts: true,
     can_view_metrics: true,
     can_view_insights: true
@@ -74,6 +86,7 @@ export function UserManager() {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       setCurrentUserEmail(user.email || null);
+      setCurrentUserId(user.id);
     }
   };
 
@@ -205,7 +218,7 @@ export function UserManager() {
     }
   };
 
-  const toggleUserStatus = async (id: string, currentStatus: boolean) => {
+  const toggleUserStatus = async (id: string, currentStatus: boolean | null) => {
     try {
       const { error } = await supabase
         .from("profiles")
@@ -269,17 +282,23 @@ export function UserManager() {
     }
   };
 
-  const openPermissions = (profile: any) => {
+  const openPermissions = (profile: ProfileRow) => {
     setSelectedProfile(profile);
-    const userPerms = profile.client_permissions?.[0] || {
-      can_view_charts: true,
-      can_view_metrics: true,
-      can_view_insights: true
-    };
+    const userPerms: PermissionState = profile.client_permissions?.[0]
+      ? {
+          can_view_charts: profile.client_permissions[0].can_view_charts ?? true,
+          can_view_metrics: profile.client_permissions[0].can_view_metrics ?? true,
+          can_view_insights: profile.client_permissions[0].can_view_insights ?? true,
+        }
+      : {
+          can_view_charts: true,
+          can_view_metrics: true,
+          can_view_insights: true,
+        };
     setPermissions(userPerms);
   };
 
-  const openAccountBinding = (profile: any) => {
+  const openAccountBinding = (profile: ProfileRow) => {
     setSelectedProfileForAccounts(profile);
     fetchLinkedAccounts(profile.id);
   };
@@ -450,7 +469,7 @@ export function UserManager() {
                         )}
                       </>
                     )}
-                    {profile.is_admin && profile.id !== (supabase.auth.getUser() as any)?.data?.user?.id && currentUserEmail === 'ovitoroliveira60@gmail.com' && (
+                    {profile.is_admin && profile.id !== currentUserId && currentUserEmail === 'ovitoroliveira60@gmail.com' && (
                        <Button 
                           variant="ghost" 
                           size="icon" 

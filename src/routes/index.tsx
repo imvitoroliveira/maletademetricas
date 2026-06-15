@@ -50,18 +50,21 @@ function Dashboard() {
    * Reduz o Total Blocking Time (TBT) ao mover o processamento para fora do fluxo principal da UI.
    */
   const { data: metrics = [], isLoading: loadingMetrics } = useQuery({
-    queryKey: ['metrics', session?.id, startDate, endDate],
+    queryKey: ['metrics', session?.id, isAdmin, startDate, endDate],
     queryFn: async () => {
       if (!session) return [];
-      
-      const query = supabase
+
+      // No Supabase JS v2 os filtros retornam uma NOVA query: é obrigatório reatribuir.
+      let query = supabase
         .from('custom_metrics')
         .select('*')
         .order('metric_date', { ascending: false });
 
-      if (startDate) query.gte('metric_date', startDate);
-      if (endDate) query.lte('metric_date', endDate);
-      
+      // Defesa em profundidade: cliente vê apenas as próprias métricas (além da RLS).
+      if (!isAdmin) query = query.eq('user_id', session.id);
+      if (startDate) query = query.gte('metric_date', startDate);
+      if (endDate) query = query.lte('metric_date', endDate);
+
       const { data, error } = await query;
       if (error) {
         ErrorHandler.report(error, "Sincronização de Métricas");

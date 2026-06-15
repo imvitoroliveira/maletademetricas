@@ -1,7 +1,8 @@
 import * as React from "react";
 import { 
   Target, 
-  Loader2
+  Loader2,
+  RefreshCcw
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -13,17 +14,55 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
+import { toast } from "sonner";
 
 type Campaign = Tables<"campaigns"> & {
   ad_accounts: { name: string } | null;
 };
 
 export function CampaignList() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const queryClient = useQueryClient();
+  const [syncing, setSyncing] = React.useState(false);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-meta-campaigns", {
+        body: {},
+      });
+      if (error) throw error;
+
+      const results: Array<{ account: string; status: string; reason?: string; count?: number }> =
+        data?.results ?? [];
+      const ok = results.filter((r) => r.status === "ok");
+      const failed = results.filter((r) => r.status !== "ok");
+      const total = ok.reduce((sum, r) => sum + (r.count ?? 0), 0);
+
+      if (ok.length > 0) {
+        toast.success(`Sincronização concluída: ${total} campanha(s) atualizada(s).`);
+      }
+      if (failed.length > 0) {
+        toast.error(
+          `${failed.length} conta(s) com falha: ${failed.map((f) => `${f.account} (${f.reason})`).join("; ")}`,
+        );
+      }
+      if (results.length === 0) {
+        toast.info("Nenhuma conta de anúncio cadastrada para sincronizar.");
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+    } catch (e) {
+      toast.error("Erro ao sincronizar: " + (e as Error).message);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const { data: campaigns = [], isLoading } = useQuery({
     queryKey: ['campaigns', user?.id],
@@ -59,12 +98,20 @@ export function CampaignList() {
   if (campaigns.length === 0) {
     return (
       <Card className="shadow-sm border-none bg-white dark:bg-slate-900">
-        <CardHeader>
-          <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-50">Campanhas do Meta Ads</CardTitle>
-          <CardDescription className="text-sm">Visualize a performance das campanhas vinculadas.</CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-50">Campanhas do Meta Ads</CardTitle>
+            <CardDescription className="text-sm">Visualize a performance das campanhas vinculadas.</CardDescription>
+          </div>
+          {isAdmin && (
+            <Button onClick={handleSync} disabled={syncing} variant="outline" size="sm" className="gap-2 shrink-0">
+              <RefreshCcw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+              {syncing ? "Sincronizando..." : "Sincronizar"}
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="h-40 flex items-center justify-center text-slate-400 italic">
-          Nenhuma campanha encontrada para as contas vinculadas.
+          Nenhuma campanha encontrada. {isAdmin ? "Clique em Sincronizar para buscar do Meta Ads." : ""}
         </CardContent>
       </Card>
     );
@@ -73,14 +120,22 @@ export function CampaignList() {
   return (
     <Card className="shadow-sm border-none bg-white dark:bg-slate-900 overflow-hidden">
       <CardHeader className="border-b p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-50">Campanhas do Meta Ads</CardTitle>
             <CardDescription className="text-sm">Dados sincronizados diretamente do Gerenciador de Anúncios.</CardDescription>
           </div>
-          <Badge className="bg-fuchsia-50 text-fuchsia-600 border-fuchsia-100">
-            {campaigns.length} Ativas
-          </Badge>
+          <div className="flex items-center gap-2 shrink-0">
+            {isAdmin && (
+              <Button onClick={handleSync} disabled={syncing} variant="outline" size="sm" className="gap-2">
+                <RefreshCcw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+                {syncing ? "Sincronizando..." : "Sincronizar"}
+              </Button>
+            )}
+            <Badge className="bg-fuchsia-50 text-fuchsia-600 border-fuchsia-100">
+              {campaigns.length} Ativas
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-0">

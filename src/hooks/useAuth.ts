@@ -24,6 +24,9 @@ export function useAuth() {
   const [loading, setLoading] = useState<boolean>(true);
   const [authLogs, setAuthLogs] = useState<AuthLog[]>([]);
   const logsRef = useRef<AuthLog[]>([]);
+  // Evita inicializações concorrentes (getSession + onAuthStateChange disparam juntos no load)
+  const loadedUidRef = useRef<string | null>(null);
+  const inFlightUidRef = useRef<string | null>(null);
 
   /**
    * Centraliza o logging de eventos de autenticação para telemetria e suporte ao usuário.
@@ -113,23 +116,51 @@ export function useAuth() {
     let mounted = true;
     let authCheckTimeout: ReturnType<typeof setTimeout>;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
+    // Carrega perfil/role uma única vez por usuário, evitando corridas entre
+    // getSession (hidratação inicial) e onAuthStateChange (eventos seguintes).
+    const syncUser = (u: User | null, label: string) => {
       if (!mounted) return;
-      
-      const u = session?.user ?? null;
       setUser(u);
-      
-      if (u) {
-        addLog(`Evento Auth: ${event}`);
-        loadProfileAndRole(u.id).finally(() => {
-          if (mounted) setLoading(false);
-        });
-      } else {
+
+      if (!u) {
+        loadedUidRef.current = null;
+        inFlightUidRef.current = null;
         setProfile(null);
         setIsAdmin(false);
         setLoading(false);
+        clearTimeout(authCheckTimeout);
+        return;
       }
-    });
+
+      // Já carregado ou em andamento para este usuário: não recarrega.
+      if (loadedUidRef.current === u.id || inFlightUidRef.current === u.id) {
+        setLoading(false);
+        clearTimeout(authCheckTimeout);
+        return;
+      }
+
+      inFlightUidRef.current = u.id;
+      addLog(label);
+      loadProfileAndRole(u.id).finally(() => {
+        if (!mounted) return;
+        loadedUidRef.current = u.id;
+        inFlightUidRef.current = null;
+        setLoading(false);
+        clearTimeout(authCheckTimeout);
+      });
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event: string, session: Session | null) => {
+        if (!mounted) return;
+        // Eventos de manutenção não exigem recarregar o perfil.
+        if (event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") {
+          setUser(session?.user ?? null);
+          return;
+        }
+        syncUser(session?.user ?? null, `Evento Auth: ${event}`);
+      },
+    );
 
     // Failsafe: Libera a tela se nada responder em 5s
     authCheckTimeout = setTimeout(() => {
@@ -140,22 +171,7 @@ export function useAuth() {
     }, 5000);
 
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
-      if (!mounted) return;
-      const u = session?.user ?? null;
-      setUser(u);
-      
-      if (u) {
-        addLog("Sessão ativa detectada. Sincronizando perfil...");
-        loadProfileAndRole(u.id).finally(() => {
-          if (mounted) {
-            setLoading(false);
-            clearTimeout(authCheckTimeout);
-          }
-        });
-      } else {
-        setLoading(false);
-        clearTimeout(authCheckTimeout);
-      }
+      syncUser(session?.user ?? null, "Sessão ativa detectada. Sincronizando perfil...");
     }).catch((err: unknown) => {
       const error = err as Error;
       addLog(`Erro de inicialização: ${error.message}`, 'error');
@@ -174,6 +190,8 @@ export function useAuth() {
 
   const signOut = useCallback(async () => {
     addLog("Encerrando sessão ativa...");
+    loadedUidRef.current = null;
+    inFlightUidRef.current = null;
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
