@@ -133,6 +133,7 @@ export function ReconciliationReport() {
             ))}
           </TableBody>
         </Table>
+        </div>
       </Card>
     </div>
   );
