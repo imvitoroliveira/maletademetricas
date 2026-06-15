@@ -137,8 +137,28 @@
     border-color: var(--color-border);
   }
 
+  /* Overflow Control: impede scroll horizontal indesejado em qualquer viewport */
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+    /* Fluid Typography: a fonte base escala suavemente entre 14px e 16px */
+    font-size: clamp(0.875rem, 0.82rem + 0.25vw, 1rem);
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    /* Respeita áreas seguras de dispositivos com notch/barras */
+    overflow-wrap: break-word;
+  }
+
+  /* Touch ergonomics: evita hover acidental e melhora resposta ao toque */
+  @media (hover: none) {
+    a,
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
   }
 }
