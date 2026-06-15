@@ -118,7 +118,8 @@ export function ReconciliationReport() {
                 </TableCell>
                 <TableCell className="text-right font-mono">{item.metaValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
                 <TableCell className="text-right font-mono">{item.appValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
-                <TableCell className="flex justify-center py-4">
+                <TableCell className="py-4 text-center">
+                  <div className="flex justify-center">
                   {item.hasParity ? (
                     <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 gap-1">
                       <CheckCircle2 className="h-3 w-3" /> Paridade OK
