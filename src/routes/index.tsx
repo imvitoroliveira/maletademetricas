@@ -262,14 +262,15 @@ function Dashboard() {
               
               {(isAdmin || permissions.can_view_insights) && (
                 <div className="lg:col-span-1">
-                  <Card className="h-full shadow-sm border-none bg-fuchsia-600 text-white overflow-hidden">
+                  <Card className="relative h-full shadow-glow border-none bg-gradient-accent text-white overflow-hidden card-lift">
                     <div className="p-6 relative z-10">
-                      <h3 className="text-lg font-semibold mb-2">Análise Estratégica</h3>
-                      <p className="text-fuchsia-100 text-sm leading-relaxed mb-6">
+                      <h3 className="font-display text-lg font-semibold mb-2">Análise Estratégica</h3>
+                      <p className="text-white/80 text-sm leading-relaxed mb-6">
                         O gestor adicionará aqui os insights baseados na performance real do período selecionado.
                       </p>
                     </div>
-                    <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-fuchsia-500/20 rounded-full blur-3xl"></div>
+                    <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-white/15 rounded-full blur-3xl"></div>
+                    <div className="absolute -top-16 -left-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                   </Card>
                 </div>
               )}
