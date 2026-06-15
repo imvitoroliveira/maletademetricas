@@ -469,7 +469,7 @@ export function UserManager() {
                         )}
                       </>
                     )}
-                    {profile.is_admin && profile.id !== (supabase.auth.getUser() as any)?.data?.user?.id && currentUserEmail === 'ovitoroliveira60@gmail.com' && (
+                    {profile.is_admin && profile.id !== currentUserId && currentUserEmail === 'ovitoroliveira60@gmail.com' && (
                        <Button 
                           variant="ghost" 
                           size="icon" 
