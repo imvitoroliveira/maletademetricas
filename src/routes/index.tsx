@@ -194,6 +194,8 @@ function Dashboard() {
 
         {activeTab === "profile" ? (
           <UserProfile />
+        ) : activeTab === "reels" && isAdmin ? (
+          <ReelsGenerator />
         ) : activeTab === "vault" && isAdmin ? (
           <ContingencyVault />
         ) : activeTab === "users" && isAdmin ? (
