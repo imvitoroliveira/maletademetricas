@@ -282,17 +282,23 @@ export function UserManager() {
     }
   };
 
-  const openPermissions = (profile: any) => {
+  const openPermissions = (profile: ProfileRow) => {
     setSelectedProfile(profile);
-    const userPerms = profile.client_permissions?.[0] || {
-      can_view_charts: true,
-      can_view_metrics: true,
-      can_view_insights: true
-    };
+    const userPerms: PermissionState = profile.client_permissions?.[0]
+      ? {
+          can_view_charts: profile.client_permissions[0].can_view_charts ?? true,
+          can_view_metrics: profile.client_permissions[0].can_view_metrics ?? true,
+          can_view_insights: profile.client_permissions[0].can_view_insights ?? true,
+        }
+      : {
+          can_view_charts: true,
+          can_view_metrics: true,
+          can_view_insights: true,
+        };
     setPermissions(userPerms);
   };
 
-  const openAccountBinding = (profile: any) => {
+  const openAccountBinding = (profile: ProfileRow) => {
     setSelectedProfileForAccounts(profile);
     fetchLinkedAccounts(profile.id);
   };
