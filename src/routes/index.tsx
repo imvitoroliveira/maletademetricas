@@ -232,13 +232,12 @@ function Dashboard() {
 
             {/* Metrics cards would only show values if there are relevant metrics */}
             {(isAdmin || permissions.can_view_charts) && (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 stagger-children">
                 <MetricCard 
                   title="Métricas Ativas" 
                   value={metrics.length} 
                   description="total no período"
                   icon={<BarChart2 className="h-4 w-4" />}
-                  className="border-none shadow-sm"
                 />
                 {/* Outros cartões seriam preenchidos dinamicamente baseados nas métricas inseridas */}
               </div>
