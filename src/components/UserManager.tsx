@@ -305,20 +305,20 @@ export function UserManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">Gestão de Clientes</h2>
-          <p className="text-slate-500">Crie acessos e gerencie o que cada cliente pode visualizar.</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50">Gestão de Clientes</h2>
+          <p className="text-sm text-slate-500">Crie acessos e gerencie o que cada cliente pode visualizar.</p>
         </div>
         
         <Dialog open={isAdding} onOpenChange={setIsAdding}>
           <DialogTrigger asChild>
-            <Button className="gap-2 bg-fuchsia-600 hover:bg-fuchsia-700">
+            <Button className="gap-2 bg-fuchsia-600 hover:bg-fuchsia-700 w-full sm:w-auto shrink-0 min-h-11">
               <UserPlus className="h-4 w-4" />
               Novo Cliente
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90dvh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Cadastrar Novo Cliente</DialogTitle>
               <CardDescription>
@@ -491,7 +491,7 @@ export function UserManager() {
 
       {/* Permissions Dialog */}
       <Dialog open={!!selectedProfile} onOpenChange={() => setSelectedProfile(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Permissões do Cliente</DialogTitle>
             <CardDescription>
@@ -549,7 +549,7 @@ export function UserManager() {
 
       {/* Ad Account Binding Dialog */}
       <Dialog open={!!selectedProfileForAccounts} onOpenChange={() => setSelectedProfileForAccounts(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Contas de Anúncio</DialogTitle>
             <CardDescription>
@@ -601,7 +601,7 @@ export function UserManager() {
 
       {/* New Ad Account Dialog */}
       <Dialog open={isAddingAccount} onOpenChange={setIsAddingAccount}>
-        <DialogContent>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nova Conta de Anúncio</DialogTitle>
           </DialogHeader>
