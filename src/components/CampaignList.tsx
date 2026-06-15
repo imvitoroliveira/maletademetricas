@@ -1,7 +1,8 @@
 import * as React from "react";
 import { 
   Target, 
-  Loader2
+  Loader2,
+  RefreshCcw
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -13,17 +14,55 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
+import { toast } from "sonner";
 
 type Campaign = Tables<"campaigns"> & {
   ad_accounts: { name: string } | null;
 };
 
 export function CampaignList() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const queryClient = useQueryClient();
+  const [syncing, setSyncing] = React.useState(false);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-meta-campaigns", {
+        body: {},
+      });
+      if (error) throw error;
+
+      const results: Array<{ account: string; status: string; reason?: string; count?: number }> =
+        data?.results ?? [];
+      const ok = results.filter((r) => r.status === "ok");
+      const failed = results.filter((r) => r.status !== "ok");
+      const total = ok.reduce((sum, r) => sum + (r.count ?? 0), 0);
+
+      if (ok.length > 0) {
+        toast.success(`Sincronização concluída: ${total} campanha(s) atualizada(s).`);
+      }
+      if (failed.length > 0) {
+        toast.error(
+          `${failed.length} conta(s) com falha: ${failed.map((f) => `${f.account} (${f.reason})`).join("; ")}`,
+        );
+      }
+      if (results.length === 0) {
+        toast.info("Nenhuma conta de anúncio cadastrada para sincronizar.");
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+    } catch (e) {
+      toast.error("Erro ao sincronizar: " + (e as Error).message);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const { data: campaigns = [], isLoading } = useQuery({
     queryKey: ['campaigns', user?.id],
