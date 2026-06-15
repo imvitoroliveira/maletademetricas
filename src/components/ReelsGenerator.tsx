@@ -14,11 +14,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Sparkles, Copy, Clapperboard } from "lucide-react";
+import { Loader2, Sparkles, Copy, Clapperboard, Link2 } from "lucide-react";
 import { toast } from "sonner";
 
 export function ReelsGenerator() {
   const [topic, setTopic] = useState("");
+  const [referenceUrl, setReferenceUrl] = useState("");
   const [niche, setNiche] = useState("");
   const [tone, setTone] = useState("educativo");
   const [duration, setDuration] = useState("30s");
@@ -27,7 +28,7 @@ export function ReelsGenerator() {
   const mutation = useMutation<ReelsScript, Error>({
     mutationFn: () =>
       runGenerate({
-        data: { topic, niche, tone: tone as never, duration: duration as never },
+        data: { topic, referenceUrl, niche, tone: tone as never, duration: duration as never },
       }),
     onError: (err) => toast.error(err.message || "Falha ao gerar roteiro."),
   });
@@ -63,7 +64,22 @@ export function ReelsGenerator() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="topic">Tema do Reels</Label>
+              <Label htmlFor="referenceUrl" className="flex items-center gap-1.5">
+                <Link2 className="h-3.5 w-3.5" /> Link do vídeo de referência (opcional)
+              </Label>
+              <Input
+                id="referenceUrl"
+                type="url"
+                placeholder="Cole o link de um Reels, TikTok ou YouTube"
+                value={referenceUrl}
+                onChange={(e) => setReferenceUrl(e.target.value)}
+              />
+              <p className="text-[11px] text-slate-400">
+                A IA lê o conteúdo do vídeo e cria um roteiro novo inspirado nele.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="topic">Tema do Reels {referenceUrl.trim() ? "(opcional)" : ""}</Label>
               <Input
                 id="topic"
                 placeholder="Ex: 3 erros que travam o seu tráfego pago"
@@ -113,7 +129,7 @@ export function ReelsGenerator() {
             </div>
             <Button
               className="w-full bg-fuchsia-600 hover:bg-fuchsia-700"
-              disabled={mutation.isPending || topic.trim().length < 2}
+              disabled={mutation.isPending || (topic.trim().length < 2 && referenceUrl.trim().length === 0)}
               onClick={() => mutation.mutate()}
             >
               {mutation.isPending ? (
