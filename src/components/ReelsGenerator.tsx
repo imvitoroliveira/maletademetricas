@@ -14,11 +14,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Sparkles, Copy, Clapperboard } from "lucide-react";
+import { Loader2, Sparkles, Copy, Clapperboard, Link2 } from "lucide-react";
 import { toast } from "sonner";
 
 export function ReelsGenerator() {
   const [topic, setTopic] = useState("");
+  const [referenceUrl, setReferenceUrl] = useState("");
   const [niche, setNiche] = useState("");
   const [tone, setTone] = useState("educativo");
   const [duration, setDuration] = useState("30s");
@@ -27,7 +28,7 @@ export function ReelsGenerator() {
   const mutation = useMutation<ReelsScript, Error>({
     mutationFn: () =>
       runGenerate({
-        data: { topic, niche, tone: tone as never, duration: duration as never },
+        data: { topic, referenceUrl, niche, tone: tone as never, duration: duration as never },
       }),
     onError: (err) => toast.error(err.message || "Falha ao gerar roteiro."),
   });
