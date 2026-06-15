@@ -9,7 +9,9 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  LogOut
+  LogOut,
+  Sun,
+  Moon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,6 +21,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTheme } from "@/hooks/useTheme";
 import logo from "@/assets/logo.jpg";
 
 interface DashboardLayoutProps {
