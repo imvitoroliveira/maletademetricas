@@ -29,25 +29,19 @@ export function UserProfile() {
     e.preventDefault();
     if (!profile) return;
 
-    // Se já existe uma senha, valida a atual (segurança básica)
-    if (profile.vault_password && profile.vault_password !== currentVaultPassword) {
-      toast.error("A senha atual do cofre está incorreta.");
-      return;
-    }
-    
     setLoadingVault(true);
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ vault_password: vaultPassword } as any)
-        .eq("id", profile.id);
-
+      const { data, error } = await supabase.functions.invoke("vault-auth", {
+        body: { action: "set", currentPassword: currentVaultPassword, newPassword: vaultPassword },
+      });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
       toast.success("Senha do cofre atualizada com sucesso!");
       setVaultPassword("");
       setCurrentVaultPassword("");
-    } catch (error: any) {
-      toast.error("Erro ao atualizar senha do cofre: " + error.message);
+    } catch (error: unknown) {
+      toast.error("Erro ao atualizar senha do cofre: " + (error as Error).message);
     } finally {
       setLoadingVault(false);
     }
