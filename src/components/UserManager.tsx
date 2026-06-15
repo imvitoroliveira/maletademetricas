@@ -55,6 +55,10 @@ export function UserManager() {
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  // The actual permission is enforced server-side in the admin-delete-user function.
+  // Optionally restrict the UI to a configured master email (no hardcoded identity).
+  const masterEmail = import.meta.env.VITE_MASTER_ADMIN_EMAIL as string | undefined;
+  const canDeleteUsers = masterEmail ? currentUserEmail === masterEmail : !!currentUserEmail;
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newEmail, setNewEmail] = useState("");
@@ -182,7 +186,7 @@ export function UserManager() {
       const { data, error } = await supabase
         .from("profiles")
         .select(`
-          *,
+          id, email, is_admin, is_active, created_at, updated_at,
           client_permissions (*)
         `)
         .order("created_at", { ascending: false });
@@ -456,7 +460,7 @@ export function UserManager() {
                           {profile.is_active ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
                         </Button>
                         
-                        {currentUserEmail === 'ovitoroliveira60@gmail.com' && (
+                        {canDeleteUsers && (
                           <Button 
                             variant="ghost" 
                             size="icon" 
@@ -469,7 +473,7 @@ export function UserManager() {
                         )}
                       </>
                     )}
-                    {profile.is_admin && profile.id !== currentUserId && currentUserEmail === 'ovitoroliveira60@gmail.com' && (
+                    {profile.is_admin && profile.id !== currentUserId && canDeleteUsers && (
                        <Button 
                           variant="ghost" 
                           size="icon" 

@@ -375,7 +375,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      exec_sql: { Args: { query: string }; Returns: undefined }
+      [_ in never]: never
     }
     Enums: {
       app_role: "admin" | "user"

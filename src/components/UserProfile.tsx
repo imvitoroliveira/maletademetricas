@@ -29,25 +29,19 @@ export function UserProfile() {
     e.preventDefault();
     if (!profile) return;
 
-    // Se já existe uma senha, valida a atual (segurança básica)
-    if (profile.vault_password && profile.vault_password !== currentVaultPassword) {
-      toast.error("A senha atual do cofre está incorreta.");
-      return;
-    }
-    
     setLoadingVault(true);
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ vault_password: vaultPassword } as any)
-        .eq("id", profile.id);
-
+      const { data, error } = await supabase.functions.invoke("vault-auth", {
+        body: { action: "set", currentPassword: currentVaultPassword, newPassword: vaultPassword },
+      });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
       toast.success("Senha do cofre atualizada com sucesso!");
       setVaultPassword("");
       setCurrentVaultPassword("");
-    } catch (error: any) {
-      toast.error("Erro ao atualizar senha do cofre: " + error.message);
+    } catch (error: unknown) {
+      toast.error("Erro ao atualizar senha do cofre: " + (error as Error).message);
     } finally {
       setLoadingVault(false);
     }
@@ -58,16 +52,18 @@ export function UserProfile() {
     setLoadingVault(true);
     try {
       const { data, error } = await supabase.functions.invoke("vault-recovery", {
-        body: { email: user.email, type: "request" }
+        body: { type: "request" }
       });
       if (error) throw error;
-      
+      if (data?.error) throw new Error(data.error);
+
       setIsTokenSent(true);
-      toast.success("Token de recuperação gerado! (Simulação de e-mail)");
-      // Em produção o token iria para o e-mail, aqui facilitamos para o teste
-      if (data.token) console.log("Token de recuperação:", data.token);
-    } catch (error: any) {
-      toast.error("Erro ao solicitar recuperação: " + error.message);
+      // Email delivery is not wired up yet, so we surface the token to the
+      // authenticated owner directly (no console logging).
+      if (data?.token) setRecoveryToken(data.token);
+      toast.success("Token de recuperação gerado e preenchido abaixo.");
+    } catch (error: unknown) {
+      toast.error("Erro ao solicitar recuperação: " + (error as Error).message);
     } finally {
       setLoadingVault(false);
     }

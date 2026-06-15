@@ -72,7 +72,7 @@ export function useAuth() {
       // Usamos chamadas sequenciais para evitar problemas de concorrência no cliente JS inicial
       const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("*, client_permissions(*)")
+          .select("id, email, is_admin, is_active, created_at, updated_at, client_permissions(*)")
           .eq("id", uid)
           .maybeSingle();
 

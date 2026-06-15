@@ -16,7 +16,6 @@ import {
   EyeOff
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,12 +43,25 @@ import { cn } from "@/lib/utils";
 
 export function ContingencyVault() {
   const queryClient = useQueryClient();
-  const { profile } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
+
+  // Whether the user has configured a vault master password (read server-side).
+  const { data: vaultStatus } = useQuery({
+    queryKey: ["vault_status"],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("vault-auth", {
+        body: { action: "status" },
+      });
+      if (error) throw error;
+      return data as { configured: boolean };
+    },
+  });
+  const vaultConfigured = vaultStatus?.configured ?? false;
 
   const emptyCredentials = {
     login: "",
@@ -73,15 +85,27 @@ export function ContingencyVault() {
     notes: ""
   });
 
-  const handleVaultAuth = (e: React.FormEvent) => {
+  const handleVaultAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (profile?.vault_password === passwordInput) {
-      setIsAuthenticated(true);
-      toast.success("Acesso ao cofre liberado!");
-    } else if (!profile?.vault_password) {
-      toast.error("Nenhuma senha definida. Defina uma senha no seu Perfil.");
-    } else {
-      toast.error("Senha incorreta!");
+    setUnlocking(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("vault-auth", {
+        body: { action: "verify", password: passwordInput },
+      });
+      if (error) throw error;
+      if (!data?.configured) {
+        toast.error("Nenhuma senha definida. Defina uma senha no seu Perfil.");
+      } else if (data?.valid) {
+        setIsAuthenticated(true);
+        setPasswordInput("");
+        toast.success("Acesso ao cofre liberado!");
+      } else {
+        toast.error("Senha incorreta!");
+      }
+    } catch (err: unknown) {
+      toast.error("Erro ao validar senha: " + (err as Error).message);
+    } finally {
+      setUnlocking(false);
     }
   };
 
@@ -169,12 +193,12 @@ export function ContingencyVault() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            <Button type="submit" className="w-full h-12 bg-fuchsia-600 hover:bg-fuchsia-700 text-lg font-bold">
-              Desbloquear Cofre
+            <Button type="submit" disabled={unlocking} className="w-full h-12 bg-fuchsia-600 hover:bg-fuchsia-700 text-lg font-bold">
+              {unlocking ? <Loader2 className="h-5 w-5 animate-spin" /> : "Desbloquear Cofre"}
             </Button>
           </form>
           
-          {!profile?.vault_password && (
+          {!vaultConfigured && (
             <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg flex items-start gap-3 text-left">
               <Shield className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
               <p className="text-[10px] text-amber-700">
@@ -243,7 +267,7 @@ export function ContingencyVault() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Senha do login</label>
                   <Input 
-                    type="text"
+                    type="password"
                     placeholder="••••••••" 
                     value={newProfile.credentials.password}
                     onChange={e => setNewProfile({
@@ -271,7 +295,7 @@ export function ContingencyVault() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Senha do e-mail primário</label>
                     <Input 
-                      type="text"
+                      type="password"
                       placeholder="••••••••" 
                       value={newProfile.credentials.primary_email_password}
                       onChange={e => setNewProfile({
@@ -300,7 +324,7 @@ export function ContingencyVault() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Senha do e-mail secundário</label>
                     <Input 
-                      type="text"
+                      type="password"
                       placeholder="••••••••" 
                       value={newProfile.credentials.secondary_email_password}
                       onChange={e => setNewProfile({
@@ -329,7 +353,7 @@ export function ContingencyVault() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Senha</label>
                     <Input 
-                      type="text"
+                      type="password"
                       placeholder="••••••••" 
                       value={newProfile.credentials.facebook_password}
                       onChange={e => setNewProfile({
@@ -358,7 +382,7 @@ export function ContingencyVault() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Senha</label>
                     <Input 
-                      type="text"
+                      type="password"
                       placeholder="••••••••" 
                       value={newProfile.credentials.x_password}
                       onChange={e => setNewProfile({
@@ -387,7 +411,7 @@ export function ContingencyVault() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Senha</label>
                     <Input 
-                      type="text"
+                      type="password"
                       placeholder="••••••••" 
                       value={newProfile.credentials.instagram_password}
                       onChange={e => setNewProfile({
