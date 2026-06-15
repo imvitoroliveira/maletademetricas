@@ -98,7 +98,7 @@ export function UserManager() {
     try {
       const { data, error } = await supabase
         .from("ad_accounts")
-        .select("*")
+        .select("id, name, account_id, created_at, updated_at")
         .order("name");
       if (error) throw error;
       setAdAccounts(data || []);
