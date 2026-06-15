@@ -460,7 +460,7 @@ export function UserManager() {
                           {profile.is_active ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
                         </Button>
                         
-                        {currentUserEmail === 'ovitoroliveira60@gmail.com' && (
+                        {canDeleteUsers && (
                           <Button 
                             variant="ghost" 
                             size="icon" 
@@ -473,7 +473,7 @@ export function UserManager() {
                         )}
                       </>
                     )}
-                    {profile.is_admin && profile.id !== currentUserId && currentUserEmail === 'ovitoroliveira60@gmail.com' && (
+                    {profile.is_admin && profile.id !== currentUserId && canDeleteUsers && (
                        <Button 
                           variant="ghost" 
                           size="icon" 
