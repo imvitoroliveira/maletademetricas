@@ -51,10 +51,25 @@ export function ContingencyVault() {
   const [passwordInput, setPasswordInput] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const emptyCredentials = {
+    login: "",
+    password: "",
+    primary_email: "",
+    primary_email_password: "",
+    secondary_email: "",
+    secondary_email_password: "",
+    facebook_email: "",
+    facebook_password: "",
+    x_user: "",
+    x_password: "",
+    instagram_user: "",
+    instagram_password: "",
+  };
+
   const [newProfile, setNewProfile] = useState({
     name: "",
     access_url: "",
-    credentials: { login: "", password: "" },
+    credentials: { ...emptyCredentials },
     notes: ""
   });
 
