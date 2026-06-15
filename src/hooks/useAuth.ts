@@ -190,6 +190,8 @@ export function useAuth() {
 
   const signOut = useCallback(async () => {
     addLog("Encerrando sessão ativa...");
+    loadedUidRef.current = null;
+    inFlightUidRef.current = null;
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
