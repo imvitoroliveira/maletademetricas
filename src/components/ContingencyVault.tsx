@@ -111,7 +111,7 @@ export function ContingencyVault() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contingency_vault"] });
       setIsAdding(false);
-      setNewProfile({ name: "", access_url: "", credentials: { login: "", password: "" }, notes: "" });
+      setNewProfile({ name: "", access_url: "", credentials: { ...emptyCredentials }, notes: "" });
       toast.success("Perfil de contingência adicionado.");
     },
     onError: (err: any) => toast.error("Erro ao adicionar: " + err.message)
