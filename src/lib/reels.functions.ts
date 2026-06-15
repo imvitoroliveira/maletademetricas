@@ -3,12 +3,17 @@ import { generateText, Output } from "ai";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const ReelsInput = z.object({
-  topic: z.string().min(2).max(300),
-  niche: z.string().max(120).optional().default(""),
-  tone: z.enum(["educativo", "inspirador", "divertido", "vendas", "polemico"]).default("educativo"),
-  duration: z.enum(["15s", "30s", "45s", "60s"]).default("30s"),
-});
+const ReelsInput = z
+  .object({
+    topic: z.string().max(300).optional().default(""),
+    referenceUrl: z.string().url().max(500).optional().or(z.literal("")).default(""),
+    niche: z.string().max(120).optional().default(""),
+    tone: z.enum(["educativo", "inspirador", "divertido", "vendas", "polemico"]).default("educativo"),
+    duration: z.enum(["15s", "30s", "45s", "60s"]).default("30s"),
+  })
+  .refine((d) => d.topic.trim().length >= 2 || (d.referenceUrl && d.referenceUrl.trim().length > 0), {
+    message: "Informe um tema ou um link de vídeo de referência.",
+  });
 
 export type ReelsScript = {
   title: string;
@@ -26,8 +31,23 @@ export const generateReelsScript = createServerFn({ method: "POST" })
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
+    // Se um link de vídeo foi informado, extrai o conteúdo da página como base.
+    let reference = "";
+    if (data.referenceUrl && data.referenceUrl.trim().length > 0) {
+      const { scrapeVideoContent } = await import("@/lib/firecrawl.server");
+      reference = await scrapeVideoContent(data.referenceUrl.trim());
+    }
+
     const { createLovableAiGatewayProvider } = await import("@/lib/ai-gateway.server");
     const gateway = createLovableAiGatewayProvider(key);
+
+    const briefing = reference
+      ? `Baseie o roteiro no conteúdo deste vídeo de referência (recrie a ideia com a sua própria voz, NÃO copie):
+"""
+${reference}
+"""
+${data.topic.trim() ? `Foco adicional desejado: ${data.topic.trim()}` : ""}`
+      : `Tema: ${data.topic.trim()}`;
 
     const { output } = await generateText({
       model: gateway("google/gemini-3-flash-preview"),
@@ -50,7 +70,8 @@ export const generateReelsScript = createServerFn({ method: "POST" })
       prompt: `Você é um especialista em conteúdo viral para Instagram Reels.
 Crie um roteiro completo de Reels em português do Brasil.
 
-Tema: ${data.topic}
+${briefing}
+
 Nicho: ${data.niche || "geral"}
 Tom: ${data.tone}
 Duração alvo: ${data.duration}
