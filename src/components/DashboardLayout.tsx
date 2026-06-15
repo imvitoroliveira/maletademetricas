@@ -155,6 +155,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 text-slate-400 hover:text-fuchsia-600 dark:hover:text-fuchsia-400"
+              onClick={toggleTheme}
+              aria-label={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
+              title={isDark ? "Modo claro" : "Modo escuro"}
+            >
+              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
             <Button 
               variant="ghost" 
               size="icon" 
