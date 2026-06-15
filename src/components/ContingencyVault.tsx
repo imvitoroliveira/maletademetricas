@@ -44,12 +44,25 @@ import { cn } from "@/lib/utils";
 
 export function ContingencyVault() {
   const queryClient = useQueryClient();
-  const { profile } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
+
+  // Whether the user has configured a vault master password (read server-side).
+  const { data: vaultStatus } = useQuery({
+    queryKey: ["vault_status"],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("vault-auth", {
+        body: { action: "status" },
+      });
+      if (error) throw error;
+      return data as { configured: boolean };
+    },
+  });
+  const vaultConfigured = vaultStatus?.configured ?? false;
 
   const emptyCredentials = {
     login: "",
@@ -73,15 +86,27 @@ export function ContingencyVault() {
     notes: ""
   });
 
-  const handleVaultAuth = (e: React.FormEvent) => {
+  const handleVaultAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (profile?.vault_password === passwordInput) {
-      setIsAuthenticated(true);
-      toast.success("Acesso ao cofre liberado!");
-    } else if (!profile?.vault_password) {
-      toast.error("Nenhuma senha definida. Defina uma senha no seu Perfil.");
-    } else {
-      toast.error("Senha incorreta!");
+    setUnlocking(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("vault-auth", {
+        body: { action: "verify", password: passwordInput },
+      });
+      if (error) throw error;
+      if (!data?.configured) {
+        toast.error("Nenhuma senha definida. Defina uma senha no seu Perfil.");
+      } else if (data?.valid) {
+        setIsAuthenticated(true);
+        setPasswordInput("");
+        toast.success("Acesso ao cofre liberado!");
+      } else {
+        toast.error("Senha incorreta!");
+      }
+    } catch (err: unknown) {
+      toast.error("Erro ao validar senha: " + (err as Error).message);
+    } finally {
+      setUnlocking(false);
     }
   };
 
