@@ -267,7 +267,7 @@ export function ContingencyVault() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Senha do login</label>
                   <Input 
-                    type="text"
+                    type="password"
                     placeholder="••••••••" 
                     value={newProfile.credentials.password}
                     onChange={e => setNewProfile({
@@ -295,7 +295,7 @@ export function ContingencyVault() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Senha do e-mail primário</label>
                     <Input 
-                      type="text"
+                      type="password"
                       placeholder="••••••••" 
                       value={newProfile.credentials.primary_email_password}
                       onChange={e => setNewProfile({
@@ -324,7 +324,7 @@ export function ContingencyVault() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Senha do e-mail secundário</label>
                     <Input 
-                      type="text"
+                      type="password"
                       placeholder="••••••••" 
                       value={newProfile.credentials.secondary_email_password}
                       onChange={e => setNewProfile({
@@ -353,7 +353,7 @@ export function ContingencyVault() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Senha</label>
                     <Input 
-                      type="text"
+                      type="password"
                       placeholder="••••••••" 
                       value={newProfile.credentials.facebook_password}
                       onChange={e => setNewProfile({
@@ -382,7 +382,7 @@ export function ContingencyVault() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Senha</label>
                     <Input 
-                      type="text"
+                      type="password"
                       placeholder="••••••••" 
                       value={newProfile.credentials.x_password}
                       onChange={e => setNewProfile({
@@ -411,7 +411,7 @@ export function ContingencyVault() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Senha</label>
                     <Input 
-                      type="text"
+                      type="password"
                       placeholder="••••••••" 
                       value={newProfile.credentials.instagram_password}
                       onChange={e => setNewProfile({
