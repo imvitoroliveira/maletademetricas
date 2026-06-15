@@ -98,10 +98,10 @@ export function UserManager() {
     try {
       const { data, error } = await supabase
         .from("ad_accounts")
-        .select("*")
+        .select("id, name, account_id, created_at, updated_at")
         .order("name");
       if (error) throw error;
-      setAdAccounts(data || []);
+      setAdAccounts((data as AdAccount[]) || []);
     } catch (error: any) {
       console.error("Erro ao carregar contas de anúncio:", error);
     }
@@ -131,13 +131,13 @@ export function UserManager() {
           access_token: newAccountAccessToken,
           app_secret: newAccountAppSecret
         })
-        .select()
+        .select("id, name, account_id, created_at, updated_at")
         .single();
 
       if (error) throw error;
       
       toast.success("Conta de anúncio criada!");
-      setAdAccounts([...adAccounts, data]);
+      setAdAccounts([...adAccounts, data as AdAccount]);
       setNewAccountName("");
       setNewAccountExternalId("");
       setNewAccountAccessToken("");
