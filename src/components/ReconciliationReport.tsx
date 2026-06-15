@@ -129,6 +129,7 @@ export function ReconciliationReport() {
                       <AlertTriangle className="h-3 w-3" /> Divergência: {item.diff.toFixed(2)}
                     </Badge>
                   )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
