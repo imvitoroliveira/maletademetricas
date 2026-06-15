@@ -137,7 +137,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         !isMobile && (isSidebarExpanded ? "pl-64" : "pl-20")
       )}>
         {/* Responsive Header */}
-        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b bg-white/80 dark:bg-slate-900/80 px-4 md:px-8 backdrop-blur-xl shrink-0">
+        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-border/60 glass-panel px-4 md:px-8 shrink-0">
           <div className="flex items-center gap-4 flex-1">
             {isMobile && (
               <Button variant="ghost" size="icon" className="h-10 w-10 -ml-2" onClick={() => setIsSheetOpen(true)}>
