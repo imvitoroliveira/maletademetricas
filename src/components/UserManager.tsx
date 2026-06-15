@@ -137,7 +137,7 @@ export function UserManager() {
       if (error) throw error;
       
       toast.success("Conta de anúncio criada!");
-      setAdAccounts([...adAccounts, data]);
+      setAdAccounts([...adAccounts, data as AdAccount]);
       setNewAccountName("");
       setNewAccountExternalId("");
       setNewAccountAccessToken("");
