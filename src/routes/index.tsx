@@ -153,44 +153,45 @@ function Dashboard() {
     <DashboardLayout>
       <div className="flex flex-col gap-8">
         {isAdmin && (
-          <div className="flex gap-2 border-b pb-4 overflow-x-auto custom-scrollbar whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex gap-2 border-b border-border/60 pb-4 overflow-x-auto custom-scrollbar whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
             <Button 
               variant={activeTab === "overview" ? "default" : "ghost"} 
               onClick={() => setActiveTab("overview")}
-              className={cn("shrink-0", activeTab === "overview" ? "bg-fuchsia-600" : "")}
+              className={cn("shrink-0 transition-all", activeTab === "overview" ? "bg-gradient-accent text-white shadow-soft" : "")}
             >
               Visão Geral
             </Button>
             <Button 
               variant={activeTab === "users" ? "default" : "ghost"} 
               onClick={() => setActiveTab("users")}
-              className={cn("shrink-0", activeTab === "users" ? "bg-fuchsia-600" : "")}
+              className={cn("shrink-0 transition-all", activeTab === "users" ? "bg-gradient-accent text-white shadow-soft" : "")}
             >
               Gestão de Clientes
             </Button>
             <Button 
               variant={activeTab === "reels" ? "default" : "ghost"} 
               onClick={() => setActiveTab("reels")}
-              className={cn("shrink-0", activeTab === "reels" ? "bg-fuchsia-600" : "")}
+              className={cn("shrink-0 transition-all", activeTab === "reels" ? "bg-gradient-accent text-white shadow-soft" : "")}
             >
               Roteiro de Reels
             </Button>
             <Button 
               variant={activeTab === "vault" ? "default" : "ghost"} 
               onClick={() => setActiveTab("vault")}
-              className={cn("shrink-0", activeTab === "vault" ? "bg-fuchsia-600" : "")}
+              className={cn("shrink-0 transition-all", activeTab === "vault" ? "bg-gradient-accent text-white shadow-soft" : "")}
             >
               Cofre
             </Button>
             <Button 
               variant={activeTab === "profile" ? "default" : "ghost"} 
               onClick={() => setActiveTab("profile")}
-              className={cn("shrink-0", activeTab === "profile" ? "bg-fuchsia-600" : "")}
+              className={cn("shrink-0 transition-all", activeTab === "profile" ? "bg-gradient-accent text-white shadow-soft" : "")}
             >
               Meu Perfil
             </Button>
           </div>
         )}
+
 
         {activeTab === "profile" ? (
           <UserProfile />
