@@ -51,10 +51,25 @@ export function ContingencyVault() {
   const [passwordInput, setPasswordInput] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const emptyCredentials = {
+    login: "",
+    password: "",
+    primary_email: "",
+    primary_email_password: "",
+    secondary_email: "",
+    secondary_email_password: "",
+    facebook_email: "",
+    facebook_password: "",
+    x_user: "",
+    x_password: "",
+    instagram_user: "",
+    instagram_password: "",
+  };
+
   const [newProfile, setNewProfile] = useState({
     name: "",
     access_url: "",
-    credentials: { login: "", password: "" },
+    credentials: { ...emptyCredentials },
     notes: ""
   });
 
@@ -96,7 +111,7 @@ export function ContingencyVault() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contingency_vault"] });
       setIsAdding(false);
-      setNewProfile({ name: "", access_url: "", credentials: { login: "", password: "" }, notes: "" });
+      setNewProfile({ name: "", access_url: "", credentials: { ...emptyCredentials }, notes: "" });
       toast.success("Perfil de contingência adicionado.");
     },
     onError: (err: any) => toast.error("Erro ao adicionar: " + err.message)
@@ -190,12 +205,12 @@ export function ContingencyVault() {
               Novo Perfil
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar">
             <DialogHeader>
               <DialogTitle>Adicionar Perfil ao Cofre</DialogTitle>
               <CardDescription>Insira as informações de acesso para contingência.</CardDescription>
             </DialogHeader>
-            <div className="space-y-4 pt-4">
+            <div className="space-y-5 pt-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Nome do Perfil / Estrutura</label>
                 <Input 
@@ -212,9 +227,10 @@ export function ContingencyVault() {
                   onChange={e => setNewProfile({...newProfile, access_url: e.target.value})}
                 />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Login/E-mail</label>
+                  <label className="text-sm font-medium">Login principal</label>
                   <Input 
                     placeholder="user@email.com" 
                     value={newProfile.credentials.login}
@@ -225,7 +241,7 @@ export function ContingencyVault() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Senha</label>
+                  <label className="text-sm font-medium">Senha do login</label>
                   <Input 
                     type="text"
                     placeholder="••••••••" 
@@ -237,6 +253,152 @@ export function ContingencyVault() {
                   />
                 </div>
               </div>
+
+              <div className="space-y-3 rounded-lg border border-slate-100 dark:border-slate-800 p-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-500">E-mail primário</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">E-mail primário</label>
+                    <Input 
+                      placeholder="primario@email.com" 
+                      value={newProfile.credentials.primary_email}
+                      onChange={e => setNewProfile({
+                        ...newProfile, 
+                        credentials: { ...newProfile.credentials, primary_email: e.target.value }
+                      })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Senha do e-mail primário</label>
+                    <Input 
+                      type="text"
+                      placeholder="••••••••" 
+                      value={newProfile.credentials.primary_email_password}
+                      onChange={e => setNewProfile({
+                        ...newProfile, 
+                        credentials: { ...newProfile.credentials, primary_email_password: e.target.value }
+                      })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3 rounded-lg border border-slate-100 dark:border-slate-800 p-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-500">E-mail secundário</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">E-mail secundário</label>
+                    <Input 
+                      placeholder="secundario@email.com" 
+                      value={newProfile.credentials.secondary_email}
+                      onChange={e => setNewProfile({
+                        ...newProfile, 
+                        credentials: { ...newProfile.credentials, secondary_email: e.target.value }
+                      })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Senha do e-mail secundário</label>
+                    <Input 
+                      type="text"
+                      placeholder="••••••••" 
+                      value={newProfile.credentials.secondary_email_password}
+                      onChange={e => setNewProfile({
+                        ...newProfile, 
+                        credentials: { ...newProfile.credentials, secondary_email_password: e.target.value }
+                      })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3 rounded-lg border border-slate-100 dark:border-slate-800 p-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Acesso Facebook</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">E-mail / usuário</label>
+                    <Input 
+                      placeholder="user@email.com" 
+                      value={newProfile.credentials.facebook_email}
+                      onChange={e => setNewProfile({
+                        ...newProfile, 
+                        credentials: { ...newProfile.credentials, facebook_email: e.target.value }
+                      })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Senha</label>
+                    <Input 
+                      type="text"
+                      placeholder="••••••••" 
+                      value={newProfile.credentials.facebook_password}
+                      onChange={e => setNewProfile({
+                        ...newProfile, 
+                        credentials: { ...newProfile.credentials, facebook_password: e.target.value }
+                      })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3 rounded-lg border border-slate-100 dark:border-slate-800 p-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Acesso X (Twitter)</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">E-mail / usuário</label>
+                    <Input 
+                      placeholder="@usuario ou e-mail" 
+                      value={newProfile.credentials.x_user}
+                      onChange={e => setNewProfile({
+                        ...newProfile, 
+                        credentials: { ...newProfile.credentials, x_user: e.target.value }
+                      })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Senha</label>
+                    <Input 
+                      type="text"
+                      placeholder="••••••••" 
+                      value={newProfile.credentials.x_password}
+                      onChange={e => setNewProfile({
+                        ...newProfile, 
+                        credentials: { ...newProfile.credentials, x_password: e.target.value }
+                      })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3 rounded-lg border border-slate-100 dark:border-slate-800 p-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Acesso Instagram</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Usuário</label>
+                    <Input 
+                      placeholder="@usuario" 
+                      value={newProfile.credentials.instagram_user}
+                      onChange={e => setNewProfile({
+                        ...newProfile, 
+                        credentials: { ...newProfile.credentials, instagram_user: e.target.value }
+                      })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Senha</label>
+                    <Input 
+                      type="text"
+                      placeholder="••••••••" 
+                      value={newProfile.credentials.instagram_password}
+                      onChange={e => setNewProfile({
+                        ...newProfile, 
+                        credentials: { ...newProfile.credentials, instagram_password: e.target.value }
+                      })}
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Notas Adicionais</label>
                 <Textarea 
@@ -313,15 +475,30 @@ export function ContingencyVault() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2 text-xs text-slate-600">
-                        <User className="h-3 w-3 text-slate-400" />
-                        <span className="font-mono">{item.credentials?.login || "---"}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-slate-600">
-                        <Key className="h-3 w-3 text-slate-400" />
-                        <span className="font-mono">{(item.credentials as any)?.password || "---"}</span>
-                      </div>
+                    <div className="flex flex-col gap-1.5 min-w-[220px]">
+                      {[
+                        { label: "Login", user: item.credentials?.login, pass: item.credentials?.password },
+                        { label: "E-mail primário", user: item.credentials?.primary_email, pass: item.credentials?.primary_email_password },
+                        { label: "E-mail secundário", user: item.credentials?.secondary_email, pass: item.credentials?.secondary_email_password },
+                        { label: "Facebook", user: item.credentials?.facebook_email, pass: item.credentials?.facebook_password },
+                        { label: "X", user: item.credentials?.x_user, pass: item.credentials?.x_password },
+                        { label: "Instagram", user: item.credentials?.instagram_user, pass: item.credentials?.instagram_password },
+                      ].filter(c => c.user || c.pass).map((c) => (
+                        <div key={c.label} className="text-xs">
+                          <span className="text-[10px] font-bold uppercase text-slate-400">{c.label}</span>
+                          <div className="flex items-center gap-2 text-slate-600">
+                            <User className="h-3 w-3 text-slate-400" />
+                            <span className="font-mono">{c.user || "---"}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-slate-600">
+                            <Key className="h-3 w-3 text-slate-400" />
+                            <span className="font-mono">{c.pass || "---"}</span>
+                          </div>
+                        </div>
+                      ))}
+                      {!(item.credentials?.login || item.credentials?.password || item.credentials?.primary_email || item.credentials?.facebook_email || item.credentials?.x_user || item.credentials?.instagram_user) && (
+                        <span className="text-xs text-slate-400">Sem credenciais</span>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
