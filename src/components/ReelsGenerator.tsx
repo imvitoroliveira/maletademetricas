@@ -129,7 +129,7 @@ export function ReelsGenerator() {
             </div>
             <Button
               className="w-full bg-fuchsia-600 hover:bg-fuchsia-700"
-              disabled={mutation.isPending || topic.trim().length < 2}
+              disabled={mutation.isPending || (topic.trim().length < 2 && referenceUrl.trim().length === 0)}
               onClick={() => mutation.mutate()}
             >
               {mutation.isPending ? (
