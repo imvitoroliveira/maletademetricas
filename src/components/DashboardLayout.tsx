@@ -38,6 +38,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { profile, isAdmin, signOut, authLogs } = useAuth();
   const isMobile = useIsMobile();
+  const { isDark, toggleTheme } = useTheme();
   const [isSidebarExpanded, setIsSidebarExpanded] = React.useState(true);
   const [showLogs, setShowLogs] = React.useState(false);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
