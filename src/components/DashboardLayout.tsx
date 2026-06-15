@@ -9,7 +9,9 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  LogOut
+  LogOut,
+  Sun,
+  Moon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,6 +21,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTheme } from "@/hooks/useTheme";
 import logo from "@/assets/logo.jpg";
 
 interface DashboardLayoutProps {
@@ -35,6 +38,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { profile, isAdmin, signOut, authLogs } = useAuth();
   const isMobile = useIsMobile();
+  const { isDark, toggleTheme } = useTheme();
   const [isSidebarExpanded, setIsSidebarExpanded] = React.useState(true);
   const [showLogs, setShowLogs] = React.useState(false);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
@@ -151,6 +155,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 text-slate-400 hover:text-fuchsia-600 dark:hover:text-fuchsia-400"
+              onClick={toggleTheme}
+              aria-label={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
+              title={isDark ? "Modo claro" : "Modo escuro"}
+            >
+              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
             <Button 
               variant="ghost" 
               size="icon" 
