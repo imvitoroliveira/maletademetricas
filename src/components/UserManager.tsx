@@ -218,7 +218,7 @@ export function UserManager() {
     }
   };
 
-  const toggleUserStatus = async (id: string, currentStatus: boolean) => {
+  const toggleUserStatus = async (id: string, currentStatus: boolean | null) => {
     try {
       const { error } = await supabase
         .from("profiles")
