@@ -98,12 +98,20 @@ export function CampaignList() {
   if (campaigns.length === 0) {
     return (
       <Card className="shadow-sm border-none bg-white dark:bg-slate-900">
-        <CardHeader>
-          <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-50">Campanhas do Meta Ads</CardTitle>
-          <CardDescription className="text-sm">Visualize a performance das campanhas vinculadas.</CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-50">Campanhas do Meta Ads</CardTitle>
+            <CardDescription className="text-sm">Visualize a performance das campanhas vinculadas.</CardDescription>
+          </div>
+          {isAdmin && (
+            <Button onClick={handleSync} disabled={syncing} variant="outline" size="sm" className="gap-2 shrink-0">
+              <RefreshCcw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+              {syncing ? "Sincronizando..." : "Sincronizar"}
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="h-40 flex items-center justify-center text-slate-400 italic">
-          Nenhuma campanha encontrada para as contas vinculadas.
+          Nenhuma campanha encontrada. {isAdmin ? "Clique em Sincronizar para buscar do Meta Ads." : ""}
         </CardContent>
       </Card>
     );
@@ -112,14 +120,22 @@ export function CampaignList() {
   return (
     <Card className="shadow-sm border-none bg-white dark:bg-slate-900 overflow-hidden">
       <CardHeader className="border-b p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-50">Campanhas do Meta Ads</CardTitle>
             <CardDescription className="text-sm">Dados sincronizados diretamente do Gerenciador de Anúncios.</CardDescription>
           </div>
-          <Badge className="bg-fuchsia-50 text-fuchsia-600 border-fuchsia-100">
-            {campaigns.length} Ativas
-          </Badge>
+          <div className="flex items-center gap-2 shrink-0">
+            {isAdmin && (
+              <Button onClick={handleSync} disabled={syncing} variant="outline" size="sm" className="gap-2">
+                <RefreshCcw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+                {syncing ? "Sincronizando..." : "Sincronizar"}
+              </Button>
+            )}
+            <Badge className="bg-fuchsia-50 text-fuchsia-600 border-fuchsia-100">
+              {campaigns.length} Ativas
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-0">
