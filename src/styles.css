@@ -152,8 +152,18 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     /* Respeita áreas seguras de dispositivos com notch/barras */
     overflow-wrap: break-word;
+    letter-spacing: -0.011em;
+  }
+
+  /* Editorial display hierarchy */
+  h1, h2, h3, h4, h5, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.022em;
   }
 
   /* Touch ergonomics: evita hover acidental e melhora resposta ao toque */
@@ -163,4 +173,116 @@
       -webkit-tap-highlight-color: transparent;
     }
   }
+}
+
+/*
+ * ============================================================
+ * Premium Design Layer — depth, glass, motion, refinement.
+ * ============================================================
+ */
+
+/* Premium soft-shadow + accent gradient tokens */
+:root {
+  --shadow-soft: 0 1px 2px -1px oklch(0.129 0.042 264.695 / 0.08), 0 4px 12px -2px oklch(0.129 0.042 264.695 / 0.06);
+  --shadow-elevated: 0 10px 30px -12px oklch(0.129 0.042 264.695 / 0.18), 0 4px 8px -4px oklch(0.129 0.042 264.695 / 0.08);
+  --shadow-glow: 0 12px 40px -12px oklch(0.66 0.27 332 / 0.45);
+  --gradient-accent: linear-gradient(135deg, oklch(0.66 0.27 332), oklch(0.55 0.27 300));
+  --gradient-surface: linear-gradient(160deg, oklch(1 0 0), oklch(0.985 0.005 320));
+}
+
+.dark {
+  --shadow-soft: 0 1px 2px -1px oklch(0 0 0 / 0.4), 0 4px 14px -4px oklch(0 0 0 / 0.5);
+  --shadow-elevated: 0 16px 40px -16px oklch(0 0 0 / 0.7), 0 4px 10px -6px oklch(0 0 0 / 0.5);
+  --shadow-glow: 0 14px 48px -14px oklch(0.66 0.27 332 / 0.55);
+  --gradient-surface: linear-gradient(160deg, oklch(0.21 0.045 280), oklch(0.18 0.04 270));
+}
+
+@utility glass-panel {
+  background: color-mix(in oklch, var(--color-card) 70%, transparent);
+  backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid color-mix(in oklch, var(--color-border) 80%, transparent);
+}
+
+@utility shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+
+@utility shadow-elevated {
+  box-shadow: var(--shadow-elevated);
+}
+
+@utility shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+@utility text-gradient {
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-gradient-accent {
+  background-image: var(--gradient-accent);
+}
+
+/* Premium card lift on hover with natural easing */
+@utility card-lift {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-elevated);
+  }
+}
+
+/* Staggered content entrance */
+@keyframes premium-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-rise {
+  opacity: 0;
+  animation: premium-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-children > * {
+  opacity: 0;
+  animation: premium-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.12s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.19s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.26s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.33s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.40s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .stagger-children > * {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Refined scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--color-muted-foreground) 35%, transparent);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklch, var(--color-muted-foreground) 55%, transparent);
 }
