@@ -86,6 +86,7 @@ export function UserManager() {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       setCurrentUserEmail(user.email || null);
+      setCurrentUserId(user.id);
     }
   };
 
