@@ -491,7 +491,7 @@ export function UserManager() {
 
       {/* Permissions Dialog */}
       <Dialog open={!!selectedProfile} onOpenChange={() => setSelectedProfile(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Permissões do Cliente</DialogTitle>
             <CardDescription>
@@ -549,7 +549,7 @@ export function UserManager() {
 
       {/* Ad Account Binding Dialog */}
       <Dialog open={!!selectedProfileForAccounts} onOpenChange={() => setSelectedProfileForAccounts(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Contas de Anúncio</DialogTitle>
             <CardDescription>
@@ -601,7 +601,7 @@ export function UserManager() {
 
       {/* New Ad Account Dialog */}
       <Dialog open={isAddingAccount} onOpenChange={setIsAddingAccount}>
-        <DialogContent>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nova Conta de Anúncio</DialogTitle>
           </DialogHeader>
