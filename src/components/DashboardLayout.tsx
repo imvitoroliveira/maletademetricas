@@ -109,12 +109,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 flex">
+    <div className="min-h-dvh bg-slate-50/50 dark:bg-slate-950 flex w-full overflow-x-hidden">
       {/* Desktop Sidebar */}
       {!isMobile && (
         <aside 
           className={cn(
-            "fixed left-0 top-0 z-40 h-screen transition-all duration-300 border-r bg-white dark:bg-slate-900",
+            "fixed left-0 top-0 z-40 h-dvh transition-all duration-300 border-r bg-white dark:bg-slate-900",
             isSidebarExpanded ? "w-64" : "w-20"
           )}
         >
