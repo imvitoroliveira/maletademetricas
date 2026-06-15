@@ -194,12 +194,12 @@ export function ContingencyVault() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            <Button type="submit" className="w-full h-12 bg-fuchsia-600 hover:bg-fuchsia-700 text-lg font-bold">
-              Desbloquear Cofre
+            <Button type="submit" disabled={unlocking} className="w-full h-12 bg-fuchsia-600 hover:bg-fuchsia-700 text-lg font-bold">
+              {unlocking ? <Loader2 className="h-5 w-5 animate-spin" /> : "Desbloquear Cofre"}
             </Button>
           </form>
           
-          {!profile?.vault_password && (
+          {!vaultConfigured && (
             <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg flex items-start gap-3 text-left">
               <Shield className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
               <p className="text-[10px] text-amber-700">
