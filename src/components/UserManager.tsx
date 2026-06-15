@@ -101,7 +101,7 @@ export function UserManager() {
         .select("id, name, account_id, created_at, updated_at")
         .order("name");
       if (error) throw error;
-      setAdAccounts(data || []);
+      setAdAccounts((data as AdAccount[]) || []);
     } catch (error: any) {
       console.error("Erro ao carregar contas de anúncio:", error);
     }
