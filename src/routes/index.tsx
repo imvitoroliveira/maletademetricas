@@ -169,6 +169,13 @@ function Dashboard() {
               Gestão de Clientes
             </Button>
             <Button 
+              variant={activeTab === "reels" ? "default" : "ghost"} 
+              onClick={() => setActiveTab("reels")}
+              className={cn("shrink-0", activeTab === "reels" ? "bg-fuchsia-600" : "")}
+            >
+              Roteiro de Reels
+            </Button>
+            <Button 
               variant={activeTab === "vault" ? "default" : "ghost"} 
               onClick={() => setActiveTab("vault")}
               className={cn("shrink-0", activeTab === "vault" ? "bg-fuchsia-600" : "")}
