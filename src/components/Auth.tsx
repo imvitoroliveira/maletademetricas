@@ -85,18 +85,25 @@ export function Auth({ authLogs = [] }: AuthProps) {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 p-4 dark:from-slate-950 dark:via-slate-900 dark:to-purple-950">
-      <Card className="w-full max-w-[92vw] sm:max-w-md border-none shadow-2xl shadow-fuchsia-200/40 animate-in fade-in zoom-in duration-500">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 p-4 dark:bg-slate-950">
+      {/* Ambient premium aurora background */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-32 -left-24 h-[28rem] w-[28rem] rounded-full bg-fuchsia-500/20 blur-[120px] dark:bg-fuchsia-600/20" />
+        <div className="absolute -bottom-32 -right-24 h-[28rem] w-[28rem] rounded-full bg-violet-500/20 blur-[120px] dark:bg-violet-700/20" />
+        <div className="absolute left-1/2 top-1/2 h-[20rem] w-[20rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-400/10 blur-[100px]" />
+      </div>
+
+      <Card className="relative w-full max-w-[92vw] sm:max-w-md glass-panel shadow-elevated animate-rise rounded-2xl">
         <CardHeader className="space-y-2 text-center pb-2 sm:pb-6">
           <div className="flex justify-center mb-2 sm:mb-6">
-            <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl overflow-hidden shadow-xl shadow-fuchsia-300/40 ring-4 ring-white">
+            <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl overflow-hidden shadow-glow ring-4 ring-white/60 dark:ring-white/10">
               <img src={logo} alt="Maleta de Métricas" className="h-full w-full object-cover" />
             </div>
           </div>
-          <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+          <CardTitle className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
             Maleta de Métricas
           </CardTitle>
-          <CardDescription className="text-sm text-slate-500">
+          <CardDescription className="text-sm text-muted-foreground">
             Acesse seu painel exclusivo de performance.
           </CardDescription>
         </CardHeader>
@@ -206,7 +213,7 @@ export function Auth({ authLogs = [] }: AuthProps) {
             </div>
             <Button
               type="submit"
-              className="w-full h-11 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-semibold shadow-lg shadow-fuchsia-200 dark:shadow-none transition-all active:scale-[0.98]"
+              className="w-full h-11 bg-gradient-accent text-white font-semibold shadow-glow transition-all duration-300 hover:brightness-110 hover:shadow-[0_16px_50px_-12px_oklch(0.66_0.27_332_/_0.6)] active:scale-[0.98]"
               disabled={loading || conn === "error"}
             >
               {loading ? (

@@ -153,44 +153,45 @@ function Dashboard() {
     <DashboardLayout>
       <div className="flex flex-col gap-8">
         {isAdmin && (
-          <div className="flex gap-2 border-b pb-4 overflow-x-auto custom-scrollbar whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex gap-2 border-b border-border/60 pb-4 overflow-x-auto custom-scrollbar whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
             <Button 
               variant={activeTab === "overview" ? "default" : "ghost"} 
               onClick={() => setActiveTab("overview")}
-              className={cn("shrink-0", activeTab === "overview" ? "bg-fuchsia-600" : "")}
+              className={cn("shrink-0 transition-all", activeTab === "overview" ? "bg-gradient-accent text-white shadow-soft" : "")}
             >
               Visão Geral
             </Button>
             <Button 
               variant={activeTab === "users" ? "default" : "ghost"} 
               onClick={() => setActiveTab("users")}
-              className={cn("shrink-0", activeTab === "users" ? "bg-fuchsia-600" : "")}
+              className={cn("shrink-0 transition-all", activeTab === "users" ? "bg-gradient-accent text-white shadow-soft" : "")}
             >
               Gestão de Clientes
             </Button>
             <Button 
               variant={activeTab === "reels" ? "default" : "ghost"} 
               onClick={() => setActiveTab("reels")}
-              className={cn("shrink-0", activeTab === "reels" ? "bg-fuchsia-600" : "")}
+              className={cn("shrink-0 transition-all", activeTab === "reels" ? "bg-gradient-accent text-white shadow-soft" : "")}
             >
               Roteiro de Reels
             </Button>
             <Button 
               variant={activeTab === "vault" ? "default" : "ghost"} 
               onClick={() => setActiveTab("vault")}
-              className={cn("shrink-0", activeTab === "vault" ? "bg-fuchsia-600" : "")}
+              className={cn("shrink-0 transition-all", activeTab === "vault" ? "bg-gradient-accent text-white shadow-soft" : "")}
             >
               Cofre
             </Button>
             <Button 
               variant={activeTab === "profile" ? "default" : "ghost"} 
               onClick={() => setActiveTab("profile")}
-              className={cn("shrink-0", activeTab === "profile" ? "bg-fuchsia-600" : "")}
+              className={cn("shrink-0 transition-all", activeTab === "profile" ? "bg-gradient-accent text-white shadow-soft" : "")}
             >
               Meu Perfil
             </Button>
           </div>
         )}
+
 
         {activeTab === "profile" ? (
           <UserProfile />
@@ -202,14 +203,14 @@ function Dashboard() {
           <UserManager />
         ) : (
           <>
-            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between animate-rise">
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Dashboard de Performance</h1>
-                <p className="text-sm md:text-base text-slate-500 mt-1">Gestão de Tráfego Pago e Métricas de Conversão.</p>
+                <h1 className="font-display text-3xl md:text-4xl font-bold tracking-tight text-foreground">Dashboard de <span className="text-gradient">Performance</span></h1>
+                <p className="text-sm md:text-base text-muted-foreground mt-1.5">Gestão de Tráfego Pago e Métricas de Conversão.</p>
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl border shadow-sm w-full sm:w-auto overflow-hidden">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase ml-2 shrink-0">Período</span>
+              <div className="flex items-center gap-2 glass-panel p-2 rounded-xl shadow-soft w-full sm:w-auto overflow-hidden">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase ml-2 shrink-0 tracking-wider">Período</span>
                   <div className="flex items-center gap-1 flex-1 min-w-0">
                     <Input 
                       type="date" 
@@ -231,13 +232,12 @@ function Dashboard() {
 
             {/* Metrics cards would only show values if there are relevant metrics */}
             {(isAdmin || permissions.can_view_charts) && (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 stagger-children">
                 <MetricCard 
                   title="Métricas Ativas" 
                   value={metrics.length} 
                   description="total no período"
                   icon={<BarChart2 className="h-4 w-4" />}
-                  className="border-none shadow-sm"
                 />
                 {/* Outros cartões seriam preenchidos dinamicamente baseados nas métricas inseridas */}
               </div>
@@ -262,14 +262,15 @@ function Dashboard() {
               
               {(isAdmin || permissions.can_view_insights) && (
                 <div className="lg:col-span-1">
-                  <Card className="h-full shadow-sm border-none bg-fuchsia-600 text-white overflow-hidden">
+                  <Card className="relative h-full shadow-glow border-none bg-gradient-accent text-white overflow-hidden card-lift">
                     <div className="p-6 relative z-10">
-                      <h3 className="text-lg font-semibold mb-2">Análise Estratégica</h3>
-                      <p className="text-fuchsia-100 text-sm leading-relaxed mb-6">
+                      <h3 className="font-display text-lg font-semibold mb-2">Análise Estratégica</h3>
+                      <p className="text-white/80 text-sm leading-relaxed mb-6">
                         O gestor adicionará aqui os insights baseados na performance real do período selecionado.
                       </p>
                     </div>
-                    <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-fuchsia-500/20 rounded-full blur-3xl"></div>
+                    <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-white/15 rounded-full blur-3xl"></div>
+                    <div className="absolute -top-16 -left-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                   </Card>
                 </div>
               )}

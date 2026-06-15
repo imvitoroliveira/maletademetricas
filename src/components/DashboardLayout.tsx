@@ -49,15 +49,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-white dark:bg-slate-900">
-      <div className="flex h-20 items-center px-6 border-b shrink-0">
+      <div className="flex h-20 items-center px-6 border-b border-border/60 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 shrink-0 rounded-xl overflow-hidden shadow-lg shadow-fuchsia-200 ring-2 ring-white">
+          <div className="h-10 w-10 shrink-0 rounded-xl overflow-hidden shadow-glow ring-2 ring-white/60 dark:ring-white/10">
             <img src={logo} alt="Maleta de Métricas" className="h-full w-full object-cover" />
           </div>
           {(isSidebarExpanded || isMobile) && (
             <div className="flex flex-col animate-in fade-in duration-300">
-              <span className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-50 leading-none">Maleta de Métricas</span>
-              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mt-1">Performance Pro</span>
+              <span className="font-display text-base font-bold tracking-tight text-foreground leading-none">Maleta de Métricas</span>
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.18em] mt-1">Performance Pro</span>
             </div>
           )}
         </div>
@@ -137,7 +137,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         !isMobile && (isSidebarExpanded ? "pl-64" : "pl-20")
       )}>
         {/* Responsive Header */}
-        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b bg-white/80 dark:bg-slate-900/80 px-4 md:px-8 backdrop-blur-xl shrink-0">
+        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-border/60 glass-panel px-4 md:px-8 shrink-0">
           <div className="flex items-center gap-4 flex-1">
             {isMobile && (
               <Button variant="ghost" size="icon" className="h-10 w-10 -ml-2" onClick={() => setIsSheetOpen(true)}>
