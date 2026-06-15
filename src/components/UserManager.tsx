@@ -55,6 +55,10 @@ export function UserManager() {
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  // The actual permission is enforced server-side in the admin-delete-user function.
+  // Optionally restrict the UI to a configured master email (no hardcoded identity).
+  const masterEmail = import.meta.env.VITE_MASTER_ADMIN_EMAIL as string | undefined;
+  const canDeleteUsers = masterEmail ? currentUserEmail === masterEmail : !!currentUserEmail;
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newEmail, setNewEmail] = useState("");
