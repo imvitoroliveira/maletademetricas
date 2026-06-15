@@ -131,7 +131,7 @@ export function UserManager() {
           access_token: newAccountAccessToken,
           app_secret: newAccountAppSecret
         })
-        .select()
+        .select("id, name, account_id, created_at, updated_at")
         .single();
 
       if (error) throw error;
