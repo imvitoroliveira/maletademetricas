@@ -68,19 +68,21 @@ export function ReconciliationReport() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">Relatório de Reconciliação</h2>
-          <p className="text-slate-500">Validação de paridade entre Meta Ads API e Dados do App.</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50">Relatório de Reconciliação</h2>
+          <p className="text-sm text-slate-500">Validação de paridade entre Meta Ads API e Dados do App.</p>
         </div>
-        <Button onClick={fetchReconciliationData} variant="outline" className="gap-2">
+        <Button onClick={fetchReconciliationData} variant="outline" className="gap-2 w-full sm:w-auto shrink-0 min-h-11">
           <RefreshCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           Atualizar
         </Button>
       </div>
 
+      {/* Data Table → container com scroll horizontal controlado em telas pequenas */}
       <Card className="border-none shadow-sm overflow-hidden">
-        <Table>
+        <div className="w-full overflow-x-auto custom-scrollbar">
+          <Table className="min-w-[700px] lg:min-w-full">
           <TableHeader className="bg-slate-50/50">
             <TableRow>
               <TableHead>Conta / Data</TableHead>
