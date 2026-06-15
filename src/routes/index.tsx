@@ -203,14 +203,14 @@ function Dashboard() {
           <UserManager />
         ) : (
           <>
-            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between animate-rise">
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Dashboard de Performance</h1>
-                <p className="text-sm md:text-base text-slate-500 mt-1">Gestão de Tráfego Pago e Métricas de Conversão.</p>
+                <h1 className="font-display text-3xl md:text-4xl font-bold tracking-tight text-foreground">Dashboard de <span className="text-gradient">Performance</span></h1>
+                <p className="text-sm md:text-base text-muted-foreground mt-1.5">Gestão de Tráfego Pago e Métricas de Conversão.</p>
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl border shadow-sm w-full sm:w-auto overflow-hidden">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase ml-2 shrink-0">Período</span>
+              <div className="flex items-center gap-2 glass-panel p-2 rounded-xl shadow-soft w-full sm:w-auto overflow-hidden">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase ml-2 shrink-0 tracking-wider">Período</span>
                   <div className="flex items-center gap-1 flex-1 min-w-0">
                     <Input 
                       type="date" 
