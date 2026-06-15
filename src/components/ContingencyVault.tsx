@@ -475,15 +475,30 @@ export function ContingencyVault() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2 text-xs text-slate-600">
-                        <User className="h-3 w-3 text-slate-400" />
-                        <span className="font-mono">{item.credentials?.login || "---"}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-slate-600">
-                        <Key className="h-3 w-3 text-slate-400" />
-                        <span className="font-mono">{(item.credentials as any)?.password || "---"}</span>
-                      </div>
+                    <div className="flex flex-col gap-1.5 min-w-[220px]">
+                      {[
+                        { label: "Login", user: item.credentials?.login, pass: item.credentials?.password },
+                        { label: "E-mail primário", user: item.credentials?.primary_email, pass: item.credentials?.primary_email_password },
+                        { label: "E-mail secundário", user: item.credentials?.secondary_email, pass: item.credentials?.secondary_email_password },
+                        { label: "Facebook", user: item.credentials?.facebook_email, pass: item.credentials?.facebook_password },
+                        { label: "X", user: item.credentials?.x_user, pass: item.credentials?.x_password },
+                        { label: "Instagram", user: item.credentials?.instagram_user, pass: item.credentials?.instagram_password },
+                      ].filter(c => c.user || c.pass).map((c) => (
+                        <div key={c.label} className="text-xs">
+                          <span className="text-[10px] font-bold uppercase text-slate-400">{c.label}</span>
+                          <div className="flex items-center gap-2 text-slate-600">
+                            <User className="h-3 w-3 text-slate-400" />
+                            <span className="font-mono">{c.user || "---"}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-slate-600">
+                            <Key className="h-3 w-3 text-slate-400" />
+                            <span className="font-mono">{c.pass || "---"}</span>
+                          </div>
+                        </div>
+                      ))}
+                      {!(item.credentials?.login || item.credentials?.password || item.credentials?.primary_email || item.credentials?.facebook_email || item.credentials?.x_user || item.credentials?.instagram_user) && (
+                        <span className="text-xs text-slate-400">Sem credenciais</span>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
