@@ -213,7 +213,7 @@ export function Auth({ authLogs = [] }: AuthProps) {
             </div>
             <Button
               type="submit"
-              className="w-full h-11 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-semibold shadow-lg shadow-fuchsia-200 dark:shadow-none transition-all active:scale-[0.98]"
+              className="w-full h-11 bg-gradient-accent text-white font-semibold shadow-glow transition-all duration-300 hover:brightness-110 hover:shadow-[0_16px_50px_-12px_oklch(0.66_0.27_332_/_0.6)] active:scale-[0.98]"
               disabled={loading || conn === "error"}
             >
               {loading ? (
