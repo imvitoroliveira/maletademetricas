@@ -49,15 +49,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-white dark:bg-slate-900">
-      <div className="flex h-20 items-center px-6 border-b shrink-0">
+      <div className="flex h-20 items-center px-6 border-b border-border/60 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 shrink-0 rounded-xl overflow-hidden shadow-lg shadow-fuchsia-200 ring-2 ring-white">
+          <div className="h-10 w-10 shrink-0 rounded-xl overflow-hidden shadow-glow ring-2 ring-white/60 dark:ring-white/10">
             <img src={logo} alt="Maleta de Métricas" className="h-full w-full object-cover" />
           </div>
           {(isSidebarExpanded || isMobile) && (
             <div className="flex flex-col animate-in fade-in duration-300">
-              <span className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-50 leading-none">Maleta de Métricas</span>
-              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mt-1">Performance Pro</span>
+              <span className="font-display text-base font-bold tracking-tight text-foreground leading-none">Maleta de Métricas</span>
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.18em] mt-1">Performance Pro</span>
             </div>
           )}
         </div>
