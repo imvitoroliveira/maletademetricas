@@ -60,7 +60,10 @@ export function ManualMetrics({ startDate, endDate }: { startDate?: string, endD
   const { data: adAccounts = [] } = useQuery({
     queryKey: ['ad_accounts'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('ad_accounts').select('*').order('name');
+      const { data, error } = await supabase
+        .from('ad_accounts')
+        .select('id, name, account_id, platform, created_at, updated_at')
+        .order('name');
       if (error) throw error;
       return data || [];
     }
