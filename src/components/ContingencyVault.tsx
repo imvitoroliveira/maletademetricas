@@ -13,7 +13,8 @@ import {
   X,
   Check,
   Eye,
-  EyeOff
+  EyeOff,
+  Pencil
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -45,6 +46,7 @@ export function ContingencyVault() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -122,6 +124,22 @@ export function ContingencyVault() {
     enabled: isAuthenticated
   });
 
+  const resetForm = () => {
+    setNewProfile({ name: "", access_url: "", credentials: { ...emptyCredentials }, notes: "" });
+    setEditingId(null);
+  };
+
+  const openEdit = (item: any) => {
+    setEditingId(item.id);
+    setNewProfile({
+      name: item.name ?? "",
+      access_url: item.access_url ?? "",
+      credentials: { ...emptyCredentials, ...(item.credentials ?? {}) },
+      notes: item.notes ?? "",
+    });
+    setIsAdding(true);
+  };
+
   const addMutation = useMutation({
     mutationFn: async (profileData: any) => {
       const { data, error } = await supabase
@@ -135,10 +153,30 @@ export function ContingencyVault() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contingency_vault"] });
       setIsAdding(false);
-      setNewProfile({ name: "", access_url: "", credentials: { ...emptyCredentials }, notes: "" });
+      resetForm();
       toast.success("Perfil de contingência adicionado.");
     },
     onError: (err: any) => toast.error("Erro ao adicionar: " + err.message)
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...profileData }: any) => {
+      const { data, error } = await supabase
+        .from("contingency_vault")
+        .update(profileData)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contingency_vault"] });
+      setIsAdding(false);
+      resetForm();
+      toast.success("Perfil atualizado com sucesso.");
+    },
+    onError: (err: any) => toast.error("Erro ao atualizar: " + err.message)
   });
 
   const deleteMutation = useMutation({
@@ -222,16 +260,16 @@ export function ContingencyVault() {
           <p className="text-slate-500">Armazene e gerencie perfis críticos para manter sua estrutura ativa.</p>
         </div>
         
-        <Dialog open={isAdding} onOpenChange={setIsAdding}>
+        <Dialog open={isAdding} onOpenChange={(open) => { setIsAdding(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="gap-2 bg-fuchsia-600 hover:bg-fuchsia-700 h-11">
+            <Button onClick={resetForm} className="gap-2 bg-fuchsia-600 hover:bg-fuchsia-700 h-11">
               <Plus className="h-4 w-4" />
               Novo Perfil
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar">
             <DialogHeader>
-              <DialogTitle>Adicionar Perfil ao Cofre</DialogTitle>
+              <DialogTitle>{editingId ? "Editar Perfil do Cofre" : "Adicionar Perfil ao Cofre"}</DialogTitle>
               <CardDescription>Insira as informações de acesso para contingência.</CardDescription>
             </DialogHeader>
             <div className="space-y-5 pt-4">
@@ -435,13 +473,14 @@ export function ContingencyVault() {
             </div>
             <DialogFooter className="pt-4">
               <Button 
-                onClick={() => addMutation.mutate(newProfile)} 
+                onClick={() => editingId ? updateMutation.mutate({ id: editingId, ...newProfile }) : addMutation.mutate(newProfile)} 
                 className="w-full bg-fuchsia-600"
-                disabled={!newProfile.name || addMutation.isPending}
+                disabled={!newProfile.name || addMutation.isPending || updateMutation.isPending}
               >
-                {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Salvar no Cofre"}
+                {(addMutation.isPending || updateMutation.isPending) ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : (editingId ? "Salvar Alterações" : "Salvar no Cofre")}
               </Button>
             </DialogFooter>
+
           </DialogContent>
         </Dialog>
       </div>
@@ -531,19 +570,30 @@ export function ContingencyVault() {
                     </p>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => {
-                        if (confirm("Deseja realmente remover este perfil?")) {
-                          deleteMutation.mutate(item.id);
-                        }
-                      }}
-                      className="text-slate-400 hover:text-rose-500 transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => openEdit(item)}
+                        className="text-slate-400 hover:text-fuchsia-600 transition-colors"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => {
+                          if (confirm("Deseja realmente remover este perfil?")) {
+                            deleteMutation.mutate(item.id);
+                          }
+                        }}
+                        className="text-slate-400 hover:text-rose-500 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
+
                 </TableRow>
               ))}
               {filteredVault.length === 0 && !isLoading && (
