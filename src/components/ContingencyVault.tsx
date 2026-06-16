@@ -124,6 +124,22 @@ export function ContingencyVault() {
     enabled: isAuthenticated
   });
 
+  const resetForm = () => {
+    setNewProfile({ name: "", access_url: "", credentials: { ...emptyCredentials }, notes: "" });
+    setEditingId(null);
+  };
+
+  const openEdit = (item: any) => {
+    setEditingId(item.id);
+    setNewProfile({
+      name: item.name ?? "",
+      access_url: item.access_url ?? "",
+      credentials: { ...emptyCredentials, ...(item.credentials ?? {}) },
+      notes: item.notes ?? "",
+    });
+    setIsAdding(true);
+  };
+
   const addMutation = useMutation({
     mutationFn: async (profileData: any) => {
       const { data, error } = await supabase
@@ -137,10 +153,30 @@ export function ContingencyVault() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contingency_vault"] });
       setIsAdding(false);
-      setNewProfile({ name: "", access_url: "", credentials: { ...emptyCredentials }, notes: "" });
+      resetForm();
       toast.success("Perfil de contingência adicionado.");
     },
     onError: (err: any) => toast.error("Erro ao adicionar: " + err.message)
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...profileData }: any) => {
+      const { data, error } = await supabase
+        .from("contingency_vault")
+        .update(profileData)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contingency_vault"] });
+      setIsAdding(false);
+      resetForm();
+      toast.success("Perfil atualizado com sucesso.");
+    },
+    onError: (err: any) => toast.error("Erro ao atualizar: " + err.message)
   });
 
   const deleteMutation = useMutation({
