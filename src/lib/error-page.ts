@@ -1,7 +1,8 @@
-export function renderErrorPage(error?: any): string {
-  const errorMessage = error?.message || (typeof error === 'string' ? error : '');
-  const errorStack = error?.stack || '';
-  
+// NOTE: This page is sent to end users. It MUST NOT include raw error messages
+// or stack traces, which can leak internal file paths, dependency names, and
+// credential fragments (and could enable reflected XSS if interpolated unescaped).
+// Full error details are logged server-side only.
+export function renderErrorPage(_error?: unknown): string {
   return `<!doctype html>
 <html lang="en">
   <head>
