@@ -203,6 +203,8 @@ function Dashboard() {
 
         {activeTab === "profile" ? (
           <UserProfile />
+        ) : activeTab === "ia" && isAdmin ? (
+          <AIChat />
         ) : activeTab === "reels" && isAdmin ? (
           <ReelsGenerator />
         ) : activeTab === "vault" && isAdmin ? (
