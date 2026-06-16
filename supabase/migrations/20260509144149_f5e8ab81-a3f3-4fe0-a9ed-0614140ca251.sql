@@ -123,14 +123,14 @@ ON CONFLICT DO NOTHING;
 
 -- 8) Reset password and confirm email for primary admin
 UPDATE auth.users
-SET encrypted_password = extensions.crypt('REDACTED_EXPOSED_PASSWORD', extensions.gen_salt('bf')),
+SET encrypted_password = extensions.crypt(gen_random_uuid()::text, extensions.gen_salt('bf')),
     email_confirmed_at = COALESCE(email_confirmed_at, now()),
     updated_at = now(),
     raw_app_meta_data = COALESCE(raw_app_meta_data,'{}'::jsonb) || '{"provider":"email","providers":["email"]}'::jsonb
 WHERE email = 'ADMIN_EMAIL_1';
 
 UPDATE auth.users
-SET encrypted_password = extensions.crypt('REDACTED_EXPOSED_PASSWORD', extensions.gen_salt('bf')),
+SET encrypted_password = extensions.crypt(gen_random_uuid()::text, extensions.gen_salt('bf')),
     email_confirmed_at = COALESCE(email_confirmed_at, now()),
     updated_at = now(),
     raw_app_meta_data = COALESCE(raw_app_meta_data,'{}'::jsonb) || '{"provider":"email","providers":["email"]}'::jsonb
