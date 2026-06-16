@@ -1,6 +1,6 @@
 // Shared CORS helper: only allow the app's own origins (no wildcard "*").
 const ALLOWED_EXACT = ["https://maletademetricas.lovable.app"];
-const ALLOWED_SUFFIXES = [".lovable.app", ".lovable.dev"];
+const ALLOWED_SUFFIXES = [".lovable.app", ".lovable.dev", ".lovableproject.com"];
 const FALLBACK_ORIGIN = ALLOWED_EXACT[0];
 
 export function corsHeaders(req: Request): Record<string, string> {
