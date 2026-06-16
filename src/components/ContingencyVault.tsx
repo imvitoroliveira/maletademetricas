@@ -473,13 +473,14 @@ export function ContingencyVault() {
             </div>
             <DialogFooter className="pt-4">
               <Button 
-                onClick={() => addMutation.mutate(newProfile)} 
+                onClick={() => editingId ? updateMutation.mutate({ id: editingId, ...newProfile }) : addMutation.mutate(newProfile)} 
                 className="w-full bg-fuchsia-600"
-                disabled={!newProfile.name || addMutation.isPending}
+                disabled={!newProfile.name || addMutation.isPending || updateMutation.isPending}
               >
-                {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Salvar no Cofre"}
+                {(addMutation.isPending || updateMutation.isPending) ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : (editingId ? "Salvar Alterações" : "Salvar no Cofre")}
               </Button>
             </DialogFooter>
+
           </DialogContent>
         </Dialog>
       </div>
