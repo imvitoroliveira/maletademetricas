@@ -9,6 +9,7 @@ import { UserProfile } from "@/components/UserProfile";
 import { ContingencyVault } from "@/components/ContingencyVault";
 import { CampaignList } from "@/components/CampaignList";
 import { ReelsGenerator } from "@/components/ReelsGenerator";
+import { AIChat } from "@/components/AIChat";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { 
