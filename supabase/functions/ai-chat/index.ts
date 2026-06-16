@@ -149,13 +149,15 @@ serve(async (req) => {
     });
 
   try {
-    // Authenticate the caller.
+    // Authenticate the caller — pass the JWT explicitly (no persisted session in Deno).
+    const token = req.headers.get("Authorization")?.replace("Bearer ", "") ?? "";
+    if (!token) return json({ error: "Unauthorized" }, 401);
     const authClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } } },
+      { global: { headers: { Authorization: `Bearer ${token}` } } },
     );
-    const { data: { user }, error: authError } = await authClient.auth.getUser();
+    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
     if (authError || !user) return json({ error: "Unauthorized" }, 401);
 
     const { messages, system } = await req.json() as {
