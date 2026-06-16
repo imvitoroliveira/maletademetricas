@@ -9,7 +9,6 @@ import { UserProfile } from "@/components/UserProfile";
 import { ContingencyVault } from "@/components/ContingencyVault";
 import { CampaignList } from "@/components/CampaignList";
 import { ReelsGenerator } from "@/components/ReelsGenerator";
-import { AIChat } from "@/components/AIChat";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { 
@@ -177,13 +176,6 @@ function Dashboard() {
               Roteiro de Reels
             </Button>
             <Button 
-              variant={activeTab === "ia" ? "default" : "ghost"} 
-              onClick={() => setActiveTab("ia")}
-              className={cn("shrink-0 transition-all", activeTab === "ia" ? "bg-gradient-accent text-white shadow-soft" : "")}
-            >
-              I.A.
-            </Button>
-            <Button 
               variant={activeTab === "vault" ? "default" : "ghost"} 
               onClick={() => setActiveTab("vault")}
               className={cn("shrink-0 transition-all", activeTab === "vault" ? "bg-gradient-accent text-white shadow-soft" : "")}
@@ -203,8 +195,6 @@ function Dashboard() {
 
         {activeTab === "profile" ? (
           <UserProfile />
-        ) : activeTab === "ia" && isAdmin ? (
-          <AIChat />
         ) : activeTab === "reels" && isAdmin ? (
           <ReelsGenerator />
         ) : activeTab === "vault" && isAdmin ? (
