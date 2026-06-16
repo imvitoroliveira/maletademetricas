@@ -177,7 +177,7 @@ export function AIProviderKeys() {
               Nenhuma chave cadastrada. Só a Lovable AI será usada.
             </p>
           )}
-          {keys.map((k) => (
+          {keys.map((k: { id: string; label: string; provider: string; model: string; is_active: boolean; priority: number }) => (
             <div
               key={k.id}
               className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 dark:border-slate-800 p-3"
