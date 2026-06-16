@@ -111,12 +111,24 @@ export function AIChat() {
       ]);
       queryClient.invalidateQueries({ queryKey: ["ai_messages", convId] });
 
-      // Chama a I.A. (com rotação de chaves no servidor).
-      const { data, error } = await supabase.functions.invoke("ai-chat", {
-        body: { messages: [...history, { role: "user", content: text }] },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      // Chama a I.A. (com rotação de chaves no servidor) via fetch direto.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada. Faça login novamente.");
+
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ messages: [...history, { role: "user", content: text }] }),
+        },
+      );
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || data?.error) throw new Error(data?.error || `Erro ${resp.status}`);
 
       await supabase.from("ai_messages").insert([
         { conversation_id: convId, role: "assistant", content: data.text, model: data.model },
