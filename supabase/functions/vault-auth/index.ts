@@ -77,7 +77,11 @@ serve(async (req) => {
         return json({ error: "A nova senha deve ter ao menos 4 caracteres." }, 400);
       }
       if (configured) {
-        const ok = await verifyPassword(String(currentPassword ?? ""), profile.vault_password);
+        const stored = String(profile.vault_password);
+        const supplied = String(currentPassword ?? "");
+        const ok = stored.startsWith("pbkdf2$")
+          ? await verifyPassword(supplied, stored)
+          : supplied === stored;
         if (!ok) return json({ error: "A senha atual do cofre está incorreta." }, 403);
       }
       const hashed = await hashPassword(String(newPassword));
