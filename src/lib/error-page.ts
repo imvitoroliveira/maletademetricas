@@ -1,7 +1,8 @@
-export function renderErrorPage(error?: any): string {
-  const errorMessage = error?.message || (typeof error === 'string' ? error : '');
-  const errorStack = error?.stack || '';
-  
+// NOTE: This page is sent to end users. It MUST NOT include raw error messages
+// or stack traces, which can leak internal file paths, dependency names, and
+// credential fragments (and could enable reflected XSS if interpolated unescaped).
+// Full error details are logged server-side only.
+export function renderErrorPage(_error?: unknown): string {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -24,13 +25,8 @@ export function renderErrorPage(error?: any): string {
     <div class="card">
       <h1>This page didn't load</h1>
       <p>Something went wrong on our end. You can try refreshing or head back home.</p>
-      
-      ${errorMessage ? `
-        <div class="error-details">
-          <strong>Error:</strong> ${errorMessage}
-          ${errorStack ? `<br><br><strong>Stack:</strong><br>${errorStack}` : ''}
-        </div>
-      ` : ''}
+
+
 
       <div class="actions">
         <button class="primary" onclick="location.reload()">Try again</button>

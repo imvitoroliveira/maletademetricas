@@ -52,8 +52,13 @@ serve(async (req) => {
 
       if (profileError || !profile) return json({ error: "Usuário não encontrado." }, 404);
 
-      // NOTE: in production this token should be emailed, not returned in the body.
-      return json({ message: "Token de recuperação gerado com sucesso.", token: recoveryToken });
+      // The token is intentionally NOT returned in the response body. It must be
+      // delivered out-of-band (e.g. via email) so it acts as a real second factor.
+      // Returning it here would let a session-level attacker reset the vault password.
+      return json({
+        message:
+          "Se a conta existir, um token de recuperação foi enviado para o e-mail cadastrado.",
+      });
     }
 
     if (type === "reset") {
