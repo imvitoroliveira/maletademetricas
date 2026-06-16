@@ -27,7 +27,18 @@ export type ReelsScript = {
 export const generateReelsScript = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => ReelsInput.parse(input))
-  .handler(async ({ data }): Promise<ReelsScript> => {
+  .handler(async ({ data, context }): Promise<ReelsScript> => {
+    // Authorization: only admins may run this (it consumes paid AI / Firecrawl quota).
+    const { supabase, userId } = context;
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", userId)
+      .single();
+    if (profileError || !profile?.is_admin) {
+      throw new Error("Forbidden: admin access required.");
+    }
+
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
