@@ -260,16 +260,16 @@ export function ContingencyVault() {
           <p className="text-slate-500">Armazene e gerencie perfis críticos para manter sua estrutura ativa.</p>
         </div>
         
-        <Dialog open={isAdding} onOpenChange={setIsAdding}>
+        <Dialog open={isAdding} onOpenChange={(open) => { setIsAdding(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="gap-2 bg-fuchsia-600 hover:bg-fuchsia-700 h-11">
+            <Button onClick={resetForm} className="gap-2 bg-fuchsia-600 hover:bg-fuchsia-700 h-11">
               <Plus className="h-4 w-4" />
               Novo Perfil
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar">
             <DialogHeader>
-              <DialogTitle>Adicionar Perfil ao Cofre</DialogTitle>
+              <DialogTitle>{editingId ? "Editar Perfil do Cofre" : "Adicionar Perfil ao Cofre"}</DialogTitle>
               <CardDescription>Insira as informações de acesso para contingência.</CardDescription>
             </DialogHeader>
             <div className="space-y-5 pt-4">
