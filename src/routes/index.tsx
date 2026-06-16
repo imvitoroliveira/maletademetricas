@@ -177,6 +177,13 @@ function Dashboard() {
               Roteiro de Reels
             </Button>
             <Button 
+              variant={activeTab === "ia" ? "default" : "ghost"} 
+              onClick={() => setActiveTab("ia")}
+              className={cn("shrink-0 transition-all", activeTab === "ia" ? "bg-gradient-accent text-white shadow-soft" : "")}
+            >
+              I.A.
+            </Button>
+            <Button 
               variant={activeTab === "vault" ? "default" : "ghost"} 
               onClick={() => setActiveTab("vault")}
               className={cn("shrink-0 transition-all", activeTab === "vault" ? "bg-gradient-accent text-white shadow-soft" : "")}
