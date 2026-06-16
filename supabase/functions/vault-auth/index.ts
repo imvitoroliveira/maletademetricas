@@ -53,7 +53,22 @@ serve(async (req) => {
 
     if (action === "verify") {
       if (!configured) return json({ valid: false, configured: false });
-      const valid = await verifyPassword(String(password ?? ""), profile.vault_password);
+      const stored = String(profile.vault_password);
+      const supplied = String(password ?? "");
+      const isHashed = stored.startsWith("pbkdf2$");
+
+      let valid: boolean;
+      if (isHashed) {
+        valid = await verifyPassword(supplied, stored);
+      } else {
+        // Legacy plaintext value (set directly in DB). Compare directly and,
+        // on success, upgrade it to a secure hash transparently.
+        valid = supplied === stored;
+        if (valid) {
+          const upgraded = await hashPassword(supplied);
+          await admin.from("profiles").update({ vault_password: upgraded }).eq("id", user.id);
+        }
+      }
       return json({ valid, configured: true });
     }
 
@@ -62,7 +77,11 @@ serve(async (req) => {
         return json({ error: "A nova senha deve ter ao menos 4 caracteres." }, 400);
       }
       if (configured) {
-        const ok = await verifyPassword(String(currentPassword ?? ""), profile.vault_password);
+        const stored = String(profile.vault_password);
+        const supplied = String(currentPassword ?? "");
+        const ok = stored.startsWith("pbkdf2$")
+          ? await verifyPassword(supplied, stored)
+          : supplied === stored;
         if (!ok) return json({ error: "A senha atual do cofre está incorreta." }, 403);
       }
       const hashed = await hashPassword(String(newPassword));
