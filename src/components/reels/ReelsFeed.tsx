@@ -116,7 +116,7 @@ export function ReelsFeed() {
             </div>
 
             <div className="space-y-2">
-              {s.scenes.map((sc, i) => (
+              {(Array.isArray(s.scenes) ? s.scenes : []).map((sc, i) => (
                 <div key={i} className="rounded-lg border p-2.5 text-sm">
                   <Badge variant="outline" className="mb-1.5">
                     {sc.time}
