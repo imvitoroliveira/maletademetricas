@@ -30,15 +30,6 @@ export type ReelsScriptRow = {
   created_at: string;
 };
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data: profile, error } = await context.supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", context.userId)
-    .single();
-  if (error || !profile?.is_admin) throw new Error("Forbidden: admin access required.");
-}
-
 /** Lista os canais de referência do usuário. */
 export const listReferenceChannels = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -58,7 +49,6 @@ export const addReferenceChannel = createServerFn({ method: "POST" })
     z.object({ channel: z.string().min(2).max(300) }).parse(input),
   )
   .handler(async ({ data, context }): Promise<ReferenceChannel> => {
-    await assertAdmin(context);
     const { resolveChannel } = await import("@/lib/youtube.server");
     const resolved = await resolveChannel(data.channel.trim());
 
@@ -149,7 +139,6 @@ export const deleteReelsScript = createServerFn({ method: "POST" })
 export const generateReelsNow = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ created: number; errors: number }> => {
-    await assertAdmin(context);
     const { data: channels, error } = await context.supabase
       .from("reels_reference_channels")
       .select("id, user_id, channel_input, channel_id, channel_name")
