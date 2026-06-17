@@ -150,7 +150,7 @@ function Dashboard() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout activeTab={activeTab} onTabChange={setActiveTab}>
       <div className="flex flex-col gap-8">
         {isAdmin && (
           <div className="flex gap-2 border-b border-border/60 pb-4 overflow-x-auto custom-scrollbar whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">

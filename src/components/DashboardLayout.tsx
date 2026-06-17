@@ -1,12 +1,13 @@
 
 import * as React from "react";
-import { Link } from "@tanstack/react-router";
 import { 
   LayoutDashboard, 
-  Search,
+  Users,
+  Clapperboard,
+  ShieldCheck,
+  UserCircle,
   Bell,
   Menu,
-  X,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -15,9 +16,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -26,6 +26,8 @@ import logo from "@/assets/logo.jpg";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
 /**
@@ -35,17 +37,25 @@ interface DashboardLayoutProps {
  * - Mobile: Sidebar transformada em Drawer (Sheet) para maximizar área útil.
  * Targets de toque otimizados (mínimo 44px).
  */
-export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { profile, isAdmin, signOut, authLogs } = useAuth();
+export function DashboardLayout({ children, activeTab = "overview", onTabChange }: DashboardLayoutProps) {
+  const { profile, isAdmin, signOut } = useAuth();
   const isMobile = useIsMobile();
   const { isDark, toggleTheme } = useTheme();
   const [isSidebarExpanded, setIsSidebarExpanded] = React.useState(true);
-  const [showLogs, setShowLogs] = React.useState(false);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  ];
+    { id: "overview", name: "Visão Geral", icon: LayoutDashboard, adminOnly: false },
+    { id: "users", name: "Gestão de Clientes", icon: Users, adminOnly: true },
+    { id: "reels", name: "Roteiro de Reels", icon: Clapperboard, adminOnly: true },
+    { id: "vault", name: "Cofre", icon: ShieldCheck, adminOnly: true },
+    { id: "profile", name: "Meu Perfil", icon: UserCircle, adminOnly: false },
+  ].filter((item) => isAdmin || !item.adminOnly);
+
+  const handleNavigate = (tab: string) => {
+    onTabChange?.(tab);
+    if (isMobile) setIsSheetOpen(false);
+  };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-white dark:bg-slate-900">
@@ -64,20 +74,25 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       <nav className="flex-1 mt-6 px-3 space-y-1 overflow-y-auto custom-scrollbar">
-        {navigation.map((item) => (
-          <Link
-            key={item.name}
-            to={item.href}
-            onClick={() => isMobile && setIsSheetOpen(false)}
-            className={cn(
-              "group flex items-center rounded-lg px-3 h-11 text-sm font-medium transition-all",
-              "text-slate-600 hover:bg-fuchsia-50 hover:text-fuchsia-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
-            )}
-          >
-            <item.icon className={cn("h-5 w-5 shrink-0", (isSidebarExpanded || isMobile) ? "mr-3" : "mx-auto")} />
-            {(isSidebarExpanded || isMobile) && <span>{item.name}</span>}
-          </Link>
-        ))}
+        {navigation.map((item) => {
+          const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleNavigate(item.id)}
+              className={cn(
+                "group flex w-full items-center rounded-lg px-3 h-11 text-sm font-medium transition-all",
+                isActive
+                  ? "bg-fuchsia-50 text-fuchsia-600 dark:bg-slate-800 dark:text-fuchsia-400"
+                  : "text-slate-600 hover:bg-fuchsia-50 hover:text-fuchsia-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
+              )}
+            >
+              <item.icon className={cn("h-5 w-5 shrink-0", (isSidebarExpanded || isMobile) ? "mr-3" : "mx-auto")} />
+              {(isSidebarExpanded || isMobile) && <span>{item.name}</span>}
+            </button>
+          );
+        })}
       </nav>
       
       <div className="p-4 border-t space-y-2">
@@ -144,14 +159,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Menu className="h-6 w-6 text-slate-600" />
               </Button>
             )}
-            <div className="relative group flex-1 max-w-sm hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-fuchsia-500 transition-colors" />
-              <Input 
-                type="search" 
-                placeholder="Pesquisar..." 
-                className="pl-10 bg-slate-100/50 border-none h-10 focus-visible:ring-1 focus-visible:ring-fuchsia-500"
-              />
-            </div>
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
@@ -169,10 +176,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               variant="ghost" 
               size="icon" 
               className="h-10 w-10 text-slate-400 hover:text-fuchsia-600"
-              onClick={() => setShowLogs(!showLogs)}
+              aria-label="Notificações"
             >
-              <Search className="h-5 w-5 sm:hidden" /> {/* Mobile search toggle icon would go here, using Search as placeholder */}
-              <Bell className="h-5 w-5 hidden sm:block" />
+              <Bell className="h-5 w-5" />
             </Button>
             
             <div className="flex items-center gap-3 pl-2 md:pl-4 border-l">
@@ -190,23 +196,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Dynamic Content Area */}
         <div className="p-4 md:p-8 flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden min-w-0">
-          {showLogs && (
-            <div className="mb-6 p-4 bg-slate-900 text-slate-50 rounded-xl text-xs font-mono border-l-4 border-fuchsia-500 shadow-2xl animate-in slide-in-from-top duration-300">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-bold text-fuchsia-400 uppercase tracking-widest">Painel de Diagnóstico</span>
-                <Button variant="ghost" size="sm" className="h-7 text-[10px] hover:bg-slate-800" onClick={() => setShowLogs(false)}>Fechar</Button>
-              </div>
-              <div className="space-y-1 max-h-40 overflow-y-auto custom-scrollbar">
-                {authLogs.length === 0 && <p className="text-slate-500 italic">Aguardando telemetria...</p>}
-                {authLogs.map((log, i) => (
-                  <div key={i} className="flex gap-3 py-1 border-b border-slate-800/50 last:border-0">
-                    <span className="text-slate-600 shrink-0">[{log.timestamp}]</span>
-                    <span className="break-words">{log.event}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
             {children}
           </div>
