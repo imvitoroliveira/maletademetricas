@@ -26,10 +26,11 @@ export function ReelsChannels() {
   const runDelete = useServerFn(deleteReferenceChannel);
   const runGenerate = useServerFn(generateReelsNow);
 
-  const { data: channels = [], isLoading } = useQuery<ReferenceChannel[]>({
+  const { data, isLoading } = useQuery<ReferenceChannel[]>({
     queryKey: ["reels-channels"],
     queryFn: () => runList(),
   });
+  const channels = Array.isArray(data) ? data : [];
 
   const addMutation = useMutation({
     mutationFn: () => runAdd({ data: { channel } }),

@@ -143,10 +143,10 @@ function ManualGenerator() {
               onClick={() =>
                 copy(
                   `${script.title}\n\nGancho: ${script.hook}\n\n` +
-                    script.scenes
+                    (Array.isArray(script.scenes) ? script.scenes : [])
                       .map((s) => `[${s.time}] ${s.visual}\nFala: ${s.speech}`)
                       .join("\n\n") +
-                    `\n\nCTA: ${script.cta}\n\nLegenda:\n${script.caption}\n\n${script.hashtags
+                    `\n\nCTA: ${script.cta}\n\nLegenda:\n${script.caption}\n\n${(Array.isArray(script.hashtags) ? script.hashtags : [])
                       .map((h) => `#${h}`)
                       .join(" ")}`,
                 )
@@ -180,7 +180,7 @@ function ManualGenerator() {
               </div>
               <div className="space-y-3">
                 <p className="text-xs font-bold uppercase text-slate-400">Cenas</p>
-                {script.scenes.map((s, i) => (
+                {(Array.isArray(script.scenes) ? script.scenes : []).map((s, i) => (
                   <div key={i} className="rounded-lg border p-3">
                     <Badge variant="secondary" className="mb-2">
                       {s.time}
@@ -205,7 +205,7 @@ function ManualGenerator() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {script.hashtags.map((h, i) => (
+                {(Array.isArray(script.hashtags) ? script.hashtags : []).map((h, i) => (
                   <Badge key={i} variant="outline">
                     #{h}
                   </Badge>

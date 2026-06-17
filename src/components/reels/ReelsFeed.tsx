@@ -13,11 +13,13 @@ import { Loader2, Copy, Trash2, Bookmark, Check, Eye, Clapperboard, ExternalLink
 import { toast } from "sonner";
 
 function scriptToText(s: ReelsScriptRow): string {
+  const scenes = Array.isArray(s.scenes) ? s.scenes : [];
+  const hashtags = Array.isArray(s.hashtags) ? s.hashtags : [];
   return (
     `${s.title}\n\nGancho: ${s.hook ?? ""}\n\n` +
-    s.scenes.map((sc) => `[${sc.time}] ${sc.visual}\nFala: ${sc.speech}`).join("\n\n") +
+    scenes.map((sc) => `[${sc.time}] ${sc.visual}\nFala: ${sc.speech}`).join("\n\n") +
     `\n\nCTA: ${s.cta ?? ""}\n\nLegenda:\n${s.caption ?? ""}\n\n` +
-    s.hashtags.map((h) => `#${h}`).join(" ")
+    hashtags.map((h) => `#${h}`).join(" ")
   );
 }
 
@@ -27,10 +29,11 @@ export function ReelsFeed() {
   const runStatus = useServerFn(updateReelsScriptStatus);
   const runDelete = useServerFn(deleteReelsScript);
 
-  const { data: scripts = [], isLoading } = useQuery<ReelsScriptRow[]>({
+  const { data, isLoading } = useQuery<ReelsScriptRow[]>({
     queryKey: ["reels-scripts"],
     queryFn: () => runList(),
   });
+  const scripts = Array.isArray(data) ? data : [];
 
   const statusMutation = useMutation({
     mutationFn: (v: { id: string; status: "new" | "saved" | "used" }) => runStatus({ data: v }),
@@ -113,7 +116,7 @@ export function ReelsFeed() {
             </div>
 
             <div className="space-y-2">
-              {s.scenes.map((sc, i) => (
+              {(Array.isArray(s.scenes) ? s.scenes : []).map((sc, i) => (
                 <div key={i} className="rounded-lg border p-2.5 text-sm">
                   <Badge variant="outline" className="mb-1.5">
                     {sc.time}
@@ -134,7 +137,7 @@ export function ReelsFeed() {
               </p>
             )}
 
-            {s.hashtags.length > 0 && (
+            {Array.isArray(s.hashtags) && s.hashtags.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {s.hashtags.map((h, i) => (
                   <Badge key={i} variant="outline" className="text-[10px]">
