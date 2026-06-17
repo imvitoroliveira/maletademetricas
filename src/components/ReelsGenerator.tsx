@@ -143,10 +143,10 @@ function ManualGenerator() {
               onClick={() =>
                 copy(
                   `${script.title}\n\nGancho: ${script.hook}\n\n` +
-                    script.scenes
+                    (Array.isArray(script.scenes) ? script.scenes : [])
                       .map((s) => `[${s.time}] ${s.visual}\nFala: ${s.speech}`)
                       .join("\n\n") +
-                    `\n\nCTA: ${script.cta}\n\nLegenda:\n${script.caption}\n\n${script.hashtags
+                    `\n\nCTA: ${script.cta}\n\nLegenda:\n${script.caption}\n\n${(Array.isArray(script.hashtags) ? script.hashtags : [])
                       .map((h) => `#${h}`)
                       .join(" ")}`,
                 )
