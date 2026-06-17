@@ -205,7 +205,7 @@ function ManualGenerator() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {script.hashtags.map((h, i) => (
+                {(Array.isArray(script.hashtags) ? script.hashtags : []).map((h, i) => (
                   <Badge key={i} variant="outline">
                     #{h}
                   </Badge>
