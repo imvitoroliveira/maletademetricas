@@ -13,11 +13,13 @@ import { Loader2, Copy, Trash2, Bookmark, Check, Eye, Clapperboard, ExternalLink
 import { toast } from "sonner";
 
 function scriptToText(s: ReelsScriptRow): string {
+  const scenes = Array.isArray(s.scenes) ? s.scenes : [];
+  const hashtags = Array.isArray(s.hashtags) ? s.hashtags : [];
   return (
     `${s.title}\n\nGancho: ${s.hook ?? ""}\n\n` +
-    s.scenes.map((sc) => `[${sc.time}] ${sc.visual}\nFala: ${sc.speech}`).join("\n\n") +
+    scenes.map((sc) => `[${sc.time}] ${sc.visual}\nFala: ${sc.speech}`).join("\n\n") +
     `\n\nCTA: ${s.cta ?? ""}\n\nLegenda:\n${s.caption ?? ""}\n\n` +
-    s.hashtags.map((h) => `#${h}`).join(" ")
+    hashtags.map((h) => `#${h}`).join(" ")
   );
 }
 
