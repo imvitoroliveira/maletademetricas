@@ -160,14 +160,6 @@ export function DashboardLayout({ children, activeTab = "overview", onTabChange 
                 <Menu className="h-6 w-6 text-slate-600" />
               </Button>
             )}
-            <div className="relative group flex-1 max-w-sm hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-fuchsia-500 transition-colors" />
-              <Input 
-                type="search" 
-                placeholder="Pesquisar..." 
-                className="pl-10 bg-slate-100/50 border-none h-10 focus-visible:ring-1 focus-visible:ring-fuchsia-500"
-              />
-            </div>
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
@@ -185,10 +177,9 @@ export function DashboardLayout({ children, activeTab = "overview", onTabChange 
               variant="ghost" 
               size="icon" 
               className="h-10 w-10 text-slate-400 hover:text-fuchsia-600"
-              onClick={() => setShowLogs(!showLogs)}
+              aria-label="Notificações"
             >
-              <Search className="h-5 w-5 sm:hidden" /> {/* Mobile search toggle icon would go here, using Search as placeholder */}
-              <Bell className="h-5 w-5 hidden sm:block" />
+              <Bell className="h-5 w-5" />
             </Button>
             
             <div className="flex items-center gap-3 pl-2 md:pl-4 border-l">
