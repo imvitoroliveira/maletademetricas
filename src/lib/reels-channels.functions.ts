@@ -49,7 +49,6 @@ export const addReferenceChannel = createServerFn({ method: "POST" })
     z.object({ channel: z.string().min(2).max(300) }).parse(input),
   )
   .handler(async ({ data, context }): Promise<ReferenceChannel> => {
-    await assertAdmin(context);
     const { resolveChannel } = await import("@/lib/youtube.server");
     const resolved = await resolveChannel(data.channel.trim());
 
