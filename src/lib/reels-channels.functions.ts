@@ -139,7 +139,6 @@ export const deleteReelsScript = createServerFn({ method: "POST" })
 export const generateReelsNow = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ created: number; errors: number }> => {
-    await assertAdmin(context);
     const { data: channels, error } = await context.supabase
       .from("reels_reference_channels")
       .select("id, user_id, channel_input, channel_id, channel_name")
