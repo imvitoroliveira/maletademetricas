@@ -13,7 +13,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Trash2, Youtube, Sparkles, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
