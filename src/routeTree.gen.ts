@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UpdatePasswordRouteImport } from './routes/update-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicHooksGenerateReelsRouteImport } from './routes/api/public/hooks/generate-reels'
 
 const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
   id: '/update-password',
@@ -28,35 +29,58 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksGenerateReelsRoute =
+  ApiPublicHooksGenerateReelsRouteImport.update({
+    id: '/api/public/hooks/generate-reels',
+    path: '/api/public/hooks/generate-reels',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/reset-password': typeof ResetPasswordRoute
   '/update-password': typeof UpdatePasswordRoute
+  '/api/public/hooks/generate-reels': typeof ApiPublicHooksGenerateReelsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/reset-password': typeof ResetPasswordRoute
   '/update-password': typeof UpdatePasswordRoute
+  '/api/public/hooks/generate-reels': typeof ApiPublicHooksGenerateReelsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/reset-password': typeof ResetPasswordRoute
   '/update-password': typeof UpdatePasswordRoute
+  '/api/public/hooks/generate-reels': typeof ApiPublicHooksGenerateReelsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/reset-password' | '/update-password'
+  fullPaths:
+    | '/'
+    | '/reset-password'
+    | '/update-password'
+    | '/api/public/hooks/generate-reels'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/reset-password' | '/update-password'
-  id: '__root__' | '/' | '/reset-password' | '/update-password'
+  to:
+    | '/'
+    | '/reset-password'
+    | '/update-password'
+    | '/api/public/hooks/generate-reels'
+  id:
+    | '__root__'
+    | '/'
+    | '/reset-password'
+    | '/update-password'
+    | '/api/public/hooks/generate-reels'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
+  ApiPublicHooksGenerateReelsRoute: typeof ApiPublicHooksGenerateReelsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +106,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/generate-reels': {
+      id: '/api/public/hooks/generate-reels'
+      path: '/api/public/hooks/generate-reels'
+      fullPath: '/api/public/hooks/generate-reels'
+      preLoaderRoute: typeof ApiPublicHooksGenerateReelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +120,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
+  ApiPublicHooksGenerateReelsRoute: ApiPublicHooksGenerateReelsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
