@@ -27,10 +27,11 @@ export function ReelsFeed() {
   const runStatus = useServerFn(updateReelsScriptStatus);
   const runDelete = useServerFn(deleteReelsScript);
 
-  const { data: scripts = [], isLoading } = useQuery<ReelsScriptRow[]>({
+  const { data, isLoading } = useQuery<ReelsScriptRow[]>({
     queryKey: ["reels-scripts"],
     queryFn: () => runList(),
   });
+  const scripts = Array.isArray(data) ? data : [];
 
   const statusMutation = useMutation({
     mutationFn: (v: { id: string; status: "new" | "saved" | "used" }) => runStatus({ data: v }),
