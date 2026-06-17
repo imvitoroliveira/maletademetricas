@@ -180,7 +180,7 @@ function ManualGenerator() {
               </div>
               <div className="space-y-3">
                 <p className="text-xs font-bold uppercase text-slate-400">Cenas</p>
-                {script.scenes.map((s, i) => (
+                {(Array.isArray(script.scenes) ? script.scenes : []).map((s, i) => (
                   <div key={i} className="rounded-lg border p-3">
                     <Badge variant="secondary" className="mb-2">
                       {s.time}
