@@ -1,12 +1,13 @@
 
 import * as React from "react";
-import { Link } from "@tanstack/react-router";
 import { 
   LayoutDashboard, 
-  Search,
+  Users,
+  Clapperboard,
+  ShieldCheck,
+  UserCircle,
   Bell,
   Menu,
-  X,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -15,9 +16,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -26,6 +26,8 @@ import logo from "@/assets/logo.jpg";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
 /**
