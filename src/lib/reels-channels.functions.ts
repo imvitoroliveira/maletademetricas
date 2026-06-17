@@ -30,15 +30,6 @@ export type ReelsScriptRow = {
   created_at: string;
 };
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data: profile, error } = await context.supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", context.userId)
-    .single();
-  if (error || !profile?.is_admin) throw new Error("Forbidden: admin access required.");
-}
-
 /** Lista os canais de referência do usuário. */
 export const listReferenceChannels = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
