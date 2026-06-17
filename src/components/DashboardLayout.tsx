@@ -37,8 +37,8 @@ interface DashboardLayoutProps {
  * - Mobile: Sidebar transformada em Drawer (Sheet) para maximizar área útil.
  * Targets de toque otimizados (mínimo 44px).
  */
-export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { profile, isAdmin, signOut, authLogs } = useAuth();
+export function DashboardLayout({ children, activeTab = "overview", onTabChange }: DashboardLayoutProps) {
+  const { profile, isAdmin, signOut } = useAuth();
   const isMobile = useIsMobile();
   const { isDark, toggleTheme } = useTheme();
   const [isSidebarExpanded, setIsSidebarExpanded] = React.useState(true);
@@ -46,8 +46,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  ];
+    { id: "overview", name: "Visão Geral", icon: LayoutDashboard, adminOnly: false },
+    { id: "users", name: "Gestão de Clientes", icon: Users, adminOnly: true },
+    { id: "reels", name: "Roteiro de Reels", icon: Clapperboard, adminOnly: true },
+    { id: "vault", name: "Cofre", icon: ShieldCheck, adminOnly: true },
+    { id: "profile", name: "Meu Perfil", icon: UserCircle, adminOnly: false },
+  ].filter((item) => isAdmin || !item.adminOnly);
+
+  const handleNavigate = (tab: string) => {
+    onTabChange?.(tab);
+    if (isMobile) setIsSheetOpen(false);
+  };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-white dark:bg-slate-900">
@@ -66,20 +75,25 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       <nav className="flex-1 mt-6 px-3 space-y-1 overflow-y-auto custom-scrollbar">
-        {navigation.map((item) => (
-          <Link
-            key={item.name}
-            to={item.href}
-            onClick={() => isMobile && setIsSheetOpen(false)}
-            className={cn(
-              "group flex items-center rounded-lg px-3 h-11 text-sm font-medium transition-all",
-              "text-slate-600 hover:bg-fuchsia-50 hover:text-fuchsia-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
-            )}
-          >
-            <item.icon className={cn("h-5 w-5 shrink-0", (isSidebarExpanded || isMobile) ? "mr-3" : "mx-auto")} />
-            {(isSidebarExpanded || isMobile) && <span>{item.name}</span>}
-          </Link>
-        ))}
+        {navigation.map((item) => {
+          const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleNavigate(item.id)}
+              className={cn(
+                "group flex w-full items-center rounded-lg px-3 h-11 text-sm font-medium transition-all",
+                isActive
+                  ? "bg-fuchsia-50 text-fuchsia-600 dark:bg-slate-800 dark:text-fuchsia-400"
+                  : "text-slate-600 hover:bg-fuchsia-50 hover:text-fuchsia-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
+              )}
+            >
+              <item.icon className={cn("h-5 w-5 shrink-0", (isSidebarExpanded || isMobile) ? "mr-3" : "mx-auto")} />
+              {(isSidebarExpanded || isMobile) && <span>{item.name}</span>}
+            </button>
+          );
+        })}
       </nav>
       
       <div className="p-4 border-t space-y-2">
