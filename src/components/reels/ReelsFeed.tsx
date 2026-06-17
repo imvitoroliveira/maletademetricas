@@ -137,7 +137,7 @@ export function ReelsFeed() {
               </p>
             )}
 
-            {s.hashtags.length > 0 && (
+            {Array.isArray(s.hashtags) && s.hashtags.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {s.hashtags.map((h, i) => (
                   <Badge key={i} variant="outline" className="text-[10px]">
