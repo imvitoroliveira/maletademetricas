@@ -197,23 +197,6 @@ export function DashboardLayout({ children, activeTab = "overview", onTabChange 
 
         {/* Dynamic Content Area */}
         <div className="p-4 md:p-8 flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden min-w-0">
-          {showLogs && (
-            <div className="mb-6 p-4 bg-slate-900 text-slate-50 rounded-xl text-xs font-mono border-l-4 border-fuchsia-500 shadow-2xl animate-in slide-in-from-top duration-300">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-bold text-fuchsia-400 uppercase tracking-widest">Painel de Diagnóstico</span>
-                <Button variant="ghost" size="sm" className="h-7 text-[10px] hover:bg-slate-800" onClick={() => setShowLogs(false)}>Fechar</Button>
-              </div>
-              <div className="space-y-1 max-h-40 overflow-y-auto custom-scrollbar">
-                {authLogs.length === 0 && <p className="text-slate-500 italic">Aguardando telemetria...</p>}
-                {authLogs.map((log, i) => (
-                  <div key={i} className="flex gap-3 py-1 border-b border-slate-800/50 last:border-0">
-                    <span className="text-slate-600 shrink-0">[{log.timestamp}]</span>
-                    <span className="break-words">{log.event}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
             {children}
           </div>
