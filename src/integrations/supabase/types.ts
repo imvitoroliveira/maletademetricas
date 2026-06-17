@@ -341,6 +341,116 @@ export type Database = {
         }
         Relationships: []
       }
+      reels_reference_channels: {
+        Row: {
+          channel_id: string | null
+          channel_input: string
+          channel_name: string | null
+          channel_url: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          last_checked_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel_id?: string | null
+          channel_input: string
+          channel_name?: string | null
+          channel_url?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_checked_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel_id?: string | null
+          channel_input?: string
+          channel_name?: string | null
+          channel_url?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_checked_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reels_scripts: {
+        Row: {
+          caption: string | null
+          channel_id: string | null
+          created_at: string
+          cta: string | null
+          hashtags: string[]
+          hook: string | null
+          id: string
+          scenes: Json
+          source_channel_name: string | null
+          source_video_id: string | null
+          source_video_title: string | null
+          source_video_url: string | null
+          source_views: number | null
+          status: string
+          theme: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          channel_id?: string | null
+          created_at?: string
+          cta?: string | null
+          hashtags?: string[]
+          hook?: string | null
+          id?: string
+          scenes?: Json
+          source_channel_name?: string | null
+          source_video_id?: string | null
+          source_video_title?: string | null
+          source_video_url?: string | null
+          source_views?: number | null
+          status?: string
+          theme?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          channel_id?: string | null
+          created_at?: string
+          cta?: string | null
+          hashtags?: string[]
+          hook?: string | null
+          id?: string
+          scenes?: Json
+          source_channel_name?: string | null
+          source_video_id?: string | null
+          source_video_title?: string | null
+          source_video_url?: string | null
+          source_views?: number | null
+          status?: string
+          theme?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reels_scripts_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "reels_reference_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
