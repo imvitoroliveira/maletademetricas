@@ -170,6 +170,13 @@ function Dashboard() {
               Gestão de Clientes
             </Button>
             <Button 
+              variant={activeTab === "accounts" ? "default" : "ghost"} 
+              onClick={() => setActiveTab("accounts")}
+              className={cn("shrink-0 transition-all", activeTab === "accounts" ? "bg-gradient-accent text-white shadow-soft" : "")}
+            >
+              Contas de Anúncio
+            </Button>
+            <Button 
               variant={activeTab === "reels" ? "default" : "ghost"} 
               onClick={() => setActiveTab("reels")}
               className={cn("shrink-0 transition-all", activeTab === "reels" ? "bg-gradient-accent text-white shadow-soft" : "")}
