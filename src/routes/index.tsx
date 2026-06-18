@@ -207,6 +207,8 @@ function Dashboard() {
           <ReelsGenerator />
         ) : activeTab === "vault" && isAdmin ? (
           <ContingencyVault />
+        ) : activeTab === "accounts" && isAdmin ? (
+          <AdAccountsManager />
         ) : activeTab === "users" && isAdmin ? (
           <UserManager />
         ) : (
