@@ -8,6 +8,7 @@ import { UserManager } from "@/components/UserManager";
 import { UserProfile } from "@/components/UserProfile";
 import { ContingencyVault } from "@/components/ContingencyVault";
 import { CampaignList } from "@/components/CampaignList";
+import { AdAccountsManager } from "@/components/AdAccountsManager";
 import { ReelsGenerator } from "@/components/ReelsGenerator";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
@@ -169,6 +170,13 @@ function Dashboard() {
               Gestão de Clientes
             </Button>
             <Button 
+              variant={activeTab === "accounts" ? "default" : "ghost"} 
+              onClick={() => setActiveTab("accounts")}
+              className={cn("shrink-0 transition-all", activeTab === "accounts" ? "bg-gradient-accent text-white shadow-soft" : "")}
+            >
+              Contas de Anúncio
+            </Button>
+            <Button 
               variant={activeTab === "reels" ? "default" : "ghost"} 
               onClick={() => setActiveTab("reels")}
               className={cn("shrink-0 transition-all", activeTab === "reels" ? "bg-gradient-accent text-white shadow-soft" : "")}
@@ -199,6 +207,8 @@ function Dashboard() {
           <ReelsGenerator />
         ) : activeTab === "vault" && isAdmin ? (
           <ContingencyVault />
+        ) : activeTab === "accounts" && isAdmin ? (
+          <AdAccountsManager />
         ) : activeTab === "users" && isAdmin ? (
           <UserManager />
         ) : (
