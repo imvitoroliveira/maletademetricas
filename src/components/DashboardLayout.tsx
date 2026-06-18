@@ -5,6 +5,7 @@ import {
   Users,
   Clapperboard,
   ShieldCheck,
+  Plug,
   UserCircle,
   Bell,
   Menu,
