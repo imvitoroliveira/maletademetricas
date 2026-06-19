@@ -382,15 +382,36 @@ export function AdAccountsManager() {
             accounts.map((acc) => (
               <div
                 key={acc.id}
-                className="flex items-center justify-between gap-3 rounded-lg border p-3"
+                className="flex items-start justify-between gap-3 rounded-lg border p-3"
               >
-                <div className="min-w-0">
+                <div className="min-w-0 space-y-1.5">
                   <p className="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate">
                     {acc.name}
                   </p>
                   <p className="text-[11px] text-slate-400 font-mono truncate">
                     {acc.account_id}
                   </p>
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <Badge
+                      variant="outline"
+                      className={
+                        STATUS_META[acc.status ?? "active"]?.className ??
+                        "bg-slate-50 text-slate-700 border-slate-200"
+                      }
+                    >
+                      {STATUS_META[acc.status ?? "active"]?.label ?? acc.status}
+                    </Badge>
+                    {acc.software && (
+                      <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200">
+                        {SOFTWARE_LABEL[acc.software] ?? acc.software}
+                      </Badge>
+                    )}
+                    {acc.birth_date && (
+                      <span className="text-[11px] text-slate-400">
+                        🎂 {new Date(acc.birth_date + "T00:00:00").toLocaleDateString("pt-BR")}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge
