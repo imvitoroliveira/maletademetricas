@@ -50,6 +50,26 @@ type TestResult = {
   account?: { name: string; status: string; currency: string | null };
 };
 
+const STATUS_META: Record<string, { label: string; className: string }> = {
+  active: {
+    label: "Ativo",
+    className: "bg-blue-50 text-blue-700 border-blue-200",
+  },
+  analysis: {
+    label: "Em análise",
+    className: "bg-amber-50 text-amber-700 border-amber-200",
+  },
+  banned: {
+    label: "Banido",
+    className: "bg-rose-50 text-rose-700 border-rose-200",
+  },
+};
+
+const SOFTWARE_LABEL: Record<string, string> = {
+  dolphin: "Dolphin",
+  incogniton: "Incogniton",
+};
+
 export function AdAccountsManager() {
   const queryClient = useQueryClient();
   const [name, setName] = React.useState("");
