@@ -21,6 +21,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -43,11 +50,34 @@ type TestResult = {
   account?: { name: string; status: string; currency: string | null };
 };
 
+const STATUS_META: Record<string, { label: string; className: string }> = {
+  active: {
+    label: "Ativo",
+    className: "bg-blue-50 text-blue-700 border-blue-200",
+  },
+  analysis: {
+    label: "Em análise",
+    className: "bg-amber-50 text-amber-700 border-amber-200",
+  },
+  banned: {
+    label: "Banido",
+    className: "bg-rose-50 text-rose-700 border-rose-200",
+  },
+};
+
+const SOFTWARE_LABEL: Record<string, string> = {
+  dolphin: "Dolphin",
+  incogniton: "Incogniton",
+};
+
 export function AdAccountsManager() {
   const queryClient = useQueryClient();
   const [name, setName] = React.useState("");
   const [accountId, setAccountId] = React.useState("");
   const [accessToken, setAccessToken] = React.useState("");
+  const [software, setSoftware] = React.useState("");
+  const [birthDate, setBirthDate] = React.useState("");
+  const [status, setStatus] = React.useState("active");
   const [testing, setTesting] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [testResult, setTestResult] = React.useState<TestResult | null>(null);
@@ -69,6 +99,9 @@ export function AdAccountsManager() {
     setName("");
     setAccountId("");
     setAccessToken("");
+    setSoftware("");
+    setBirthDate("");
+    setStatus("active");
     setTestResult(null);
   };
 
@@ -115,6 +148,9 @@ export function AdAccountsManager() {
         account_id: accountId.trim(),
         access_token: accessToken.trim(),
         platform: "meta",
+        software: software || null,
+        birth_date: birthDate || null,
+        status,
       });
       if (error) throw error;
       toast.success("Conta de anúncio cadastrada!");
@@ -219,6 +255,45 @@ export function AdAccountsManager() {
             />
           </div>
 
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="acc-software">Programa de criação</Label>
+              <Select value={software} onValueChange={setSoftware}>
+                <SelectTrigger id="acc-software">
+                  <SelectValue placeholder="Selecione o programa" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dolphin">Dolphin</SelectItem>
+                  <SelectItem value="incogniton">Incogniton</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="acc-birth">Data de nascimento do perfil</Label>
+              <Input
+                id="acc-birth"
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="acc-status">Status do perfil</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger id="acc-status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Ativo</SelectItem>
+                <SelectItem value="analysis">Em análise</SelectItem>
+                <SelectItem value="banned">Banido</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {testResult && (
             <div
               className={
@@ -307,15 +382,36 @@ export function AdAccountsManager() {
             accounts.map((acc) => (
               <div
                 key={acc.id}
-                className="flex items-center justify-between gap-3 rounded-lg border p-3"
+                className="flex items-start justify-between gap-3 rounded-lg border p-3"
               >
-                <div className="min-w-0">
+                <div className="min-w-0 space-y-1.5">
                   <p className="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate">
                     {acc.name}
                   </p>
                   <p className="text-[11px] text-slate-400 font-mono truncate">
                     {acc.account_id}
                   </p>
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <Badge
+                      variant="outline"
+                      className={
+                        STATUS_META[acc.status ?? "active"]?.className ??
+                        "bg-slate-50 text-slate-700 border-slate-200"
+                      }
+                    >
+                      {STATUS_META[acc.status ?? "active"]?.label ?? acc.status}
+                    </Badge>
+                    {acc.software && (
+                      <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200">
+                        {SOFTWARE_LABEL[acc.software] ?? acc.software}
+                      </Badge>
+                    )}
+                    {acc.birth_date && (
+                      <span className="text-[11px] text-slate-400">
+                        🎂 {new Date(acc.birth_date + "T00:00:00").toLocaleDateString("pt-BR")}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge
