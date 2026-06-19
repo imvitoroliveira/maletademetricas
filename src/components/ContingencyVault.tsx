@@ -39,8 +39,26 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+const STATUS_META: Record<string, { label: string; className: string }> = {
+  active: { label: "Ativo", className: "bg-blue-50 text-blue-700 border-blue-200" },
+  analysis: { label: "Em análise", className: "bg-amber-50 text-amber-700 border-amber-200" },
+  banned: { label: "Banido", className: "bg-rose-50 text-rose-700 border-rose-200" },
+};
+
+const SOFTWARE_LABEL: Record<string, string> = {
+  dolphin: "Dolphin",
+  incogniton: "Incogniton",
+};
 
 export function ContingencyVault() {
   const queryClient = useQueryClient();
