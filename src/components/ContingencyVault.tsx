@@ -129,7 +129,7 @@ export function ContingencyVault() {
   });
 
   const resetForm = () => {
-    setNewProfile({ name: "", access_url: "", credentials: { ...emptyCredentials }, notes: "" });
+    setNewProfile({ name: "", access_url: "", credentials: { ...emptyCredentials }, notes: "", status: "active", software: "", birth_date: "", profile_created_date: "" });
     setEditingId(null);
   };
 
@@ -140,6 +140,10 @@ export function ContingencyVault() {
       access_url: item.access_url ?? "",
       credentials: { ...emptyCredentials, ...(item.credentials ?? {}) },
       notes: item.notes ?? "",
+      status: item.status ?? "active",
+      software: item.software ?? "",
+      birth_date: item.birth_date ?? "",
+      profile_created_date: item.profile_created_date ?? "",
     });
     setIsAdding(true);
   };
