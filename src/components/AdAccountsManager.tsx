@@ -148,6 +148,9 @@ export function AdAccountsManager() {
         account_id: accountId.trim(),
         access_token: accessToken.trim(),
         platform: "meta",
+        software: software || null,
+        birth_date: birthDate || null,
+        status,
       });
       if (error) throw error;
       toast.success("Conta de anúncio cadastrada!");
