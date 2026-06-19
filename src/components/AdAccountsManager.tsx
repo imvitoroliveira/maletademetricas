@@ -75,6 +75,9 @@ export function AdAccountsManager() {
   const [name, setName] = React.useState("");
   const [accountId, setAccountId] = React.useState("");
   const [accessToken, setAccessToken] = React.useState("");
+  const [software, setSoftware] = React.useState("");
+  const [birthDate, setBirthDate] = React.useState("");
+  const [status, setStatus] = React.useState("active");
   const [testing, setTesting] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [testResult, setTestResult] = React.useState<TestResult | null>(null);
