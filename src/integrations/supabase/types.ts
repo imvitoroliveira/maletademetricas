@@ -19,30 +19,39 @@ export type Database = {
           access_token: string | null
           account_id: string
           app_secret: string | null
+          birth_date: string | null
           created_at: string
           id: string
           name: string
           platform: string | null
+          software: string | null
+          status: string
           updated_at: string
         }
         Insert: {
           access_token?: string | null
           account_id: string
           app_secret?: string | null
+          birth_date?: string | null
           created_at?: string
           id?: string
           name: string
           platform?: string | null
+          software?: string | null
+          status?: string
           updated_at?: string
         }
         Update: {
           access_token?: string | null
           account_id?: string
           app_secret?: string | null
+          birth_date?: string | null
           created_at?: string
           id?: string
           name?: string
           platform?: string | null
+          software?: string | null
+          status?: string
           updated_at?: string
         }
         Relationships: []
