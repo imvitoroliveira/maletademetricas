@@ -546,7 +546,16 @@ export function ContingencyVault() {
             </div>
             <DialogFooter className="pt-4">
               <Button 
-                onClick={() => editingId ? updateMutation.mutate({ id: editingId, ...newProfile }) : addMutation.mutate(newProfile)} 
+                onClick={() => {
+                  const payload = {
+                    ...newProfile,
+                    software: newProfile.software || null,
+                    birth_date: newProfile.birth_date || null,
+                    profile_created_date: newProfile.profile_created_date || null,
+                  };
+                  if (editingId) updateMutation.mutate({ id: editingId, ...payload });
+                  else addMutation.mutate(payload);
+                }}
                 className="w-full bg-fuchsia-600"
                 disabled={!newProfile.name || addMutation.isPending || updateMutation.isPending}
               >
