@@ -318,6 +318,52 @@ export function ContingencyVault() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
+                  <label className="text-sm font-medium">Programa</label>
+                  <Select value={newProfile.software} onValueChange={(v) => setNewProfile({ ...newProfile, software: v })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o programa" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="dolphin">Dolphin</SelectItem>
+                      <SelectItem value="incogniton">Incogniton</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Status</label>
+                  <Select value={newProfile.status} onValueChange={(v) => setNewProfile({ ...newProfile, status: v })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Ativo</SelectItem>
+                      <SelectItem value="analysis">Em análise</SelectItem>
+                      <SelectItem value="banned">Banido</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Data de nascimento</label>
+                  <Input
+                    type="date"
+                    value={newProfile.birth_date}
+                    onChange={e => setNewProfile({ ...newProfile, birth_date: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Data de criação do perfil</label>
+                  <Input
+                    type="date"
+                    value={newProfile.profile_created_date}
+                    onChange={e => setNewProfile({ ...newProfile, profile_created_date: e.target.value })}
+                  />
+                </div>
+              </div>
+
+                <div className="space-y-2">
                   <label className="text-sm font-medium">Login principal</label>
                   <Input 
                     placeholder="user@email.com" 
