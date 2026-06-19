@@ -99,6 +99,9 @@ export function AdAccountsManager() {
     setName("");
     setAccountId("");
     setAccessToken("");
+    setSoftware("");
+    setBirthDate("");
+    setStatus("active");
     setTestResult(null);
   };
 
