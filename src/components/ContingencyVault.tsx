@@ -39,8 +39,26 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+const STATUS_META: Record<string, { label: string; className: string }> = {
+  active: { label: "Ativo", className: "bg-blue-50 text-blue-700 border-blue-200" },
+  analysis: { label: "Em análise", className: "bg-amber-50 text-amber-700 border-amber-200" },
+  banned: { label: "Banido", className: "bg-rose-50 text-rose-700 border-rose-200" },
+};
+
+const SOFTWARE_LABEL: Record<string, string> = {
+  dolphin: "Dolphin",
+  incogniton: "Incogniton",
+};
 
 export function ContingencyVault() {
   const queryClient = useQueryClient();
@@ -84,7 +102,11 @@ export function ContingencyVault() {
     name: "",
     access_url: "",
     credentials: { ...emptyCredentials },
-    notes: ""
+    notes: "",
+    status: "active",
+    software: "",
+    birth_date: "",
+    profile_created_date: "",
   });
 
   const handleVaultAuth = async (e: React.FormEvent) => {
@@ -125,7 +147,7 @@ export function ContingencyVault() {
   });
 
   const resetForm = () => {
-    setNewProfile({ name: "", access_url: "", credentials: { ...emptyCredentials }, notes: "" });
+    setNewProfile({ name: "", access_url: "", credentials: { ...emptyCredentials }, notes: "", status: "active", software: "", birth_date: "", profile_created_date: "" });
     setEditingId(null);
   };
 
@@ -136,6 +158,10 @@ export function ContingencyVault() {
       access_url: item.access_url ?? "",
       credentials: { ...emptyCredentials, ...(item.credentials ?? {}) },
       notes: item.notes ?? "",
+      status: item.status ?? "active",
+      software: item.software ?? "",
+      birth_date: item.birth_date ?? "",
+      profile_created_date: item.profile_created_date ?? "",
     });
     setIsAdding(true);
   };
@@ -288,6 +314,53 @@ export function ContingencyVault() {
                   value={newProfile.access_url}
                   onChange={e => setNewProfile({...newProfile, access_url: e.target.value})}
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Programa</label>
+                  <Select value={newProfile.software} onValueChange={(v) => setNewProfile({ ...newProfile, software: v })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o programa" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="dolphin">Dolphin</SelectItem>
+                      <SelectItem value="incogniton">Incogniton</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Status</label>
+                  <Select value={newProfile.status} onValueChange={(v) => setNewProfile({ ...newProfile, status: v })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Ativo</SelectItem>
+                      <SelectItem value="analysis">Em análise</SelectItem>
+                      <SelectItem value="banned">Banido</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Data de nascimento</label>
+                  <Input
+                    type="date"
+                    value={newProfile.birth_date}
+                    onChange={e => setNewProfile({ ...newProfile, birth_date: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Data de criação do perfil</label>
+                  <Input
+                    type="date"
+                    value={newProfile.profile_created_date}
+                    onChange={e => setNewProfile({ ...newProfile, profile_created_date: e.target.value })}
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -473,7 +546,16 @@ export function ContingencyVault() {
             </div>
             <DialogFooter className="pt-4">
               <Button 
-                onClick={() => editingId ? updateMutation.mutate({ id: editingId, ...newProfile }) : addMutation.mutate(newProfile)} 
+                onClick={() => {
+                  const payload = {
+                    ...newProfile,
+                    software: newProfile.software || null,
+                    birth_date: newProfile.birth_date || null,
+                    profile_created_date: newProfile.profile_created_date || null,
+                  };
+                  if (editingId) updateMutation.mutate({ id: editingId, ...payload });
+                  else addMutation.mutate(payload);
+                }}
                 className="w-full bg-fuchsia-600"
                 disabled={!newProfile.name || addMutation.isPending || updateMutation.isPending}
               >
@@ -518,11 +600,32 @@ export function ContingencyVault() {
               ) : filteredVault.map((item: any) => (
                 <TableRow key={item.id} className="group hover:bg-slate-50/50 transition-colors">
                   <TableCell>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col gap-1.5">
                       <span className="font-bold text-slate-900 dark:text-slate-100">{item.name}</span>
-                      <span className="text-[10px] text-slate-400 font-mono uppercase mt-1">Status: {item.status}</span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Badge
+                          variant="outline"
+                          className={STATUS_META[item.status ?? "active"]?.className ?? "bg-slate-50 text-slate-700 border-slate-200"}
+                        >
+                          {STATUS_META[item.status ?? "active"]?.label ?? item.status}
+                        </Badge>
+                        {item.software && (
+                          <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200">
+                            {SOFTWARE_LABEL[item.software] ?? item.software}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-0.5 text-[10px] text-slate-400">
+                        {item.birth_date && (
+                          <span>🎂 Nasc.: {new Date(item.birth_date + "T00:00:00").toLocaleDateString("pt-BR")}</span>
+                        )}
+                        {item.profile_created_date && (
+                          <span>📅 Criação: {new Date(item.profile_created_date + "T00:00:00").toLocaleDateString("pt-BR")}</span>
+                        )}
+                      </div>
                     </div>
                   </TableCell>
+
                   <TableCell>
                     {item.access_url ? (
                       <a 

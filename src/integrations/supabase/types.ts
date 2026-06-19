@@ -159,31 +159,40 @@ export type Database = {
       contingency_vault: {
         Row: {
           access_url: string | null
+          birth_date: string | null
           created_at: string
           credentials: Json | null
           id: string
           name: string
           notes: string | null
+          profile_created_date: string | null
+          software: string | null
           status: string | null
           updated_at: string
         }
         Insert: {
           access_url?: string | null
+          birth_date?: string | null
           created_at?: string
           credentials?: Json | null
           id?: string
           name: string
           notes?: string | null
+          profile_created_date?: string | null
+          software?: string | null
           status?: string | null
           updated_at?: string
         }
         Update: {
           access_url?: string | null
+          birth_date?: string | null
           created_at?: string
           credentials?: Json | null
           id?: string
           name?: string
           notes?: string | null
+          profile_created_date?: string | null
+          software?: string | null
           status?: string | null
           updated_at?: string
         }
