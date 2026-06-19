@@ -84,7 +84,11 @@ export function ContingencyVault() {
     name: "",
     access_url: "",
     credentials: { ...emptyCredentials },
-    notes: ""
+    notes: "",
+    status: "active",
+    software: "",
+    birth_date: "",
+    profile_created_date: "",
   });
 
   const handleVaultAuth = async (e: React.FormEvent) => {
