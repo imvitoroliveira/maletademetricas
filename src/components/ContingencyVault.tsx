@@ -591,11 +591,32 @@ export function ContingencyVault() {
               ) : filteredVault.map((item: any) => (
                 <TableRow key={item.id} className="group hover:bg-slate-50/50 transition-colors">
                   <TableCell>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col gap-1.5">
                       <span className="font-bold text-slate-900 dark:text-slate-100">{item.name}</span>
-                      <span className="text-[10px] text-slate-400 font-mono uppercase mt-1">Status: {item.status}</span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Badge
+                          variant="outline"
+                          className={STATUS_META[item.status ?? "active"]?.className ?? "bg-slate-50 text-slate-700 border-slate-200"}
+                        >
+                          {STATUS_META[item.status ?? "active"]?.label ?? item.status}
+                        </Badge>
+                        {item.software && (
+                          <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200">
+                            {SOFTWARE_LABEL[item.software] ?? item.software}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-0.5 text-[10px] text-slate-400">
+                        {item.birth_date && (
+                          <span>🎂 Nasc.: {new Date(item.birth_date + "T00:00:00").toLocaleDateString("pt-BR")}</span>
+                        )}
+                        {item.profile_created_date && (
+                          <span>📅 Criação: {new Date(item.profile_created_date + "T00:00:00").toLocaleDateString("pt-BR")}</span>
+                        )}
+                      </div>
                     </div>
                   </TableCell>
+
                   <TableCell>
                     {item.access_url ? (
                       <a 
