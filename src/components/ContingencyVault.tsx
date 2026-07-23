@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, Loader2, Plus, Search, Shield, Users } from "lucide-react";
+import { FileText, Loader2, Plus, Search, Shield, Users, Wrench } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { vaultStatus } from "@/lib/vault.functions";
 import { Button } from "@/components/ui/button";
