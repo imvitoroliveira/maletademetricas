@@ -24,18 +24,16 @@ serve(async (req) => {
       })
     }
 
-    const { data: profile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single()
+    const { data: isAdmin, error: adminError } = await supabaseClient
+      .rpc('has_role', { _user_id: user.id, _role: 'admin' })
 
-    if (profileError || !profile?.is_admin) {
+    if (adminError || !isAdmin) {
       return new Response(JSON.stringify({ error: 'Forbidden: Admin access required' }), {
         status: 403,
         headers: { ...cors, 'Content-Type': 'application/json' },
       })
     }
+
 
     // Get request body
     const { email, password } = await req.json()
