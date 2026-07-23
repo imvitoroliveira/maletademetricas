@@ -49,6 +49,26 @@ export const addReferenceChannel = createServerFn({ method: "POST" })
     z.object({ channel: z.string().min(2).max(300) }).parse(input),
   )
   .handler(async ({ data, context }): Promise<ReferenceChannel> => {
+    // Enforce per-user channel cap before hitting YouTube API.
+    const [{ count }, { data: profile }] = await Promise.all([
+      context.supabase
+        .from("reels_reference_channels")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", context.userId)
+        .eq("is_active", true),
+      context.supabase
+        .from("profiles")
+        .select("reels_max_channels")
+        .eq("id", context.userId)
+        .maybeSingle(),
+    ]);
+    const cap = profile?.reels_max_channels ?? 5;
+    if ((count ?? 0) >= cap) {
+      throw new Error(
+        `Limite de ${cap} canal(is) de referência ativo(s) atingido. Desative um canal existente ou peça ao administrador para aumentar seu limite.`,
+      );
+    }
+
     const { resolveChannel } = await import("@/lib/youtube.server");
     const resolved = await resolveChannel(data.channel.trim());
 
@@ -66,6 +86,7 @@ export const addReferenceChannel = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return inserted as ReferenceChannel;
   });
+
 
 /** Ativa/desativa um canal. */
 export const toggleReferenceChannel = createServerFn({ method: "POST" })
