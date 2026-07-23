@@ -56,14 +56,10 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // 5. Delete related rows explicitly (defensive, in case cascades are absent)
-    await supabaseAdmin.from('profile_ad_accounts').delete().eq('profile_id', userId)
-    await supabaseAdmin.from('user_roles').delete().eq('user_id', userId)
-    await supabaseAdmin.from('client_permissions').delete().eq('client_id', userId)
-    await supabaseAdmin.from('custom_metrics').delete().eq('user_id', userId)
-    await supabaseAdmin.from('profiles').delete().eq('id', userId)
-
-    // 6. Finally delete from auth.users
+    // 5. Delete the auth user only. All application tables reference
+    //    auth.users (directly or through profiles) with ON DELETE CASCADE,
+    //    so the entire user footprint is removed atomically by Postgres —
+    //    no manual per-table cleanup needed.
     const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
     if (authDeleteError) {
       return json({ error: authDeleteError.message }, 400)
@@ -71,6 +67,8 @@ serve(async (req) => {
 
     return json({ message: 'User and all related data deleted successfully' }, 200)
   } catch (error) {
-    return json({ error: (error as Error).message }, 500)
+    console.error('admin-delete-user error', error)
+    return json({ error: 'Erro interno.' }, 500)
   }
 })
+
