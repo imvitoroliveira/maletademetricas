@@ -46,7 +46,12 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const { user: session, profile, isAdmin, isActive, loading: authLoading, signOut, authLogs } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
+  const { tab: requestedTab } = Route.useSearch();
+  const navigate = useNavigate({ from: "/" });
+  const activeTab: DashboardTabId = resolveTab(requestedTab, isAdmin);
+  const availableTabs = getAvailableTabs(isAdmin);
+  const setActiveTab = (tab: DashboardTabId) =>
+    navigate({ search: (prev) => ({ ...prev, tab }), replace: true });
   
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
