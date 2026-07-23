@@ -526,6 +526,13 @@ export type Database = {
           app_secret: string
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       update_ad_account_credentials: {
         Args: { p_access_token?: string; p_app_secret?: string; p_id: string }
         Returns: undefined
