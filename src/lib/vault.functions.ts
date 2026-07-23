@@ -39,13 +39,15 @@ export const vaultVerify = createServerFn({ method: "POST" })
     if (!profile.vault_password) return { valid: false, configured: false };
 
     const stored = String(profile.vault_password);
-    const supplied = String(data.password);
+    const supplied = String(data.password).trim();
     const isHashed = stored.startsWith("pbkdf2$");
     let valid: boolean;
     if (isHashed) {
       valid = await verifyPassword(supplied, stored);
+      console.log("[vaultVerify] hashed", { userId: context.userId, suppliedLen: supplied.length, storedLen: stored.length, valid });
     } else {
       valid = supplied === stored;
+      console.log("[vaultVerify] plain", { userId: context.userId, valid });
       if (valid) {
         const upgraded = await hashPassword(supplied);
         await supabaseAdmin.from("profiles").update({ vault_password: upgraded }).eq("id", context.userId);
