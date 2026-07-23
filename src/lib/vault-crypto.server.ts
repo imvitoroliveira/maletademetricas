@@ -1,7 +1,7 @@
 // PBKDF2 password hashing. Stored format is cross-compatible with the previous
 // implementation:
 //   "pbkdf2$<iterations>$<saltB64>$<hashB64>"
-import { pbkdf2Sync, randomBytes, timingSafeEqual, webcrypto } from "node:crypto";
+import { createHmac, pbkdf2Sync, randomBytes, timingSafeEqual } from "node:crypto";
 
 // The deployed runtime supports node:crypto PBKDF2 only up to 100k iterations.
 // Keep new hashes within that limit, while still verifying older 120k hashes
@@ -21,25 +21,28 @@ async function deriveCompat(password: string, salt: Buffer, iterations: number):
       throw err;
     }
 
-    const keyMaterial = await webcrypto.subtle.importKey(
-      "raw",
-      new TextEncoder().encode(password),
-      { name: "PBKDF2" },
-      false,
-      ["deriveBits"],
-    );
-    const bits = await webcrypto.subtle.deriveBits(
-      {
-        name: "PBKDF2",
-        salt,
-        iterations,
-        hash: "SHA-256",
-      },
-      keyMaterial,
-      KEY_LEN * 8,
-    );
-    return Buffer.from(bits);
+    return deriveSha256Fallback(password, salt, iterations);
   }
+}
+
+function deriveSha256Fallback(password: string, salt: Buffer, iterations: number): Buffer {
+  const passwordBytes = Buffer.from(password, "utf8");
+  const blockIndex = Buffer.alloc(4);
+  blockIndex.writeUInt32BE(1, 0);
+
+  let previous = createHmac("sha256", passwordBytes)
+    .update(Buffer.concat([salt, blockIndex]))
+    .digest();
+  const output = Buffer.from(previous);
+
+  for (let i = 1; i < iterations; i += 1) {
+    previous = createHmac("sha256", passwordBytes).update(previous).digest();
+    for (let j = 0; j < KEY_LEN; j += 1) {
+      output[j] ^= previous[j];
+    }
+  }
+
+  return output;
 }
 
 export async function hashPassword(password: string): Promise<string> {
