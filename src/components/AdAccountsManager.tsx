@@ -113,9 +113,9 @@ export function AdAccountsManager() {
     setTesting(true);
     setTestResult(null);
     try {
-      const { data, error } = await supabase.functions.invoke("test-meta-connection", {
-        body: { accountId: accountId.trim(), accessToken: accessToken.trim() },
-      });
+      const { testMetaConnection } = await import("@/lib/meta.functions");
+      const data = await testMetaConnection({ data: { accountId: accountId.trim(), accessToken: accessToken.trim() } });
+      const error = null as unknown as null;
       if (error) throw error;
       setTestResult(data as TestResult);
       if ((data as TestResult).ok) {
