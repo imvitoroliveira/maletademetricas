@@ -143,14 +143,14 @@ export function AdAccountsManager() {
     }
     setSaving(true);
     try {
-      const { error } = await supabase.from("ad_accounts").insert({
-        name: name.trim(),
-        account_id: accountId.trim(),
-        access_token: accessToken.trim(),
-        platform: "meta",
-        software: software || null,
-        birth_date: birthDate || null,
-        status,
+      const { error } = await supabase.rpc("create_ad_account", {
+        p_name: name.trim(),
+        p_account_id: accountId.trim(),
+        p_access_token: accessToken.trim(),
+        p_platform: "meta",
+        p_software: software || null,
+        p_birth_date: birthDate || null,
+        p_status: status,
       });
       if (error) throw error;
       toast.success("Conta de anúncio cadastrada!");
