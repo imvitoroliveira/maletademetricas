@@ -143,14 +143,14 @@ export function AdAccountsManager() {
     }
     setSaving(true);
     try {
-      const { error } = await supabase.from("ad_accounts").insert({
-        name: name.trim(),
-        account_id: accountId.trim(),
-        access_token: accessToken.trim(),
-        platform: "meta",
-        software: software || null,
-        birth_date: birthDate || null,
-        status,
+      const { error } = await supabase.rpc("create_ad_account", {
+        p_name: name.trim(),
+        p_account_id: accountId.trim(),
+        p_access_token: accessToken.trim(),
+        p_platform: "meta",
+        p_software: software || null,
+        p_birth_date: birthDate || null,
+        p_status: status,
       });
       if (error) throw error;
       toast.success("Conta de anúncio cadastrada!");
@@ -417,12 +417,12 @@ export function AdAccountsManager() {
                   <Badge
                     variant="outline"
                     className={
-                      acc.access_token
+                      acc.has_credentials
                         ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                         : "bg-amber-50 text-amber-700 border-amber-100"
                     }
                   >
-                    {acc.access_token ? "Conectada" : "Sem token"}
+                    {acc.has_credentials ? "Conectada" : "Sem token"}
                   </Badge>
                   <Button
                     variant="ghost"

@@ -16,11 +16,12 @@ export type Database = {
     Tables: {
       ad_accounts: {
         Row: {
-          access_token: string | null
+          access_token_encrypted: string | null
           account_id: string
-          app_secret: string | null
+          app_secret_encrypted: string | null
           birth_date: string | null
           created_at: string
+          has_credentials: boolean | null
           id: string
           name: string
           platform: string | null
@@ -29,11 +30,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          access_token?: string | null
+          access_token_encrypted?: string | null
           account_id: string
-          app_secret?: string | null
+          app_secret_encrypted?: string | null
           birth_date?: string | null
           created_at?: string
+          has_credentials?: boolean | null
           id?: string
           name: string
           platform?: string | null
@@ -42,11 +44,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          access_token?: string | null
+          access_token_encrypted?: string | null
           account_id?: string
-          app_secret?: string | null
+          app_secret_encrypted?: string | null
           birth_date?: string | null
           created_at?: string
+          has_credentials?: boolean | null
           id?: string
           name?: string
           platform?: string | null
@@ -503,7 +506,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_ad_account: {
+        Args: {
+          p_access_token: string
+          p_account_id: string
+          p_app_secret?: string
+          p_birth_date?: string
+          p_name: string
+          p_platform?: string
+          p_software?: string
+          p_status?: string
+        }
+        Returns: string
+      }
+      get_ad_account_secret: {
+        Args: { p_id: string }
+        Returns: {
+          access_token: string
+          app_secret: string
+        }[]
+      }
+      update_ad_account_credentials: {
+        Args: { p_access_token?: string; p_app_secret?: string; p_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"

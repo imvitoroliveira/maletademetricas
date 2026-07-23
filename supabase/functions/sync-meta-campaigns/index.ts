@@ -55,7 +55,7 @@ serve(async (req) => {
 
     let accountsQuery = supabaseAdmin
       .from("ad_accounts")
-      .select("id, name, account_id, access_token");
+      .select("id, name, account_id");
     if (targetAccountId) accountsQuery = accountsQuery.eq("id", targetAccountId);
 
     const { data: accounts, error: accountsError } = await accountsQuery;
@@ -64,7 +64,12 @@ serve(async (req) => {
     const results: Array<Record<string, unknown>> = [];
 
     for (const acc of accounts ?? []) {
-      if (!acc.access_token || !acc.account_id) {
+      // Recupera o token decifrado (RPC SECURITY DEFINER, restrita a service_role)
+      const { data: secretRows, error: secretError } = await supabaseAdmin
+        .rpc("get_ad_account_secret", { p_id: acc.id });
+      const accessToken: string | null = secretRows?.[0]?.access_token ?? null;
+
+      if (secretError || !accessToken || !acc.account_id) {
         results.push({ account: acc.name, status: "skipped", reason: "Credenciais ausentes" });
         continue;
       }
@@ -77,7 +82,7 @@ serve(async (req) => {
         `https://graph.facebook.com/${GRAPH_VERSION}/${actId}/campaigns` +
         `?fields=name,status,objective,daily_budget,` +
         `insights{spend,reach,impressions,clicks,ctr}` +
-        `&limit=100&access_token=${encodeURIComponent(acc.access_token)}`;
+        `&limit=100&access_token=${encodeURIComponent(accessToken)}`;
 
       let payload: any;
       try {
