@@ -5,7 +5,7 @@ import { createHmac, pbkdf2Sync, randomBytes, timingSafeEqual } from "node:crypt
 
 // The deployed runtime supports node:crypto PBKDF2 only up to 100k iterations.
 // Keep new hashes within that limit, while still verifying older 120k hashes
-// through Web Crypto below.
+// through a small PBKDF2-SHA256 fallback below.
 const ITERATIONS = 100000;
 const KEY_LEN = 32; // bytes -> 256 bits
 
