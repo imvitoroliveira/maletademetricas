@@ -34,13 +34,11 @@ serve(async (req) => {
     if (masterEmail) {
       authorized = caller.email === masterEmail
     } else {
-      const { data: prof } = await supabaseClient
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', caller.id)
-        .single()
-      authorized = !!prof?.is_admin
+      const { data: isAdmin } = await supabaseClient
+        .rpc('has_role', { _user_id: caller.id, _role: 'admin' })
+      authorized = !!isAdmin
     }
+
 
     if (!authorized) {
       return json({ error: 'Forbidden: insufficient privileges to delete users.' }, 403)
