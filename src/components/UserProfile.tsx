@@ -15,9 +15,10 @@ export function UserProfile() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [vaultPassword, setVaultPassword] = useState("");
   const [currentVaultPassword, setCurrentVaultPassword] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
   const [recoveryToken, setRecoveryToken] = useState("");
-  const [showRecover, setShowRecover] = useState(false);
-  const [isTokenSent, setIsTokenSent] = useState(false);
+  const [recoveryMode, setRecoveryMode] = useState<"none" | "login" | "email">("none");
+  const [isTokenRequested, setIsTokenRequested] = useState(false);
   const [loadingVault, setLoadingVault] = useState(false);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -47,21 +48,38 @@ export function UserProfile() {
     }
   };
 
+  const handleResetWithLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoadingVault(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("vault-auth", {
+        body: { action: "reset-with-login", loginPassword, newPassword: vaultPassword },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success("Senha do cofre redefinida com sucesso!");
+      setVaultPassword("");
+      setLoginPassword("");
+      setRecoveryMode("none");
+    } catch (error: unknown) {
+      toast.error("Erro ao redefinir senha: " + (error as Error).message);
+    } finally {
+      setLoadingVault(false);
+    }
+  };
+
   const handleRequestRecovery = async () => {
     if (!user?.email) return;
     setLoadingVault(true);
     try {
       const { data, error } = await supabase.functions.invoke("vault-recovery", {
-        body: { type: "request" }
+        body: { type: "request" },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-
-      setIsTokenSent(true);
-      // Email delivery is not wired up yet, so we surface the token to the
-      // authenticated owner directly (no console logging).
-      if (data?.token) setRecoveryToken(data.token);
-      toast.success("Token de recuperação gerado e preenchido abaixo.");
+      setIsTokenRequested(true);
+      toast.success("Se a conta existir, um token foi enviado para o seu e-mail.");
     } catch (error: unknown) {
       toast.error("Erro ao solicitar recuperação: " + (error as Error).message);
     } finally {
@@ -71,31 +89,27 @@ export function UserProfile() {
 
   const handleRecoverVaultPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.email || !recoveryToken) return;
-    
+    if (!recoveryToken) return;
+
     setLoadingVault(true);
     try {
-      const { error } = await supabase.functions.invoke("vault-recovery", {
-        body: { 
-          email: user.email, 
-          type: "reset", 
-          token: recoveryToken, 
-          newPassword: vaultPassword 
-        }
+      const { data, error } = await supabase.functions.invoke("vault-recovery", {
+        body: { type: "reset", token: recoveryToken, newPassword: vaultPassword },
       });
-
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       toast.success("Nova senha do cofre definida com sucesso!");
       setVaultPassword("");
       setRecoveryToken("");
-      setIsTokenSent(false);
-      setShowRecover(false);
-    } catch (error: any) {
-      toast.error("Erro ao redefinir senha do cofre: " + error.message);
+      setIsTokenRequested(false);
+      setRecoveryMode("none");
+    } catch (error: unknown) {
+      toast.error("Erro ao redefinir senha do cofre: " + (error as Error).message);
     } finally {
       setLoadingVault(false);
     }
   };
+
 
   if (!profile) return null;
 
