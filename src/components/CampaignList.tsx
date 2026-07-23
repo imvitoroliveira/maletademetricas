@@ -33,10 +33,9 @@ export function CampaignList() {
   const handleSync = async () => {
     setSyncing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("sync-meta-campaigns", {
-        body: {},
-      });
-      if (error) throw error;
+      const { syncMetaCampaigns } = await import("@/lib/meta.functions");
+      const data = await syncMetaCampaigns({ data: {} });
+
 
       const results: Array<{ account: string; status: string; reason?: string; count?: number }> =
         data?.results ?? [];
