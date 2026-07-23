@@ -1,7 +1,12 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  vaultSet,
+  vaultResetWithLogin,
+  vaultRecoveryRequest,
+  vaultRecoveryReset,
+} from "@/lib/vault.functions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,12 +37,7 @@ export function UserProfile() {
 
     setLoadingVault(true);
     try {
-      const { data, error } = await supabase.functions.invoke("vault-auth", {
-        body: { action: "set", currentPassword: currentVaultPassword, newPassword: vaultPassword },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
+      await vaultSet({ data: { currentPassword: currentVaultPassword, newPassword: vaultPassword } });
       toast.success("Senha do cofre atualizada com sucesso!");
       setVaultPassword("");
       setCurrentVaultPassword("");
@@ -52,12 +52,7 @@ export function UserProfile() {
     e.preventDefault();
     setLoadingVault(true);
     try {
-      const { data, error } = await supabase.functions.invoke("vault-auth", {
-        body: { action: "reset-with-login", loginPassword, newPassword: vaultPassword },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
+      await vaultResetWithLogin({ data: { loginPassword, newPassword: vaultPassword } });
       toast.success("Senha do cofre redefinida com sucesso!");
       setVaultPassword("");
       setLoginPassword("");
@@ -73,11 +68,7 @@ export function UserProfile() {
     if (!user?.email) return;
     setLoadingVault(true);
     try {
-      const { data, error } = await supabase.functions.invoke("vault-recovery", {
-        body: { type: "request" },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      await vaultRecoveryRequest();
       setIsTokenRequested(true);
       toast.success("Se a conta existir, um token foi enviado para o seu e-mail.");
     } catch (error: unknown) {
@@ -93,11 +84,7 @@ export function UserProfile() {
 
     setLoadingVault(true);
     try {
-      const { data, error } = await supabase.functions.invoke("vault-recovery", {
-        body: { type: "reset", token: recoveryToken, newPassword: vaultPassword },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      await vaultRecoveryReset({ data: { token: recoveryToken, newPassword: vaultPassword } });
       toast.success("Nova senha do cofre definida com sucesso!");
       setVaultPassword("");
       setRecoveryToken("");
@@ -112,6 +99,7 @@ export function UserProfile() {
 
 
   if (!profile) return null;
+
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">

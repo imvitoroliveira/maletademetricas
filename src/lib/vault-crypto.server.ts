@@ -1,11 +1,12 @@
-// Password hashing using Web Crypto PBKDF2 (no external deps, edge-runtime safe).
+// PBKDF2 password hashing using Web Crypto (works in Workers and Node with nodejs_compat).
+// Same format as the legacy edge function shared helper, so hashes are cross-compatible:
+//   "pbkdf2$<iterations>$<saltB64>$<hashB64>"
 const ITERATIONS = 120000;
 const KEY_LEN_BITS = 256;
 
 function toB64(buf: ArrayBuffer): string {
   return btoa(String.fromCharCode(...new Uint8Array(buf)));
 }
-
 function fromB64(s: string): Uint8Array {
   return Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 }
@@ -19,7 +20,7 @@ async function derive(password: string, salt: Uint8Array, iterations: number): P
     ["deriveBits"],
   );
   const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
+    { name: "PBKDF2", salt: salt as BufferSource, iterations, hash: "SHA-256" },
     key,
     KEY_LEN_BITS,
   );
@@ -40,7 +41,6 @@ export async function verifyPassword(password: string, stored: string | null): P
     const iterations = parseInt(iterStr, 10);
     const salt = fromB64(saltB64);
     const computed = await derive(password, salt, iterations);
-    // constant-time-ish comparison
     if (computed.length !== hashB64.length) return false;
     let diff = 0;
     for (let i = 0; i < computed.length; i++) {

@@ -205,12 +205,10 @@ export function UserManager() {
     if (!newEmail || !newPassword) return;
 
     try {
-      // Use the admin-create-user Edge Function instead of client-side signUp
-      const { data, error } = await supabase.functions.invoke("admin-create-user", {
-        body: { email: newEmail, password: newPassword }
-      });
+      const { adminCreateUser } = await import("@/lib/admin-users.functions");
+      await adminCreateUser({ data: { email: newEmail, password: newPassword } });
 
-      if (error) throw error;
+
       
       toast.success("Usuário criado com sucesso!");
       setIsAdding(false);
@@ -240,23 +238,12 @@ export function UserManager() {
 
   const handleDeleteUser = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir permanentemente este usuário e todos os seus dados? Esta ação não pode ser desfeita.")) return;
-    
-    try {
-      console.log("Solicitando exclusão do usuário:", id);
-      const { data, error } = await supabase.functions.invoke("admin-delete-user", {
-        body: { userId: id }
-      });
 
-      if (error) {
-        console.error("Erro na Edge Function:", error);
-        throw new Error(error.message || "Erro desconhecido ao excluir usuário");
-      }
-      
-      console.log("Resposta da exclusão:", data);
+    try {
+      const { adminDeleteUser } = await import("@/lib/admin-users.functions");
+      await adminDeleteUser({ data: { userId: id } });
       setProfiles(prev => prev.filter(p => p.id !== id));
       toast.success("Usuário excluído com sucesso");
-      
-      // Opcional: recarregar a lista para garantir sincronia
       setTimeout(() => fetchProfiles(), 1000);
     } catch (error: any) {
       console.error("Erro ao excluir:", error);

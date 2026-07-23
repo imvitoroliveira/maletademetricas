@@ -113,15 +113,13 @@ export function AdAccountsManager() {
     setTesting(true);
     setTestResult(null);
     try {
-      const { data, error } = await supabase.functions.invoke("test-meta-connection", {
-        body: { accountId: accountId.trim(), accessToken: accessToken.trim() },
-      });
-      if (error) throw error;
+      const { testMetaConnection } = await import("@/lib/meta.functions");
+      const data = await testMetaConnection({ data: { accountId: accountId.trim(), accessToken: accessToken.trim() } });
       setTestResult(data as TestResult);
-      if ((data as TestResult).ok) {
+      if (data.ok) {
         toast.success("Conexão validada com sucesso!");
       } else {
-        toast.error((data as TestResult).error ?? "Falha na conexão.");
+        toast.error(data.error ?? "Falha na conexão.");
       }
     } catch (e) {
       const msg = (e as Error).message;
