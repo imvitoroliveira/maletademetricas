@@ -30,7 +30,7 @@ serve(async (req) => {
       data: { user },
       error: authError,
     } = await supabaseClient.auth.getUser();
-    if (authError || !user) return json({ error: "Unauthorized" }, 401);
+    if (authError || !user) return json(req, { error: "Unauthorized" }, 401);
 
     const { data: profile } = await supabaseClient
       .from("profiles")
@@ -38,7 +38,7 @@ serve(async (req) => {
       .eq("id", user.id)
       .single();
     if (!profile?.is_admin) {
-      return json({ error: "Forbidden: Admin access required" }, 403);
+      return json(req, { error: "Forbidden: Admin access required" }, 403);
     }
 
     const body = await req.json().catch(() => ({}));
@@ -129,8 +129,8 @@ serve(async (req) => {
       results.push({ account: acc.name, status: "ok", count: rows.length });
     }
 
-    return json({ results }, 200);
+    return json(req, { results }, 200);
   } catch (error) {
-    return json({ error: (error as Error).message }, 500);
+    return json(req, { error: (error as Error).message }, 500);
   }
 });
