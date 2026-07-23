@@ -32,14 +32,12 @@ serve(async (req) => {
     } = await supabaseClient.auth.getUser();
     if (authError || !user) return json(req, { error: "Unauthorized" }, 401);
 
-    const { data: profile } = await supabaseClient
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", user.id)
-      .single();
-    if (!profile?.is_admin) {
+    const { data: isAdmin } = await supabaseClient
+      .rpc("has_role", { _user_id: user.id, _role: "admin" });
+    if (!isAdmin) {
       return json(req, { error: "Forbidden: Admin access required" }, 403);
     }
+
 
     const body = await req.json().catch(() => ({}));
     const targetAccountId: string | undefined = body?.adAccountId;
