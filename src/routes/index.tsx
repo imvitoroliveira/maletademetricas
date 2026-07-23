@@ -1,5 +1,7 @@
 
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { MetricCard } from "@/components/MetricCard";
 import { ChartSection } from "@/components/ChartSection";
@@ -12,7 +14,7 @@ import { AdAccountsManager } from "@/components/AdAccountsManager";
 import { ReelsGenerator } from "@/components/ReelsGenerator";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { 
+import {
   BarChart2,
   X,
   Loader2,
@@ -26,12 +28,19 @@ import { Auth } from "@/components/Auth";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { ErrorHandler } from "@/lib/error-utils";
+import { getAvailableTabs, resolveTab, type DashboardTabId } from "@/lib/dashboard-tabs";
+
+const searchSchema = z.object({
+  tab: fallback(z.string(), "overview").default("overview"),
+});
 
 /**
  * Route Configuration
  * Implementa code-splitting automático através do TanStack Router.
+ * `tab` é persistido na URL para permitir deep-links.
  */
 export const Route = createFileRoute("/")({
+  validateSearch: zodValidator(searchSchema),
   component: Dashboard,
 });
 
