@@ -140,44 +140,6 @@ export function AdAccountForm({
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="acc-software">Programa de criação</Label>
-            <Select value={software} onValueChange={setSoftware}>
-              <SelectTrigger id="acc-software">
-                <SelectValue placeholder="Selecione o programa" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="dolphin">Dolphin</SelectItem>
-                <SelectItem value="incogniton">Incogniton</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="acc-birth">Data de nascimento do perfil</Label>
-            <Input
-              id="acc-birth"
-              type="date"
-              value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="acc-status">Status do perfil</Label>
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger id="acc-status">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Ativo</SelectItem>
-              <SelectItem value="analysis">Em análise</SelectItem>
-              <SelectItem value="banned">Banido</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
 
         {testResult && (
           <div
