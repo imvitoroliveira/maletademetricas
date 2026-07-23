@@ -333,6 +333,9 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_admin: boolean | null
+          reels_generation_enabled: boolean
+          reels_max_channels: number
+          reels_max_runs_per_day: number
           updated_at: string
           vault_password: string | null
           vault_recovery_expires: string | null
@@ -344,6 +347,9 @@ export type Database = {
           id: string
           is_active?: boolean | null
           is_admin?: boolean | null
+          reels_generation_enabled?: boolean
+          reels_max_channels?: number
+          reels_max_runs_per_day?: number
           updated_at?: string
           vault_password?: string | null
           vault_recovery_expires?: string | null
@@ -355,10 +361,37 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_admin?: boolean | null
+          reels_generation_enabled?: boolean
+          reels_max_channels?: number
+          reels_max_runs_per_day?: number
           updated_at?: string
           vault_password?: string | null
           vault_recovery_expires?: string | null
           vault_recovery_token?: string | null
+        }
+        Relationships: []
+      }
+      reels_daily_usage: {
+        Row: {
+          run_date: string
+          runs: number
+          scripts_created: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          run_date?: string
+          runs?: number
+          scripts_created?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          run_date?: string
+          runs?: number
+          scripts_created?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -533,6 +566,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_reels_generation: {
+        Args: { _scripts_created: number; _user_id: string }
+        Returns: undefined
+      }
+      try_consume_reels_run: { Args: { _user_id: string }; Returns: number }
       update_ad_account_credentials: {
         Args: { p_access_token?: string; p_app_secret?: string; p_id: string }
         Returns: undefined

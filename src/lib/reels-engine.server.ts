@@ -67,81 +67,138 @@ Tudo em português do Brasil.`,
   return output;
 }
 
+const DEFAULT_MAX_CHANNELS = 5;
+
 export async function generateReelsForChannels(
   db: DB,
   channels: ChannelForRun[],
   opts: { perChannel?: number } = {},
-): Promise<{ created: number; errors: number }> {
+): Promise<{ created: number; errors: number; skippedUsers: number; processedUsers: number }> {
   const perChannel = opts.perChannel ?? 2;
   const key = process.env.LOVABLE_API_KEY;
   if (!key) throw new Error("LOVABLE_API_KEY ausente.");
   const gateway = createLovableAiGatewayProvider(key);
 
+  // Group channels by user so quota checks happen once per user.
+  const byUser = new Map<string, ChannelForRun[]>();
+  for (const ch of channels) {
+    const list = byUser.get(ch.user_id) ?? [];
+    list.push(ch);
+    byUser.set(ch.user_id, list);
+  }
+
   let created = 0;
   let errors = 0;
+  let skippedUsers = 0;
+  let processedUsers = 0;
 
-  for (const ch of channels) {
-    try {
-      let channelId = ch.channel_id;
-      let channelName = ch.channel_name ?? ch.channel_input;
+  for (const [userId, userChannels] of byUser) {
+    // Load per-user quota config.
+    const { data: profile } = await db
+      .from("profiles")
+      .select("reels_max_channels, reels_generation_enabled")
+      .eq("id", userId)
+      .maybeSingle();
 
-      if (!channelId) {
-        const resolved = await resolveChannel(ch.channel_input);
-        channelId = resolved.channelId;
-        channelName = resolved.channelName;
+    if (!profile?.reels_generation_enabled) {
+      skippedUsers++;
+      continue;
+    }
+
+    // Atomically consume one daily run; NULL means disabled or cap reached.
+    const { data: runsToday, error: rpcError } = await db.rpc("try_consume_reels_run", {
+      _user_id: userId,
+    });
+    if (rpcError) {
+      errors++;
+      console.error(`[reels-engine] quota rpc falhou para ${userId}:`, rpcError.message);
+      continue;
+    }
+    if (runsToday == null) {
+      skippedUsers++;
+      continue;
+    }
+
+    processedUsers++;
+    const maxChannels = profile?.reels_max_channels ?? DEFAULT_MAX_CHANNELS;
+    const scoped = userChannels.slice(0, Math.max(0, maxChannels));
+    let createdForUser = 0;
+
+    for (const ch of scoped) {
+      try {
+        let channelId = ch.channel_id;
+        let channelName = ch.channel_name ?? ch.channel_input;
+
+        if (!channelId) {
+          const resolved = await resolveChannel(ch.channel_input);
+          channelId = resolved.channelId;
+          channelName = resolved.channelName;
+          await db
+            .from("reels_reference_channels")
+            .update({
+              channel_id: resolved.channelId,
+              channel_name: resolved.channelName,
+              channel_url: resolved.channelUrl,
+            })
+            .eq("id", ch.id);
+        }
+
+        const videos = await getRecentVideos(channelId, 15);
+        const trending = pickTrending(videos, 30, perChannel + 4);
+
+        if (trending.length > 0) {
+          const { data: existing } = await db
+            .from("reels_scripts")
+            .select("source_video_id")
+            .eq("user_id", ch.user_id);
+          const seen = new Set((existing ?? []).map((e) => e.source_video_id));
+          const fresh = trending.filter((v) => !seen.has(v.videoId)).slice(0, perChannel);
+
+          for (const video of fresh) {
+            const script = await generateScript(gateway, video, channelName);
+            const { error } = await db.from("reels_scripts").insert({
+              user_id: ch.user_id,
+              channel_id: ch.id,
+              source_video_id: video.videoId,
+              source_video_title: video.title,
+              source_video_url: video.url,
+              source_channel_name: channelName,
+              source_views: video.views,
+              theme: script.theme,
+              title: script.title,
+              hook: script.hook,
+              scenes: script.scenes,
+              cta: script.cta,
+              caption: script.caption,
+              hashtags: script.hashtags,
+              status: "new",
+            });
+            if (!error) {
+              created++;
+              createdForUser++;
+            }
+          }
+        }
+
         await db
           .from("reels_reference_channels")
-          .update({
-            channel_id: resolved.channelId,
-            channel_name: resolved.channelName,
-            channel_url: resolved.channelUrl,
-          })
+          .update({ last_checked_at: new Date().toISOString() })
           .eq("id", ch.id);
+      } catch (e) {
+        errors++;
+        console.error(`[reels-engine] erro no canal ${ch.id}:`, e);
       }
+    }
 
-      const videos = await getRecentVideos(channelId, 15);
-      const trending = pickTrending(videos, 30, perChannel + 4);
-
-      if (trending.length > 0) {
-        const { data: existing } = await db
-          .from("reels_scripts")
-          .select("source_video_id")
-          .eq("user_id", ch.user_id);
-        const seen = new Set((existing ?? []).map((e) => e.source_video_id));
-        const fresh = trending.filter((v) => !seen.has(v.videoId)).slice(0, perChannel);
-
-        for (const video of fresh) {
-          const script = await generateScript(gateway, video, channelName);
-          const { error } = await db.from("reels_scripts").insert({
-            user_id: ch.user_id,
-            channel_id: ch.id,
-            source_video_id: video.videoId,
-            source_video_title: video.title,
-            source_video_url: video.url,
-            source_channel_name: channelName,
-            source_views: video.views,
-            theme: script.theme,
-            title: script.title,
-            hook: script.hook,
-            scenes: script.scenes,
-            cta: script.cta,
-            caption: script.caption,
-            hashtags: script.hashtags,
-            status: "new",
-          });
-          if (!error) created++;
-        }
-      }
-
-      await db
-        .from("reels_reference_channels")
-        .update({ last_checked_at: new Date().toISOString() })
-        .eq("id", ch.id);
-    } catch (e) {
-      errors++;
-      console.error(`[reels-engine] erro no canal ${ch.id}:`, e);
+    if (createdForUser > 0) {
+      const { error: recError } = await db.rpc("record_reels_generation", {
+        _user_id: userId,
+        _scripts_created: createdForUser,
+      });
+      if (recError) console.error(`[reels-engine] record rpc falhou para ${userId}:`, recError.message);
     }
   }
 
-  return { created, errors };
+  return { created, errors, skippedUsers, processedUsers };
 }
+
