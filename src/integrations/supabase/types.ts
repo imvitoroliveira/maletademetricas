@@ -534,6 +534,42 @@ export type Database = {
           },
         ]
       }
+      vault_documents: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          doc_type: string
+          id: string
+          image_data: string
+          prompt: string
+          subject_data: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          doc_type?: string
+          id?: string
+          image_data?: string
+          prompt?: string
+          subject_data?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          doc_type?: string
+          id?: string
+          image_data?: string
+          prompt?: string
+          subject_data?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       vault_notes: {
         Row: {
           content: string
