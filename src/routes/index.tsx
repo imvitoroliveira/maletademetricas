@@ -165,52 +165,23 @@ function Dashboard() {
   }
 
   return (
-    <DashboardLayout activeTab={activeTab} onTabChange={setActiveTab}>
+    <DashboardLayout activeTab={activeTab} onTabChange={setActiveTab} tabs={availableTabs}>
       <div className="flex flex-col gap-8">
-        {isAdmin && (
+        {availableTabs.length > 1 && (
           <div className="flex gap-2 border-b border-border/60 pb-4 overflow-x-auto custom-scrollbar whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
-            <Button 
-              variant={activeTab === "overview" ? "default" : "ghost"} 
-              onClick={() => setActiveTab("overview")}
-              className={cn("shrink-0 transition-all", activeTab === "overview" ? "bg-gradient-accent text-white shadow-soft" : "")}
-            >
-              Visão Geral
-            </Button>
-            <Button 
-              variant={activeTab === "users" ? "default" : "ghost"} 
-              onClick={() => setActiveTab("users")}
-              className={cn("shrink-0 transition-all", activeTab === "users" ? "bg-gradient-accent text-white shadow-soft" : "")}
-            >
-              Gestão de Clientes
-            </Button>
-            <Button 
-              variant={activeTab === "accounts" ? "default" : "ghost"} 
-              onClick={() => setActiveTab("accounts")}
-              className={cn("shrink-0 transition-all", activeTab === "accounts" ? "bg-gradient-accent text-white shadow-soft" : "")}
-            >
-              Contas de Anúncio
-            </Button>
-            <Button 
-              variant={activeTab === "reels" ? "default" : "ghost"} 
-              onClick={() => setActiveTab("reels")}
-              className={cn("shrink-0 transition-all", activeTab === "reels" ? "bg-gradient-accent text-white shadow-soft" : "")}
-            >
-              Roteiro de Reels
-            </Button>
-            <Button 
-              variant={activeTab === "vault" ? "default" : "ghost"} 
-              onClick={() => setActiveTab("vault")}
-              className={cn("shrink-0 transition-all", activeTab === "vault" ? "bg-gradient-accent text-white shadow-soft" : "")}
-            >
-              Cofre
-            </Button>
-            <Button 
-              variant={activeTab === "profile" ? "default" : "ghost"} 
-              onClick={() => setActiveTab("profile")}
-              className={cn("shrink-0 transition-all", activeTab === "profile" ? "bg-gradient-accent text-white shadow-soft" : "")}
-            >
-              Meu Perfil
-            </Button>
+            {availableTabs.map((tab) => (
+              <Button
+                key={tab.id}
+                variant={activeTab === tab.id ? "default" : "ghost"}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "shrink-0 transition-all",
+                  activeTab === tab.id ? "bg-gradient-accent text-white shadow-soft" : ""
+                )}
+              >
+                {tab.name}
+              </Button>
+            ))}
           </div>
         )}
 
