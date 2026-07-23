@@ -115,13 +115,11 @@ export function AdAccountsManager() {
     try {
       const { testMetaConnection } = await import("@/lib/meta.functions");
       const data = await testMetaConnection({ data: { accountId: accountId.trim(), accessToken: accessToken.trim() } });
-      const error = null as unknown as null;
-      if (error) throw error;
       setTestResult(data as TestResult);
-      if ((data as TestResult).ok) {
+      if (data.ok) {
         toast.success("Conexão validada com sucesso!");
       } else {
-        toast.error((data as TestResult).error ?? "Falha na conexão.");
+        toast.error(data.error ?? "Falha na conexão.");
       }
     } catch (e) {
       const msg = (e as Error).message;
