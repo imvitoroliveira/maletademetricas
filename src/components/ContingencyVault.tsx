@@ -108,10 +108,7 @@ export function ContingencyVault() {
     e.preventDefault();
     setUnlocking(true);
     try {
-      const { data, error } = await supabase.functions.invoke("vault-auth", {
-        body: { action: "verify", password: passwordInput },
-      });
-      if (error) throw error;
+      const data = await vaultVerify({ data: { password: passwordInput } });
       if (!data?.configured) {
         toast.error("Nenhuma senha definida. Defina uma senha no seu Perfil.");
       } else if (data?.valid) {
