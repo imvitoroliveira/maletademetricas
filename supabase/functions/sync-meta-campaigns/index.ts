@@ -82,7 +82,7 @@ serve(async (req) => {
         `https://graph.facebook.com/${GRAPH_VERSION}/${actId}/campaigns` +
         `?fields=name,status,objective,daily_budget,` +
         `insights{spend,reach,impressions,clicks,ctr}` +
-        `&limit=100&access_token=${encodeURIComponent(acc.access_token)}`;
+        `&limit=100&access_token=${encodeURIComponent(accessToken)}`;
 
       let payload: any;
       try {
