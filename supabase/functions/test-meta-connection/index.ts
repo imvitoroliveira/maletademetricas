@@ -30,7 +30,7 @@ serve(async (req) => {
       data: { user },
       error: authError,
     } = await supabaseClient.auth.getUser();
-    if (authError || !user) return json({ ok: false, error: "Unauthorized" }, 401);
+    if (authError || !user) return json(req, { ok: false, error: "Unauthorized" }, 401);
 
     const { data: profile } = await supabaseClient
       .from("profiles")
@@ -38,7 +38,7 @@ serve(async (req) => {
       .eq("id", user.id)
       .single();
     if (!profile?.is_admin) {
-      return json({ ok: false, error: "Acesso restrito a administradores." }, 403);
+      return json(req, { ok: false, error: "Acesso restrito a administradores." }, 403);
     }
 
     const body = await req.json().catch(() => ({}));
@@ -46,7 +46,7 @@ serve(async (req) => {
     const accessToken: string | undefined = body?.accessToken;
 
     if (!accountId || !accessToken) {
-      return json({ ok: false, error: "Informe o ID da conta e o token de acesso." }, 400);
+      return json(req, { ok: false, error: "Informe o ID da conta e o token de acesso." }, 400);
     }
 
     const actId = String(accountId).startsWith("act_")
@@ -62,7 +62,7 @@ serve(async (req) => {
     const payload = await resp.json();
 
     if (!resp.ok || payload?.error) {
-      return json(
+      return json(req, 
         {
           ok: false,
           error:
@@ -82,7 +82,7 @@ serve(async (req) => {
       100: "Pendente de fechamento",
     };
 
-    return json(
+    return json(req, 
       {
         ok: true,
         account: {
@@ -94,6 +94,6 @@ serve(async (req) => {
       200,
     );
   } catch (error) {
-    return json({ ok: false, error: (error as Error).message }, 500);
+    return json(req, { ok: false, error: (error as Error).message }, 500);
   }
 });
