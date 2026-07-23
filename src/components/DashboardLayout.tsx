@@ -1,12 +1,6 @@
 
 import * as React from "react";
-import { 
-  LayoutDashboard, 
-  Users,
-  Clapperboard,
-  ShieldCheck,
-  Plug,
-  UserCircle,
+import {
   Bell,
   Menu,
   ChevronLeft,
@@ -24,37 +18,30 @@ import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "@/hooks/useTheme";
 import logo from "@/assets/logo.jpg";
+import { getAvailableTabs, type DashboardTab, type DashboardTabId } from "@/lib/dashboard-tabs";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  activeTab?: string;
-  onTabChange?: (tab: string) => void;
+  activeTab?: DashboardTabId;
+  onTabChange?: (tab: DashboardTabId) => void;
+  tabs?: readonly DashboardTab[];
 }
 
 /**
  * DashboardLayout (Adaptive & Ergonomic)
- * Implementa uma arquitetura fluida com sidebar inteligente:
- * - Desktop: Sidebar persistente com toggle de expansão.
- * - Mobile: Sidebar transformada em Drawer (Sheet) para maximizar área útil.
- * Targets de toque otimizados (mínimo 44px).
+ * Recebe a lista de abas já filtrada por role para manter a navegação
+ * (sidebar/drawer) e o conteúdo em sincronia com um único array.
  */
-export function DashboardLayout({ children, activeTab = "overview", onTabChange }: DashboardLayoutProps) {
+export function DashboardLayout({ children, activeTab = "overview", onTabChange, tabs }: DashboardLayoutProps) {
   const { profile, isAdmin, signOut } = useAuth();
   const isMobile = useIsMobile();
   const { isDark, toggleTheme } = useTheme();
   const [isSidebarExpanded, setIsSidebarExpanded] = React.useState(true);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
 
-  const navigation = [
-    { id: "overview", name: "Visão Geral", icon: LayoutDashboard, adminOnly: false },
-    { id: "users", name: "Gestão de Clientes", icon: Users, adminOnly: true },
-    { id: "accounts", name: "Contas de Anúncio", icon: Plug, adminOnly: true },
-    { id: "reels", name: "Roteiro de Reels", icon: Clapperboard, adminOnly: true },
-    { id: "vault", name: "Cofre", icon: ShieldCheck, adminOnly: true },
-    { id: "profile", name: "Meu Perfil", icon: UserCircle, adminOnly: false },
-  ].filter((item) => isAdmin || !item.adminOnly);
+  const navigation = tabs ?? getAvailableTabs(isAdmin);
 
-  const handleNavigate = (tab: string) => {
+  const handleNavigate = (tab: DashboardTabId) => {
     onTabChange?.(tab);
     if (isMobile) setIsSheetOpen(false);
   };
