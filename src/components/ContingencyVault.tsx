@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Loader2, Plus, Search, Shield } from "lucide-react";
+import { FileText, Loader2, Plus, Search, Shield, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { vaultStatus } from "@/lib/vault.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardDescription, CardHeader } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -29,6 +30,7 @@ import {
 import { VaultUnlock } from "@/components/vault/VaultUnlock";
 import { VaultProfileForm } from "@/components/vault/VaultProfileForm";
 import { VaultProfileRow } from "@/components/vault/VaultProfileRow";
+import { VaultNotesTab } from "@/components/vault/VaultNotesTab";
 
 export function ContingencyVault() {
   const [searchTerm, setSearchTerm] = useState("");
