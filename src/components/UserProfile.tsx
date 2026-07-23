@@ -15,9 +15,10 @@ export function UserProfile() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [vaultPassword, setVaultPassword] = useState("");
   const [currentVaultPassword, setCurrentVaultPassword] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
   const [recoveryToken, setRecoveryToken] = useState("");
-  const [showRecover, setShowRecover] = useState(false);
-  const [isTokenSent, setIsTokenSent] = useState(false);
+  const [recoveryMode, setRecoveryMode] = useState<"none" | "login" | "email">("none");
+  const [isTokenRequested, setIsTokenRequested] = useState(false);
   const [loadingVault, setLoadingVault] = useState(false);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -47,21 +48,38 @@ export function UserProfile() {
     }
   };
 
+  const handleResetWithLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoadingVault(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("vault-auth", {
+        body: { action: "reset-with-login", loginPassword, newPassword: vaultPassword },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success("Senha do cofre redefinida com sucesso!");
+      setVaultPassword("");
+      setLoginPassword("");
+      setRecoveryMode("none");
+    } catch (error: unknown) {
+      toast.error("Erro ao redefinir senha: " + (error as Error).message);
+    } finally {
+      setLoadingVault(false);
+    }
+  };
+
   const handleRequestRecovery = async () => {
     if (!user?.email) return;
     setLoadingVault(true);
     try {
       const { data, error } = await supabase.functions.invoke("vault-recovery", {
-        body: { type: "request" }
+        body: { type: "request" },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-
-      setIsTokenSent(true);
-      // Email delivery is not wired up yet, so we surface the token to the
-      // authenticated owner directly (no console logging).
-      if (data?.token) setRecoveryToken(data.token);
-      toast.success("Token de recuperação gerado e preenchido abaixo.");
+      setIsTokenRequested(true);
+      toast.success("Se a conta existir, um token foi enviado para o seu e-mail.");
     } catch (error: unknown) {
       toast.error("Erro ao solicitar recuperação: " + (error as Error).message);
     } finally {
@@ -71,31 +89,27 @@ export function UserProfile() {
 
   const handleRecoverVaultPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.email || !recoveryToken) return;
-    
+    if (!recoveryToken) return;
+
     setLoadingVault(true);
     try {
-      const { error } = await supabase.functions.invoke("vault-recovery", {
-        body: { 
-          email: user.email, 
-          type: "reset", 
-          token: recoveryToken, 
-          newPassword: vaultPassword 
-        }
+      const { data, error } = await supabase.functions.invoke("vault-recovery", {
+        body: { type: "reset", token: recoveryToken, newPassword: vaultPassword },
       });
-
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       toast.success("Nova senha do cofre definida com sucesso!");
       setVaultPassword("");
       setRecoveryToken("");
-      setIsTokenSent(false);
-      setShowRecover(false);
-    } catch (error: any) {
-      toast.error("Erro ao redefinir senha do cofre: " + error.message);
+      setIsTokenRequested(false);
+      setRecoveryMode("none");
+    } catch (error: unknown) {
+      toast.error("Erro ao redefinir senha do cofre: " + (error as Error).message);
     } finally {
       setLoadingVault(false);
     }
   };
+
 
   if (!profile) return null;
 
@@ -183,31 +197,85 @@ export function UserProfile() {
                 <Lock className="h-5 w-5 text-fuchsia-600" />
                 <CardTitle className="text-xl">Segurança do Cofre</CardTitle>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-fuchsia-600 hover:text-fuchsia-700 text-xs"
-                onClick={() => setShowRecover(!showRecover)}
-              >
-                {showRecover ? "Voltar para troca" : "Esqueci minha senha"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-fuchsia-600 hover:text-fuchsia-700 text-xs"
+                  onClick={() => {
+                    setRecoveryMode(recoveryMode === "login" ? "none" : "login");
+                    setIsTokenRequested(false);
+                  }}
+                >
+                  {recoveryMode === "login" ? "Voltar" : "Esqueci a senha (login)"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-fuchsia-600 hover:text-fuchsia-700 text-xs"
+                  onClick={() => {
+                    setRecoveryMode(recoveryMode === "email" ? "none" : "email");
+                    setIsTokenRequested(false);
+                  }}
+                >
+                  {recoveryMode === "email" ? "Voltar" : "Recuperar por e-mail"}
+                </Button>
+              </div>
             </div>
             <CardDescription>
-              {showRecover 
-                ? "Defina uma nova senha mestre se você esqueceu a anterior." 
+              {recoveryMode === "login"
+                ? "Confirme sua senha de login desta plataforma para definir uma nova senha do cofre."
+                : recoveryMode === "email"
+                ? "Enviaremos um token de segurança para o seu e-mail cadastrado."
                 : "Atualize sua senha mestre para acessar a área de contingência."}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {showRecover ? (
+            {recoveryMode === "login" ? (
+              <form onSubmit={handleResetWithLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="login_pass">Senha de Login (esta plataforma)</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="login_pass"
+                      type="password"
+                      placeholder="Sua senha de acesso ao sistema..."
+                      className="pl-10 h-11"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new_vault_pass_login">Nova Senha do Cofre</Label>
+                  <div className="relative">
+                    <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="new_vault_pass_login"
+                      type="password"
+                      placeholder="Defina uma nova senha mestre..."
+                      className="pl-10 h-11"
+                      value={vaultPassword}
+                      onChange={(e) => setVaultPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                <Button type="submit" disabled={loadingVault} className="w-full bg-fuchsia-600 hover:bg-fuchsia-700 h-11">
+                  {loadingVault ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Redefinir Senha do Cofre"}
+                </Button>
+              </form>
+            ) : recoveryMode === "email" ? (
               <div className="space-y-4">
-                {!isTokenSent ? (
+                {!isTokenRequested ? (
                   <div className="text-center space-y-4 py-4">
                     <p className="text-sm text-slate-600">
-                      Enviaremos um token de segurança para o seu e-mail cadastrado para validar a troca da senha do cofre.
+                      Um token será enviado para o e-mail cadastrado. Ele expira em 1 hora.
                     </p>
-                    <Button 
-                      onClick={handleRequestRecovery} 
+                    <Button
+                      onClick={handleRequestRecovery}
                       disabled={loadingVault}
                       className="w-full bg-fuchsia-600 hover:bg-fuchsia-700 h-11"
                     >
@@ -218,9 +286,9 @@ export function UserProfile() {
                   <form onSubmit={handleRecoverVaultPassword} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="recovery_token">Token Recebido</Label>
-                      <Input 
+                      <Input
                         id="recovery_token"
-                        placeholder="Cole o token recebido aqui..." 
+                        placeholder="Cole o token recebido no e-mail..."
                         className="h-11"
                         value={recoveryToken}
                         onChange={(e) => setRecoveryToken(e.target.value)}
@@ -231,10 +299,10 @@ export function UserProfile() {
                       <Label htmlFor="recover_vault_pass">Nova Senha do Cofre</Label>
                       <div className="relative">
                         <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                        <Input 
+                        <Input
                           id="recover_vault_pass"
-                          type="password" 
-                          placeholder="Defina uma nova senha mestre..." 
+                          type="password"
+                          placeholder="Defina uma nova senha mestre..."
                           className="pl-10 h-11"
                           value={vaultPassword}
                           onChange={(e) => setVaultPassword(e.target.value)}
@@ -255,10 +323,10 @@ export function UserProfile() {
                     <Label htmlFor="current_vault_pass">Senha Atual do Cofre</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                      <Input 
+                      <Input
                         id="current_vault_pass"
-                        type="password" 
-                        placeholder="Sua senha atual..." 
+                        type="password"
+                        placeholder="Sua senha atual..."
                         className="pl-10 h-11"
                         value={currentVaultPassword}
                         onChange={(e) => setCurrentVaultPassword(e.target.value)}
@@ -269,10 +337,10 @@ export function UserProfile() {
                     <Label htmlFor="vault_pass">Nova Senha do Cofre</Label>
                     <div className="relative">
                       <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                      <Input 
+                      <Input
                         id="vault_pass"
-                        type="password" 
-                        placeholder="Digite a nova senha..." 
+                        type="password"
+                        placeholder="Digite a nova senha..."
                         className="pl-10 h-11"
                         value={vaultPassword}
                         onChange={(e) => setVaultPassword(e.target.value)}
@@ -286,6 +354,7 @@ export function UserProfile() {
                 </Button>
               </form>
             )}
+
           </CardContent>
         </Card>
       )}
