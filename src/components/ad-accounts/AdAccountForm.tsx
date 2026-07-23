@@ -18,13 +18,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { TestResult } from "@/hooks/useAdAccounts";
 
 type Props = {
@@ -54,22 +47,23 @@ export function AdAccountForm({
   const [name, setName] = useState("");
   const [accountId, setAccountId] = useState("");
   const [accessToken, setAccessToken] = useState("");
-  const [software, setSoftware] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [status, setStatus] = useState("active");
 
   const resetForm = () => {
     setName("");
     setAccountId("");
     setAccessToken("");
-    setSoftware("");
-    setBirthDate("");
-    setStatus("active");
     onResetTest();
   };
 
   const handleSave = async () => {
-    const ok = await onSave({ name, accountId, accessToken, software, birthDate, status });
+    const ok = await onSave({
+      name,
+      accountId,
+      accessToken,
+      software: "",
+      birthDate: "",
+      status: "active",
+    });
     if (ok) resetForm();
   };
 
@@ -146,44 +140,6 @@ export function AdAccountForm({
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="acc-software">Programa de criação</Label>
-            <Select value={software} onValueChange={setSoftware}>
-              <SelectTrigger id="acc-software">
-                <SelectValue placeholder="Selecione o programa" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="dolphin">Dolphin</SelectItem>
-                <SelectItem value="incogniton">Incogniton</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="acc-birth">Data de nascimento do perfil</Label>
-            <Input
-              id="acc-birth"
-              type="date"
-              value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="acc-status">Status do perfil</Label>
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger id="acc-status">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Ativo</SelectItem>
-              <SelectItem value="analysis">Em análise</SelectItem>
-              <SelectItem value="banned">Banido</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
 
         {testResult && (
           <div
