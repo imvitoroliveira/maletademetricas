@@ -47,22 +47,23 @@ export function AdAccountForm({
   const [name, setName] = useState("");
   const [accountId, setAccountId] = useState("");
   const [accessToken, setAccessToken] = useState("");
-  const [software, setSoftware] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [status, setStatus] = useState("active");
 
   const resetForm = () => {
     setName("");
     setAccountId("");
     setAccessToken("");
-    setSoftware("");
-    setBirthDate("");
-    setStatus("active");
     onResetTest();
   };
 
   const handleSave = async () => {
-    const ok = await onSave({ name, accountId, accessToken, software, birthDate, status });
+    const ok = await onSave({
+      name,
+      accountId,
+      accessToken,
+      software: "",
+      birthDate: "",
+      status: "active",
+    });
     if (ok) resetForm();
   };
 
