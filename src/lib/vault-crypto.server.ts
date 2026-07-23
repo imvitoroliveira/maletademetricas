@@ -1,36 +1,21 @@
-// PBKDF2 password hashing using Web Crypto (works in Workers and Node with nodejs_compat).
-// Same format as the legacy edge function shared helper, so hashes are cross-compatible:
+// PBKDF2 password hashing. Uses Node's crypto (available in workerd with
+// nodejs_compat) for maximum consistency between local Node tests and the
+// deployed Worker runtime. Stored format is cross-compatible with the previous
+// Web Crypto implementation:
 //   "pbkdf2$<iterations>$<saltB64>$<hashB64>"
+import { pbkdf2Sync, randomBytes, timingSafeEqual } from "node:crypto";
+
 const ITERATIONS = 120000;
-const KEY_LEN_BITS = 256;
+const KEY_LEN = 32; // bytes -> 256 bits
 
-function toB64(buf: ArrayBuffer): string {
-  return btoa(String.fromCharCode(...new Uint8Array(buf)));
-}
-function fromB64(s: string): Uint8Array {
-  return Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
-}
-
-async function derive(password: string, salt: Uint8Array, iterations: number): Promise<string> {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(password),
-    "PBKDF2",
-    false,
-    ["deriveBits"],
-  );
-  const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt: salt as BufferSource, iterations, hash: "SHA-256" },
-    key,
-    KEY_LEN_BITS,
-  );
-  return toB64(bits);
+function derive(password: string, salt: Buffer, iterations: number): Buffer {
+  return pbkdf2Sync(password, salt, iterations, KEY_LEN, "sha256");
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const hash = await derive(password, salt, ITERATIONS);
-  return `pbkdf2$${ITERATIONS}$${toB64(salt.buffer)}$${hash}`;
+  const salt = randomBytes(16);
+  const hash = derive(password, salt, ITERATIONS);
+  return `pbkdf2$${ITERATIONS}$${salt.toString("base64")}$${hash.toString("base64")}`;
 }
 
 export async function verifyPassword(password: string, stored: string | null): Promise<boolean> {
@@ -39,15 +24,14 @@ export async function verifyPassword(password: string, stored: string | null): P
     const [scheme, iterStr, saltB64, hashB64] = stored.split("$");
     if (scheme !== "pbkdf2") return false;
     const iterations = parseInt(iterStr, 10);
-    const salt = fromB64(saltB64);
-    const computed = await derive(password, salt, iterations);
-    if (computed.length !== hashB64.length) return false;
-    let diff = 0;
-    for (let i = 0; i < computed.length; i++) {
-      diff |= computed.charCodeAt(i) ^ hashB64.charCodeAt(i);
-    }
-    return diff === 0;
-  } catch {
+    if (!Number.isFinite(iterations) || iterations <= 0) return false;
+    const salt = Buffer.from(saltB64, "base64");
+    const expected = Buffer.from(hashB64, "base64");
+    const computed = derive(password, salt, iterations);
+    if (computed.length !== expected.length) return false;
+    return timingSafeEqual(computed, expected);
+  } catch (err) {
+    console.error("[vault-crypto] verify error", err);
     return false;
   }
 }
