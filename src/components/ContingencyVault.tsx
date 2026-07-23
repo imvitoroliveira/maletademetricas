@@ -17,6 +17,7 @@ import {
   Pencil
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { vaultStatus, vaultVerify } from "@/lib/vault.functions";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,17 +72,11 @@ export function ContingencyVault() {
   const [unlocking, setUnlocking] = useState(false);
 
   // Whether the user has configured a vault master password (read server-side).
-  const { data: vaultStatus } = useQuery({
+  const { data: vaultStatusData } = useQuery({
     queryKey: ["vault_status"],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("vault-auth", {
-        body: { action: "status" },
-      });
-      if (error) throw error;
-      return data as { configured: boolean };
-    },
+    queryFn: async () => vaultStatus(),
   });
-  const vaultConfigured = vaultStatus?.configured ?? false;
+  const vaultConfigured = vaultStatusData?.configured ?? false;
 
   const emptyCredentials = {
     login: "",
