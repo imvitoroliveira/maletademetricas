@@ -417,12 +417,12 @@ export function AdAccountsManager() {
                   <Badge
                     variant="outline"
                     className={
-                      acc.access_token
+                      acc.has_credentials
                         ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                         : "bg-amber-50 text-amber-700 border-amber-100"
                     }
                   >
-                    {acc.access_token ? "Conectada" : "Sem token"}
+                    {acc.has_credentials ? "Conectada" : "Sem token"}
                   </Badge>
                   <Button
                     variant="ghost"
