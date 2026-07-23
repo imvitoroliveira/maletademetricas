@@ -51,7 +51,7 @@ function Dashboard() {
   const activeTab: DashboardTabId = resolveTab(requestedTab, isAdmin);
   const availableTabs = getAvailableTabs(isAdmin);
   const setActiveTab = (tab: DashboardTabId) =>
-    navigate({ search: (prev) => ({ ...prev, tab }), replace: true });
+    navigate({ search: (prev: { tab: string }) => ({ ...prev, tab }), replace: true });
   
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
