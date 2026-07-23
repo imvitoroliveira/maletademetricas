@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, Loader2, Plus, Search, Shield, Users } from "lucide-react";
+import { FileText, Loader2, Plus, Search, Shield, Users, Wrench } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { vaultStatus } from "@/lib/vault.functions";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ import { VaultUnlock } from "@/components/vault/VaultUnlock";
 import { VaultProfileForm } from "@/components/vault/VaultProfileForm";
 import { VaultProfileRow } from "@/components/vault/VaultProfileRow";
 import { VaultNotesTab } from "@/components/vault/VaultNotesTab";
+import { VaultToolsTab } from "@/components/vault/tools/VaultToolsTab";
 
 export function ContingencyVault() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -126,6 +127,10 @@ export function ContingencyVault() {
             <FileText className="h-4 w-4" />
             Anotações
           </TabsTrigger>
+          <TabsTrigger value="tools" className="gap-2 data-[state=active]:bg-white data-[state=active]:text-fuchsia-700">
+            <Wrench className="h-4 w-4" />
+            Ferramentas
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profiles" className="space-y-6 mt-0">
@@ -214,6 +219,10 @@ export function ContingencyVault() {
 
         <TabsContent value="notes" className="mt-0">
           <VaultNotesTab />
+        </TabsContent>
+
+        <TabsContent value="tools" className="mt-0">
+          <VaultToolsTab />
         </TabsContent>
       </Tabs>
     </div>
