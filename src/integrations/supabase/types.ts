@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounts: {
+        Row: {
+          ativo: boolean
+          cor: string
+          created_at: string
+          icone: string
+          id: string
+          nome: string
+          saldo_atual: number
+          tipo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          icone?: string
+          id?: string
+          nome: string
+          saldo_atual?: number
+          tipo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          icone?: string
+          id?: string
+          nome?: string
+          saldo_atual?: number
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_accounts: {
         Row: {
           access_token_encrypted: string | null
@@ -58,6 +105,57 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      budgets: {
+        Row: {
+          alerta_80_enviado: boolean
+          ano: number
+          category_id: string
+          created_at: string
+          id: string
+          limite: number
+          mes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alerta_80_enviado?: boolean
+          ano: number
+          category_id: string
+          created_at?: string
+          id?: string
+          limite?: number
+          mes: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alerta_80_enviado?: boolean
+          ano?: number
+          category_id?: string
+          created_at?: string
+          id?: string
+          limite?: number
+          mes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       campaigns: {
         Row: {
@@ -114,6 +212,53 @@ export type Database = {
             columns: ["ad_account_id"]
             isOneToOne: false
             referencedRelation: "ad_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          cor: string
+          created_at: string
+          essencial: boolean
+          icone: string
+          id: string
+          nome: string
+          orcamento_mensal: number | null
+          tipo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cor?: string
+          created_at?: string
+          essencial?: boolean
+          icone?: string
+          id?: string
+          nome: string
+          orcamento_mensal?: number | null
+          tipo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cor?: string
+          created_at?: string
+          essencial?: boolean
+          icone?: string
+          id?: string
+          nome?: string
+          orcamento_mensal?: number | null
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -328,42 +473,54 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          cor_tema: string
           created_at: string
           email: string
           id: string
           is_active: boolean | null
           is_admin: boolean | null
+          nome: string | null
           reels_generation_enabled: boolean
           reels_max_channels: number
           reels_max_runs_per_day: number
+          role: string
           updated_at: string
           vault_password: string | null
           vault_recovery_expires: string | null
           vault_recovery_token: string | null
         }
         Insert: {
+          avatar_url?: string | null
+          cor_tema?: string
           created_at?: string
           email: string
           id: string
           is_active?: boolean | null
           is_admin?: boolean | null
+          nome?: string | null
           reels_generation_enabled?: boolean
           reels_max_channels?: number
           reels_max_runs_per_day?: number
+          role?: string
           updated_at?: string
           vault_password?: string | null
           vault_recovery_expires?: string | null
           vault_recovery_token?: string | null
         }
         Update: {
+          avatar_url?: string | null
+          cor_tema?: string
           created_at?: string
           email?: string
           id?: string
           is_active?: boolean | null
           is_admin?: boolean | null
+          nome?: string | null
           reels_generation_enabled?: boolean
           reels_max_channels?: number
           reels_max_runs_per_day?: number
+          role?: string
           updated_at?: string
           vault_password?: string | null
           vault_recovery_expires?: string | null
@@ -505,6 +662,73 @@ export type Database = {
           },
         ]
       }
+      transactions: {
+        Row: {
+          account_id: string | null
+          category_id: string | null
+          comprovante_url: string | null
+          created_at: string
+          data: string
+          descricao: string | null
+          id: string
+          responsavel: string
+          tipo: string
+          updated_at: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          account_id?: string | null
+          category_id?: string | null
+          comprovante_url?: string | null
+          created_at?: string
+          data?: string
+          descricao?: string | null
+          id?: string
+          responsavel?: string
+          tipo: string
+          updated_at?: string
+          user_id: string
+          valor: number
+        }
+        Update: {
+          account_id?: string | null
+          category_id?: string | null
+          comprovante_url?: string | null
+          created_at?: string
+          data?: string
+          descricao?: string | null
+          id?: string
+          responsavel?: string
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -636,6 +860,7 @@ export type Database = {
         Args: { _scripts_created: number; _user_id: string }
         Returns: undefined
       }
+      seed_finance_defaults: { Args: { _user_id: string }; Returns: undefined }
       try_consume_reels_run: { Args: { _user_id: string }; Returns: number }
       update_ad_account_credentials: {
         Args: { p_access_token?: string; p_app_secret?: string; p_id: string }
